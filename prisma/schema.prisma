@@ -1,0 +1,278 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================================
+// ENUMS DE NEGOCIO Y ESTADOS
+// ========================================================
+
+/// Modalidad de despacho del pedido
+enum MetodoEntrega {
+  DOMICILIO       // Envío directo a la dirección suministrada por el comprador
+  RECOGIDA_TIENDA // "Ir por el arbolito" - retiro físico en la tienda oficial
+}
+
+/// Medios de pago soportados a través de la pasarela Bold
+enum MetodoPago {
+  TARJETA_CREDITO
+  TARJETA_DEBITO
+  PSE
+}
+
+/// Estados de procesamiento y conciliación de la transacción
+enum EstadoPago {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+/// Tipos de layout visual adaptable para las secciones del catálogo
+enum TipoLayoutSeccion {
+  TARJETAS_CON_VARIANTES // Selector de altura (1.80m, 2.10m, 2.40m)
+  CHIPS_FILTRABLES       // Barra de píldoras / subcategorías dinámicas
+  GRILLA_ESTANDAR        // Cuadrícula limpia estándar
+}
+
+// ========================================================
+// 1. TABLA: tb_users (USUARIOS ADMINISTRADORES Y 2FA)
+// ========================================================
+/// Tabla tb_users: Gestiona los usuarios autorizados para ingresar al panel administrativo,
+/// sus credenciales cifradas y el estado del doble factor de autenticación (2FA).
+/// Permite al administrador principal crear nuevos operadores o supervisores.
+model Usuario {
+  id                    String    @id @default(uuid()) @db.Uuid
+  nombres_apellidos     String    @db.VarChar(180)
+  correo_electronico    String    @unique @db.VarChar(255)
+  contrasena_hash       String    @db.VarChar(255)
+  rol                   String    @default("ADMIN") @db.VarChar(50) // ADMIN, SUPERVISOR, OPERADOR
+  activacion_2fa        Boolean   @default(true) // Requiere código 2FA para iniciar sesión
+  codigo_2fa_temporal   String?   @db.VarChar(10) // Código numérico de verificación de 6 dígitos
+  expiracion_codigo_2fa DateTime? @db.Timestamptz(6)
+  ultimo_login          DateTime? @db.Timestamptz(6)
+  esta_activo           Boolean   @default(true)
+  fecha_creacion        DateTime  @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion   DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@index([correo_electronico, esta_activo])
+  @@map("tb_users")
+}
+
+// ========================================================
+// 2. TABLA: tb_secciones (SECCIONES DINÁMICAS AUTO-ORGANIZABLES)
+// ========================================================
+/// Tabla tb_secciones: Almacena las categorías principales del catálogo (Árboles tradicionales,
+/// Fibra óptica, Accesorios, Pesebres, etc.). Auto-organiza su posición en el storefront.
+model Seccion {
+  id                  String            @id @default(uuid()) @db.Uuid
+  slug                String            @unique @db.VarChar(100)
+  titulo              String            @db.VarChar(150)
+  subtitulo           String?           @db.VarChar(255)
+  texto_badge         String?           @db.VarChar(80)
+  nombre_icono        String            @default("forest") @db.VarChar(50)
+  color_acento        String            @default("primary") @db.VarChar(30)
+  tipo_layout         TipoLayoutSeccion @default(GRILLA_ESTANDAR)
+  orden_visualizacion Int               @db.Integer
+  esta_activa         Boolean           @default(true)
+  fecha_creacion      DateTime          @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime          @updatedAt @db.Timestamptz(6)
+
+  subcategorias Subcategoria[]
+  productos     Producto[]
+
+  @@index([orden_visualizacion, esta_activa])
+  @@map("tb_secciones")
+}
+
+// ========================================================
+// 3. TABLA: tb_subcategorias (SUBCATEGORÍAS FILTRABLES)
+// ========================================================
+/// Tabla tb_subcategorias: Subclasificaciones dentro de una sección (ej. Coronas, Guirnaldas, Luces)
+/// para navegación mediante chips filtrables sin recargar la página.
+model Subcategoria {
+  id                  String   @id @default(uuid()) @db.Uuid
+  id_seccion          String   @db.Uuid
+  slug                String   @db.VarChar(100)
+  nombre              String   @db.VarChar(100)
+  fecha_creacion      DateTime @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime @updatedAt @db.Timestamptz(6)
+
+  seccion   Seccion    @relation(fields: [id_seccion], references: [id], onDelete: Cascade)
+  productos Producto[]
+
+  @@unique([id_seccion, slug])
+  @@map("tb_subcategorias")
+}
+
+// ========================================================
+// 4. TABLA: tb_productos (PRODUCTOS ATÓMICOS SEGÚN CODD)
+// ========================================================
+/// Tabla tb_productos: Entidad principal de los artículos navideños (Árboles, Luces, Decoraciones).
+/// Mantiene integridad referencial con secciones y subcategorías, precios base y visibilidad.
+model Producto {
+  id                  String   @id @default(uuid()) @db.Uuid
+  id_seccion          String   @db.Uuid
+  id_subcategoria     String?  @db.Uuid
+  sku                 String   @unique @db.VarChar(60)
+  nombre              String   @db.VarChar(180)
+  descripcion         String   @db.Text
+  precio_base         Decimal  @db.Decimal(12, 2)
+  precio_comparacion  Decimal? @db.Decimal(12, 2)
+  badge_superior      String?  @db.VarChar(60)
+  badge_inferior      String?  @db.VarChar(60)
+  stock               Int      @default(10) @db.Integer
+  orden_visualizacion Int      @default(1) @db.Integer
+  esta_publicado      Boolean  @default(true)
+  fecha_creacion      DateTime @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime @updatedAt @db.Timestamptz(6)
+
+  seccion      Seccion            @relation(fields: [id_seccion], references: [id], onDelete: Restrict)
+  subcategoria Subcategoria?      @relation(fields: [id_subcategoria], references: [id], onDelete: SetNull)
+  imagenes     ImagenProducto[]
+  variantes    VarianteProducto[]
+  items_orden  ItemOrden[]
+
+  @@index([id_seccion, esta_publicado, orden_visualizacion])
+  @@map("tb_productos")
+}
+
+// ========================================================
+// 5. TABLA: tb_imagenes_producto (BINARIOS EXTERNOS WEBP)
+// ========================================================
+/// Tabla tb_imagenes_producto: Desacopla el almacenamiento físico de la base de datos (Regla 8 de Codd).
+/// Almacena metadatos y la ruta lógica /api/media/... hacia los binarios WebP optimizados fuera de Git.
+model ImagenProducto {
+  id                  String   @id @default(uuid()) @db.Uuid
+  id_producto         String   @db.Uuid
+  ruta_almacenamiento String   @unique @db.VarChar(500) // Ruta lógica al binario WebP
+  texto_alternativo   String   @db.VarChar(180)
+  ancho_px            Int      @db.Integer
+  alto_px             Int      @db.Integer
+  tamano_bytes        Int      @db.Integer
+  checksum_sha256     String   @db.VarChar(64) // Hash para prevenir duplicidad física
+  es_principal        Boolean  @default(false)
+  orden               Int      @default(0) @db.Integer
+  fecha_creacion      DateTime @default(now()) @db.Timestamptz(6)
+
+  producto Producto @relation(fields: [id_producto], references: [id], onDelete: Cascade)
+
+  @@index([id_producto, orden])
+  @@map("tb_imagenes_producto")
+}
+
+// ========================================================
+// 6. TABLA: tb_variantes_producto (OPCIONES DE ALTURA / TAMAÑO)
+// ========================================================
+/// Tabla tb_variantes_producto: Normalización 1FN atómica. Cada tamaño o altura (1.80m, 2.10m, 2.40m)
+/// se registra como una fila independiente con su precio y stock específico.
+model VarianteProducto {
+  id                String      @id @default(uuid()) @db.Uuid
+  id_producto       String      @db.Uuid
+  etiqueta          String      @db.VarChar(50) // Ej: "1.80m", "2.10m", "2.40m"
+  precio            Decimal     @db.Decimal(12, 2)
+  stock             Int         @default(10) @db.Integer
+  es_predeterminada Boolean     @default(false)
+
+  producto    Producto    @relation(fields: [id_producto], references: [id], onDelete: Cascade)
+  items_orden ItemOrden[]
+
+  @@unique([id_producto, etiqueta])
+  @@map("tb_variantes_producto")
+}
+
+// ========================================================
+// 7. TABLA: tb_clientes (HISTORIAL ÚNICO POR CORREO ELECTRÓNICO)
+// ========================================================
+/// Tabla tb_clientes: Identificador de negocio único por email. Los clientes compran como invitados
+/// sin registrarse previamente, agrupando todas sus compras históricas bajo un único registro sin duplicados.
+model Cliente {
+  id                  String   @id @default(uuid()) @db.Uuid
+  correo_electronico  String   @unique @db.VarChar(255) // ID único natural para el historial
+  nombres_apellidos   String   @db.VarChar(180)
+  telefono            String   @db.VarChar(30)
+  fecha_creacion      DateTime @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime @updatedAt @db.Timestamptz(6)
+
+  ordenes Orden[]
+
+  @@index([correo_electronico])
+  @@map("tb_clientes")
+}
+
+// ========================================================
+// 8. TABLA: tb_ordenes (VENTAS, GUÍAS Y PASARELA BOLD)
+// ========================================================
+/// Tabla tb_ordenes: Registra cada venta realizada, genera el número de guía único (ND-2026-XXXXXX),
+/// el método de entrega (con dirección nula si es recogida en tienda) y el enlace / transacción de Bold.
+model Orden {
+  id                  String         @id @default(uuid()) @db.Uuid
+  numero_guia         String         @unique @db.VarChar(40) // Número de guía único: ND-2026-XXXXXX
+  referencia_bold     String         @unique @db.VarChar(80)
+  id_cliente          String         @db.Uuid
+  metodo_entrega      MetodoEntrega
+  direccion_envio     String?        @db.VarChar(300) // NULL sistemático si es RECOGIDA_TIENDA
+  ciudad_envio        String?        @db.VarChar(100)
+  metodo_pago         MetodoPago
+  estado_pago         EstadoPago     @default(PENDIENTE)
+  id_transaccion_bold String?        @unique @db.VarChar(100)
+  url_pago_bold       String?        @db.VarChar(500) // URL generada directamente por la API de Bold
+  monto_total         Decimal        @db.Decimal(12, 2)
+  fecha_creacion      DateTime       @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime       @updatedAt @db.Timestamptz(6)
+
+  cliente      Cliente            @relation(fields: [id_cliente], references: [id], onDelete: Restrict)
+  items        ItemOrden[]
+  notificacion NotificacionAdmin?
+
+  @@index([id_cliente, fecha_creacion])
+  @@index([estado_pago])
+  @@index([fecha_creacion])
+  @@map("tb_ordenes")
+}
+
+// ========================================================
+// 9. TABLA: tb_items_orden (LÍNEAS DE ARTÍCULOS COMPRADOS)
+// ========================================================
+/// Tabla tb_items_orden: Detalles específicos de cada producto y variante adquirida en una orden,
+/// congelando el precio unitario en el momento de la transacción para auditoría contable.
+model ItemOrden {
+  id              String   @id @default(uuid()) @db.Uuid
+  id_orden        String   @db.Uuid
+  id_producto     String   @db.Uuid
+  id_variante     String?  @db.Uuid
+  nombre_producto String   @db.VarChar(180)
+  nombre_variante String?  @db.VarChar(50)
+  cantidad        Int      @db.Integer
+  precio_unitario Decimal  @db.Decimal(12, 2)
+  subtotal        Decimal  @db.Decimal(12, 2)
+
+  orden    Orden             @relation(fields: [id_orden], references: [id], onDelete: Cascade)
+  producto Producto          @relation(fields: [id_producto], references: [id], onDelete: Restrict)
+  variante VarianteProducto? @relation(fields: [id_variante], references: [id], onDelete: SetNull)
+
+  @@index([id_producto])
+  @@map("tb_items_orden")
+}
+
+// ========================================================
+// 10. TABLA: tb_notificaciones_admin (ALERTAS EN TIEMPO REAL)
+// ========================================================
+/// Tabla tb_notificaciones_admin: Notificaciones generadas automáticamente tras cada orden creada
+/// o pago conciliado por Bold, visibles en el panel de control del administrador.
+model NotificacionAdmin {
+  id             String   @id @default(uuid()) @db.Uuid
+  id_orden       String   @unique @db.Uuid
+  titulo         String   @db.VarChar(180)
+  resumen        String   @db.Text
+  esta_leida     Boolean  @default(false)
+  fecha_creacion DateTime @default(now()) @db.Timestamptz(6)
+
+  orden Orden @relation(fields: [id_orden], references: [id], onDelete: Cascade)
+
+  @@index([esta_leida, fecha_creacion])
+  @@map("tb_notificaciones_admin")
+}

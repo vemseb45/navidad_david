@@ -40,6 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Prisma migrations (no se suben al repositorio)
+/prisma/migrations/
+prisma/migrations/
+
 /storage/binaries/**/*.webp
 /storage/binaries/**/*.jpg
 /storage/binaries/**/*.png

@@ -1,0 +1,180 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { StoreSection, StoreProduct, StoreVariant, CartItem } from '@/types/domain.types';
+import { Navbar } from './components/Navbar';
+import { Hero } from './components/Hero';
+import { DynamicSectionBar } from './components/DynamicSectionBar';
+import { DynamicSectionGrid } from './components/DynamicSectionGrid';
+import { Footer } from './components/Footer';
+import { CartDrawer } from '@/frontend/components/CartDrawer';
+import { GuestCheckoutModal } from '@/frontend/components/GuestCheckoutModal';
+
+export function StorefrontView({ initialSections }: { initialSections: StoreSection[] }) {
+  const [activeSectionSlug, setActiveSectionSlug] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  const totalProductsCount = useMemo(
+    () => initialSections.reduce((acc, sec) => acc + sec.products.length, 0),
+    [initialSections]
+  );
+
+  const cartCount = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
+  const cartTotal = useMemo(
+    () => cart.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0),
+    [cart]
+  );
+
+  const handleAddToCart = (product: StoreProduct, variant?: StoreVariant) => {
+    const selectedVariant = variant || product.variants.find((v) => v.isDefault) || product.variants[0];
+    const unitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice);
+    const imageUrl = product.images[0]?.storagePath || '/placeholder-tree.svg';
+
+    setCart((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.productId === product.id && item.variantId === selectedVariant?.id
+      );
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex].quantity += 1;
+        return updated;
+      }
+      return [
+        ...prev,
+        {
+          productId: product.id,
+          variantId: selectedVariant?.id,
+          name: product.name,
+          variantLabel: selectedVariant?.label,
+          unitPrice,
+          quantity: 1,
+          imageUrl,
+        },
+      ];
+    });
+  };
+
+  const handleRemoveFromCart = (productId: string, variantId?: string) => {
+    setCart((prev) =>
+      prev.filter((i) => !(i.productId === productId && i.variantId === variantId))
+    );
+  };
+
+  const handleUpdateQuantity = (productId: string, quantity: number, variantId?: string) => {
+    if (quantity <= 0) {
+      handleRemoveFromCart(productId, variantId);
+      return;
+    }
+    setCart((prev) =>
+      prev.map((i) =>
+        i.productId === productId && i.variantId === variantId
+          ? { ...i, quantity }
+          : i
+      )
+    );
+  };
+
+  const visibleSections = useMemo(() => {
+    return initialSections
+      .filter((sec) => activeSectionSlug === 'all' || sec.slug === activeSectionSlug)
+      .map((sec) => ({
+        ...sec,
+        products: sec.products.filter((prod) =>
+          searchQuery.trim() === ''
+            ? true
+            : prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              prod.description.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+      }))
+      .filter((sec) => sec.products.length > 0);
+  }, [initialSections, activeSectionSlug, searchQuery]);
+
+  return (
+    <div className="bg-[#fbf9f5] text-[#1b1c1a] min-h-screen font-sans antialiased flex flex-col justify-between">
+      {/* NAVBAR */}
+      <Navbar
+        sections={initialSections}
+        activeSectionSlug={activeSectionSlug}
+        onSelectSection={(slug) => setActiveSectionSlug(slug)}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => setSearchQuery(q)}
+        cartCount={cartCount}
+        cartTotal={cartTotal}
+        onOpenCart={() => setIsCartOpen(true)}
+      />
+
+      <main className="pt-28 flex-1">
+        {/* HERO */}
+        <Hero
+          onExploreClick={() => {
+            const el = document.getElementById('arboles-tradicionales') || document.querySelector('section[id]');
+            el?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        />
+
+        {/* BARRA DE FILTROS DINÁMICA */}
+        <DynamicSectionBar
+          sections={initialSections}
+          activeSectionSlug={activeSectionSlug}
+          totalProductsCount={totalProductsCount}
+          onSelectSection={(slug) => setActiveSectionSlug(slug)}
+        />
+
+        {/* SECCIONES RENDERIZADAS */}
+        {visibleSections.length === 0 ? (
+          <div className="text-center py-20">
+            <span className="material-symbols-outlined text-5xl text-gray-400">search_off</span>
+            <p className="text-base font-bold text-gray-700 mt-2">
+              No encontramos productos que coincidan con &quot;{searchQuery}&quot;
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setActiveSectionSlug('all');
+              }}
+              className="mt-4 px-4 py-2 rounded-xl bg-[#133e2b] text-white text-xs font-bold"
+            >
+              Restablecer búsqueda
+            </button>
+          </div>
+        ) : (
+          visibleSections.map((section, idx) => (
+            <DynamicSectionGrid
+              key={section.id}
+              section={section}
+              index={idx}
+              onAddToCart={handleAddToCart}
+            />
+          ))
+        )}
+      </main>
+
+      {/* FOOTER */}
+      <Footer />
+
+      {/* DRAWER CARRITO */}
+      <CartDrawer
+        isOpen={isCartOpen}
+        cart={cart}
+        cartTotal={cartTotal}
+        onClose={() => setIsCartOpen(false)}
+        onRemoveItem={handleRemoveFromCart}
+        onUpdateQuantity={handleUpdateQuantity}
+        onOpenCheckout={() => setIsCheckoutOpen(true)}
+      />
+
+      {/* MODAL CHECKOUT */}
+      {isCheckoutOpen && (
+        <GuestCheckoutModal
+          cart={cart}
+          totalAmount={cartTotal}
+          onClose={() => setIsCheckoutOpen(false)}
+          onSuccessClear={() => setCart([])}
+        />
+      )}
+    </div>
+  );
+}
