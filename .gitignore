@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/storage/binaries/**/*.webp
+/storage/binaries/**/*.jpg
+/storage/binaries/**/*.png
+!.gitkeep
+.env
