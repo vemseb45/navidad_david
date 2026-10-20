@@ -116,12 +116,12 @@ export function ViewUsuariosAdmin({
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       {/* HEADER DE LA SECCIÓN */}
-      <div className="bg-white p-6 rounded-[28px] border border-[#e4e2de] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[28px] border border-[#e4e2de] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#b90d1c]">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#b90d1c]">
             Seguridad & Accesos • tb_users
           </span>
-          <h2 className="font-serif text-2xl font-bold text-[#002718]">
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#002718]">
             Gestión de Usuarios Administradores & 2FA
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
@@ -131,7 +131,7 @@ export function ViewUsuariosAdmin({
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-5 py-3 rounded-2xl bg-[#133e2b] hover:bg-[#002718] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-98"
+          className="w-full sm:w-auto px-5 py-3 rounded-xl sm:rounded-2xl bg-[#133e2b] hover:bg-[#002718] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all active:scale-98"
         >
           <Plus size={16} />
           <span>Crear Usuario</span>
@@ -237,14 +237,14 @@ export function ViewUsuariosAdmin({
 
       {/* MODAL CREAR USUARIO EN tb_users */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-[28px] sm:rounded-[32px] max-w-md w-full p-5 sm:p-8 shadow-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto space-y-4 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
-                <h3 className="font-serif text-xl font-bold text-[#002718]">
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-[#002718]">
                   Crear Nuevo Administrador
                 </h3>
-                <p className="text-xs text-gray-500">Se registrará en la tabla tb_users con hash seguro.</p>
+                <p className="text-[11px] sm:text-xs text-gray-500">Se registrará en la tabla tb_users con hash seguro.</p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -265,7 +265,7 @@ export function ViewUsuariosAdmin({
                   value={nombres}
                   onChange={(e) => setNombres(e.target.value)}
                   placeholder="Ej: David Sánchez"
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#133e2b]"
+                  className="w-full h-11 sm:h-10 px-3 rounded-xl border border-gray-200 text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b]"
                 />
               </div>
 
@@ -279,7 +279,7 @@ export function ViewUsuariosAdmin({
                   value={correo}
                   onChange={(e) => setCorreo(e.target.value)}
                   placeholder="usuario@navidaddavid.com"
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#133e2b]"
+                  className="w-full h-11 sm:h-10 px-3 rounded-xl border border-gray-200 text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b]"
                 />
               </div>
 
@@ -293,7 +293,7 @@ export function ViewUsuariosAdmin({
                   value={contrasena}
                   onChange={(e) => setContrasena(e.target.value)}
                   placeholder="Mínimo 8 caracteres..."
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#133e2b]"
+                  className="w-full h-11 sm:h-10 px-3 rounded-xl border border-gray-200 text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b]"
                 />
               </div>
 

@@ -1,9 +1,27 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#002718',
+};
+
 export const metadata: Metadata = {
-  title: 'Navidad David - Artisan Christmas Co. | Árboles y Decoración Navideña',
-  description: 'Colección exclusiva de árboles de Navidad tradicionales, tecnología en fibra óptica y adornos artesanales. Envíos a toda Colombia o recoge tu arbolito en tienda.',
+  title: 'Navidad David',
+  description: 'Colección exclusiva de árboles de Navidad tradicionales, tecnología en fibra óptica y adornos artesanales.',
+  icons: {
+    icon: [
+      { url: '/Logo_david.png', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/Logo_david.png',
+    apple: [
+      { url: '/Logo_david.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -14,6 +32,8 @@ export default function RootLayout({
   return (
     <html lang="es" className="h-full antialiased scroll-smooth">
       <head>
+        <link rel="icon" href="/Logo_david.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/Logo_david.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

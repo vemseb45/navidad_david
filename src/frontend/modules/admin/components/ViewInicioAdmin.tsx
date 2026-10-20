@@ -78,22 +78,22 @@ export function ViewInicioAdmin({
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
       {/* HEADER Y FILTRO DE FECHAS */}
-      <div className="bg-white p-6 rounded-[28px] border border-[#e4e2de] shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[28px] border border-[#e4e2de] shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#b90d1c]">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#b90d1c]">
             Métricas de Desempeño
           </span>
-          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#002718] mt-0.5">
+          <h2 className="font-serif text-xl sm:text-3xl font-bold text-[#002718] mt-0.5">
             Panel Principal de Ventas
           </h2>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">
             Visualización general de ingresos, clientes recurrentes y notificaciones automáticas.
           </p>
         </div>
 
         {/* CONTROLES DE FILTRO POR FECHAS */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
-          <div className="flex items-center gap-1 bg-[#efeeea] p-1 rounded-2xl w-full sm:w-auto overflow-x-auto">
+          <div className="flex items-center gap-1 bg-[#efeeea] p-1 rounded-2xl w-full sm:w-auto overflow-x-auto no-scrollbar">
             {[
               { id: 'todo', label: 'Todo' },
               { id: 'hoy', label: 'Hoy' },

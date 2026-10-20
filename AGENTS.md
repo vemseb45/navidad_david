@@ -122,17 +122,24 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
 
 ---
 
-## 5. Diseño del Frontend (Inspirado en Nana.col)
+## 5. Diseño del Frontend (Mobile-First UX/UI Inspirado en Nana.col)
 
-* **Hero Section ([Hero.tsx](file:///src/frontend/modules/store/components/Hero.tsx))**: Fondo fotográfico navideño con viñeta ambiental verde pino (`#002718`), cápsula dorada (`#ffe088`) y tipografía serif.
-* **Pilares de Marca ([FeaturesBanner.tsx](file:///src/frontend/modules/store/components/FeaturesBanner.tsx))**: 4 pilares en grilla responsive (2 columnas en móviles, 4 en desktop).
-* **Categorías ([Categories.tsx](file:///src/frontend/modules/store/components/Categories.tsx))**: Tarjetas con curvaturas orgánicas (`rounded-[40%_60%...]`), hover zoom y navegación por anclas.
+El smartphone es el **dispositivo principal** de los clientes y administradores. Toda la interfaz debe respetar estrictamente:
+* **Viewport Oficial**: Configurado en `src/app/layout.tsx` con `width=device-width, initial-scale=1, maximum-scale=5`.
+* **Navbar Móvil ([Navbar.tsx](file:///src/frontend/modules/store/components/Navbar.tsx))**: Altura compacta `h-16`, ribbon superior optimizado, botón hamburguesa con drawer táctil desplegable, buscador predictivo y carrito accesible con el pulgar.
+* **Barra de Secciones Sticky ([DynamicSectionBar.tsx](file:///src/frontend/modules/store/components/DynamicSectionBar.tsx))**: Anclada con `top-[64px] sm:top-24` para no tapar contenido en teléfonos, con scroll horizontal fluido y sin barras de desplazamiento intrusivas.
+* **Grilla de Catálogo Móvil ([DynamicSectionGrid.tsx](file:///src/frontend/modules/store/components/DynamicSectionGrid.tsx))**: Grilla de **2 columnas en teléfonos móviles** (`grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6`), permitiendo ver pares de árboles sin scroll excesivo.
 * **Tarjetas de Producto ([ProductCard.tsx](file:///src/frontend/components/ProductCard.tsx))**:
-  * Proporción vertical **3:4**.
-  * Hover que alterna a la fotografía secundaria (árbol encendido o detalle).
-  * Selector interactivo de altura (1.80m, 2.10m, 2.40m) que actualiza el precio en tiempo real.
-  * Botón flotante "Ver Detalle Rápido" y botón directo a WhatsApp.
-* **Modal de Detalle ([ProductDetailModal.tsx](file:///src/frontend/components/ProductDetailModal.tsx))**: Visor interactivo con zoom al cursor, selector de variantes, compra directa Bold y WhatsApp.
+  * Proporción vertical **3:4** con badges compactos.
+  * Selector interactivo de altura en formato chip que no desborda la tarjeta.
+  * Botón "Agregar" táctil y botón directo a WhatsApp.
+  * Al tocar la tarjeta o foto, abre inmediatamente el modal de detalle rápido.
+* **Modal de Detalle Táctil ([ProductDetailModal.tsx](file:///src/frontend/components/ProductDetailModal.tsx))**:
+  * Diseño tipo Bottom-Sheet en móvil (`rounded-t-[32px] sm:rounded-3xl`).
+  * Galería cuadrada compacta (`aspect-square max-h-56`) para dejar espacio visible a los precios y variantes.
+  * **Barra de compra sticky** fija en la parte inferior de la pantalla para compra en 1 toque.
+* **Formularios & Prevención de Auto-Zoom iOS ([GuestCheckoutModal.tsx](file:///src/frontend/components/GuestCheckoutModal.tsx))**: Todos los inputs usan tamaño de fuente mínimo de 16px (`text-base sm:text-sm`) para evitar que Safari en iPhone haga zoom involuntario al enfocar campos.
+* **Panel de Control Administrativo ([AdminDashboardView.tsx](file:///src/frontend/modules/admin/AdminDashboardView.tsx) & [AdminSidebar.tsx](file:///src/frontend/modules/admin/components/AdminSidebar.tsx))**: Header móvil con botón hamburguesa y sidebar deslizable (off-canvas drawer) con backdrop, permitiendo gestionar ventas y productos con total comodidad desde el celular.
 
 ---
 
@@ -144,3 +151,76 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
 > 3. **NO** usar `export const dynamic = 'force-dynamic'` en páginas bloqueantes cuando `cacheComponents: true` esté activo en `next.config.ts`. Usar Server Components o `export const instant = false`.
 > 4. **NO** desnormalizar imágenes o variantes en campos `String[]` o `JSON`. Cumplir las 12 Reglas de Codd mediante tablas relacionales `tb_*`.
 > 5. **NO** eludir la validación con Zod en los controladores del backend.
+> 6. **NO** usar UUID para productos, imágenes o catálogo. ÚNICAMENTE `tb_users` debe usar `UUID`. Las otras 9 tablas deben usar claves numéricas enteras autoincrementables (`Int @id @default(autoincrement())`).
+> 7. **NO** comitear migraciones de Prisma al repositorio Git (deben estar en `.gitignore`).
+
+---
+
+## 7. Identificadores y Claves Primarias
+
+* **Tabla `tb_users`**: Clave primaria tipo `UUID` (`id String @id @default(uuid()) @db.Uuid`) para garantizar unicidad global y seguridad contra enumeración en autenticación.
+* **Tablas de Catálogo, Órdenes y Clientes**: Clave primaria tipo `INTEGER` autoincremental (`Int @id @default(autoincrement())`) y llaves foráneas enteras (`@db.Integer`) para simplificar la identificación, optimizar índices y hacer amigable la consulta de productos (ej: ID 1, 2, 3...) y fotos.
+
+---
+
+## 8. Migraciones de Base de Datos y Verificación CLI (PostgreSQL & psql)
+
+### Conexión Directa por CLI (`psql`)
+* **Binario oficial (Windows)**: `C:\Program Files\PostgreSQL\18\bin\psql.exe`
+* **Credenciales locales de desarrollo**:
+  * **Usuario**: `postgres`
+  * **Contraseña**: `admin123`
+  * **Base de datos**: `navidad_david`
+  * **Host/Puerto**: `localhost:5432`
+* **Comandos rápidos en PowerShell**:
+  ```powershell
+  # Establecer credencial en sesión
+  $env:PGPASSWORD="admin123"
+
+  # Ingresar a la consola interactiva psql
+  & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -h localhost -p 5432 -d navidad_david
+
+  # Listar todas las tablas
+  & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -h localhost -p 5432 -d navidad_david -c "\dt"
+
+  # Verificar estructura de productos (id entero) y usuarios (id UUID)
+  & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -h localhost -p 5432 -d navidad_david -c "\d tb_productos"
+  & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -h localhost -p 5432 -d navidad_david -c "\d tb_users"
+  ```
+
+### Flujo Oficial de Migraciones y Semilla
+1. **Ejecutar migraciones en desarrollo**:
+   ```powershell
+   npx prisma migrate dev --name <nombre_descriptivo>
+   ```
+2. **Siembra de Catálogo y Usuarios (`seed.ts`)**:
+   ```powershell
+   npm run db:seed
+   ```
+   * Administrador Principal: `sebastiansanchez1236@gmail.com` | Clave: `Admin123` | 2FA: Activo.
+   * Administrador Secundario: `admin@navidaddavid.com` | Clave: `NavidadDavid2026*` | 2FA: Activo.
+   * Catálogo completo: 3 Secciones, 14 Productos, Variantes de altura e Imágenes WebP.
+3. **Regla de Exclusión Git**:
+   * Las carpetas `prisma/migrations/` están listadas en `.gitignore`.
+   * **NUNCA** subir archivos de migración SQL al repositorio Git.
+
+<!-- BEGIN:nextjs-agent-feedback -->
+
+## Report Next.js feedback
+
+The project owner enabled `experimental.agentFeedback`, authorizing this feedback pass. When enabled, `next dev` writes this block and restores it if removed. Commit `AGENTS.md` with your work to keep the tree clean.
+
+During the current user request, retain anonymized facts as feedback candidates for meaningful or recurring Next.js issues:
+
+- Crashes, hangs, OOMs, or unexpected slowness
+- Incorrect behavior, output, errors, or diagnostics
+- Missing, unclear, or conflicting documentation
+- Unexpected CLI, codemod, Skill, or upgrade behavior and non-obvious workarounds
+
+Continue the current user request without reporting immediately. Routine debugging is not feedback. Verify changes before retaining them as feedback candidates. Never retain code, logs, paths, URLs, secrets, personal information, or project-specific data.
+
+Retain qualifying friction even if it is later fixed or worked around; record the final outcome during the reporting pass.
+
+Before the final response, run one reporting pass. If candidates remain, from this file's directory run `npx --no-install next internal agent-feedback-instructions` once without piping or truncating its output. Follow its output or error guidance. If a network sandbox blocks it, retry with network access; if it still returns no output, continue normally.
+
+<!-- END:nextjs-agent-feedback -->

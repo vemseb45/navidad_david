@@ -10,7 +10,7 @@ export function ProductManager({
   sections: StoreSection[];
   onRefresh: () => void;
 }) {
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [editPrice, setEditPrice] = useState<number>(0);
   const [editCompareAt, setEditCompareAt] = useState<number | undefined>(undefined);
   const [editDescription, setEditDescription] = useState<string>('');
@@ -23,7 +23,7 @@ export function ProductManager({
     setEditDescription(product.description);
   };
 
-  const handleSaveProduct = async (productId: string) => {
+  const handleSaveProduct = async (productId: number) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/products/${productId}`, {
@@ -46,7 +46,7 @@ export function ProductManager({
     }
   };
 
-  const handleDeleteImage = async (productId: string, imageId: string) => {
+  const handleDeleteImage = async (productId: number, imageId: number) => {
     if (!confirm('¿Seguro que deseas eliminar esta imagen binaria?')) return;
     try {
       const res = await fetch(`/api/products/${productId}?imageId=${imageId}`, {
@@ -60,7 +60,7 @@ export function ProductManager({
     }
   };
 
-  const handleUploadImage = async (productId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadImage = async (productId: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -147,7 +147,7 @@ export function ProductManager({
                             <button
                               onClick={() => handleDeleteImage(prod.id, img.id)}
                               title="Eliminar imagen física"
-                              className="absolute inset-0 bg-red-900/80 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold transition-opacity"
+                              className="absolute inset-0 bg-red-900/80 text-white opacity-90 sm:opacity-0 sm:group-hover:opacity-100 flex items-center justify-center text-xs font-bold transition-opacity"
                             >
                               ✕
                             </button>

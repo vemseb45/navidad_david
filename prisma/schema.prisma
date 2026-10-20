@@ -1,3 +1,6 @@
+// ========================================================
+// CONFIGURACIÓN DE FUENTE DE DATOS Y GENERADOR PRISMA
+// ========================================================
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,23 +11,23 @@ datasource db {
 }
 
 // ========================================================
-// ENUMS DE NEGOCIO Y ESTADOS
+// ENUMERACIONES DEL NEGOCIO (VALORES ATÓMICOS EN ESPAÑOL)
 // ========================================================
 
-/// Modalidad de despacho del pedido
+/// Modalidad de entrega seleccionada por el cliente en el checkout
 enum MetodoEntrega {
-  DOMICILIO       // Envío directo a la dirección suministrada por el comprador
-  RECOGIDA_TIENDA // "Ir por el arbolito" - retiro físico en la tienda oficial
+  DOMICILIO       // Envío a domicilio a cualquier parte de Colombia
+  RECOGIDA_TIENDA // Retiro presencial en tienda física ("Ir por el arbolito")
 }
 
-/// Medios de pago soportados a través de la pasarela Bold
+/// Métodos de pago disponibles a través de la pasarela Bold
 enum MetodoPago {
-  TARJETA_CREDITO
-  TARJETA_DEBITO
-  PSE
+  TARJETA_CREDITO // Tarjeta de Crédito (Visa, Mastercard, etc.)
+  TARJETA_DEBITO  // Tarjeta de Débito
+  PSE             // Débito bancario en línea PSE Colombia
 }
 
-/// Estados de procesamiento y conciliación de la transacción
+/// Estados de conciliación del pago
 enum EstadoPago {
   PENDIENTE
   APROBADO
@@ -39,11 +42,11 @@ enum TipoLayoutSeccion {
 }
 
 // ========================================================
-// 1. TABLA: tb_users (USUARIOS ADMINISTRADORES Y 2FA)
+// 1. TABLA: tb_users (USUARIOS ADMINISTRADORES Y 2FA - ÚNICA CON UUID)
 // ========================================================
 /// Tabla tb_users: Gestiona los usuarios autorizados para ingresar al panel administrativo,
 /// sus credenciales cifradas y el estado del doble factor de autenticación (2FA).
-/// Permite al administrador principal crear nuevos operadores o supervisores.
+/// Mantiene UUID como identificador único global de seguridad.
 model Usuario {
   id                    String    @id @default(uuid()) @db.Uuid
   nombres_apellidos     String    @db.VarChar(180)
@@ -63,12 +66,12 @@ model Usuario {
 }
 
 // ========================================================
-// 2. TABLA: tb_secciones (SECCIONES DINÁMICAS AUTO-ORGANIZABLES)
+// 2. TABLA: tb_secciones (SECCIONES DINÁMICAS CON ID ENTERO)
 // ========================================================
 /// Tabla tb_secciones: Almacena las categorías principales del catálogo (Árboles tradicionales,
 /// Fibra óptica, Accesorios, Pesebres, etc.). Auto-organiza su posición en el storefront.
 model Seccion {
-  id                  String            @id @default(uuid()) @db.Uuid
+  id                  Int               @id @default(autoincrement())
   slug                String            @unique @db.VarChar(100)
   titulo              String            @db.VarChar(150)
   subtitulo           String?           @db.VarChar(255)
@@ -89,13 +92,13 @@ model Seccion {
 }
 
 // ========================================================
-// 3. TABLA: tb_subcategorias (SUBCATEGORÍAS FILTRABLES)
+// 3. TABLA: tb_subcategorias (SUBCATEGORÍAS CON ID ENTERO)
 // ========================================================
 /// Tabla tb_subcategorias: Subclasificaciones dentro de una sección (ej. Coronas, Guirnaldas, Luces)
 /// para navegación mediante chips filtrables sin recargar la página.
 model Subcategoria {
-  id                  String   @id @default(uuid()) @db.Uuid
-  id_seccion          String   @db.Uuid
+  id                  Int      @id @default(autoincrement())
+  id_seccion          Int      @db.Integer
   slug                String   @db.VarChar(100)
   nombre              String   @db.VarChar(100)
   fecha_creacion      DateTime @default(now()) @db.Timestamptz(6)
@@ -109,14 +112,14 @@ model Subcategoria {
 }
 
 // ========================================================
-// 4. TABLA: tb_productos (PRODUCTOS ATÓMICOS SEGÚN CODD)
+// 4. TABLA: tb_productos (PRODUCTOS CON ID ENTERO)
 // ========================================================
 /// Tabla tb_productos: Entidad principal de los artículos navideños (Árboles, Luces, Decoraciones).
-/// Mantiene integridad referencial con secciones y subcategorías, precios base y visibilidad.
+/// Utiliza identificador numérico entero secuencial autoincremental fácil de leer y consultar.
 model Producto {
-  id                  String   @id @default(uuid()) @db.Uuid
-  id_seccion          String   @db.Uuid
-  id_subcategoria     String?  @db.Uuid
+  id                  Int      @id @default(autoincrement())
+  id_seccion          Int      @db.Integer
+  id_subcategoria     Int?     @db.Integer
   sku                 String   @unique @db.VarChar(60)
   nombre              String   @db.VarChar(180)
   descripcion         String   @db.Text
@@ -141,13 +144,13 @@ model Producto {
 }
 
 // ========================================================
-// 5. TABLA: tb_imagenes_producto (BINARIOS EXTERNOS WEBP)
+// 5. TABLA: tb_imagenes_producto (FOTOS DE PRODUCTOS CON ID ENTERO)
 // ========================================================
 /// Tabla tb_imagenes_producto: Desacopla el almacenamiento físico de la base de datos (Regla 8 de Codd).
-/// Almacena metadatos y la ruta lógica /api/media/... hacia los binarios WebP optimizados fuera de Git.
+/// Identificada con clave entera autoincremental, enlazada a id_producto entero.
 model ImagenProducto {
-  id                  String   @id @default(uuid()) @db.Uuid
-  id_producto         String   @db.Uuid
+  id                  Int      @id @default(autoincrement())
+  id_producto         Int      @db.Integer
   ruta_almacenamiento String   @unique @db.VarChar(500) // Ruta lógica al binario WebP
   texto_alternativo   String   @db.VarChar(180)
   ancho_px            Int      @db.Integer
@@ -165,13 +168,13 @@ model ImagenProducto {
 }
 
 // ========================================================
-// 6. TABLA: tb_variantes_producto (OPCIONES DE ALTURA / TAMAÑO)
+// 6. TABLA: tb_variantes_producto (OPCIONES DE ALTURA CON ID ENTERO)
 // ========================================================
 /// Tabla tb_variantes_producto: Normalización 1FN atómica. Cada tamaño o altura (1.80m, 2.10m, 2.40m)
-/// se registra como una fila independiente con su precio y stock específico.
+/// se registra como una fila independiente con clave numérica entera autoincremental.
 model VarianteProducto {
-  id                String      @id @default(uuid()) @db.Uuid
-  id_producto       String      @db.Uuid
+  id                Int         @id @default(autoincrement())
+  id_producto       Int         @db.Integer
   etiqueta          String      @db.VarChar(50) // Ej: "1.80m", "2.10m", "2.40m"
   precio            Decimal     @db.Decimal(12, 2)
   stock             Int         @default(10) @db.Integer
@@ -185,13 +188,12 @@ model VarianteProducto {
 }
 
 // ========================================================
-// 7. TABLA: tb_clientes (HISTORIAL ÚNICO POR CORREO ELECTRÓNICO)
+// 7. TABLA: tb_clientes (DIRECTORIO DE CLIENTES CON ID ENTERO)
 // ========================================================
-/// Tabla tb_clientes: Identificador de negocio único por email. Los clientes compran como invitados
-/// sin registrarse previamente, agrupando todas sus compras históricas bajo un único registro sin duplicados.
+/// Tabla tb_clientes: Identificador numérico entero para el cliente, con email único natural para el historial.
 model Cliente {
-  id                  String   @id @default(uuid()) @db.Uuid
-  correo_electronico  String   @unique @db.VarChar(255) // ID único natural para el historial
+  id                  Int      @id @default(autoincrement())
+  correo_electronico  String   @unique @db.VarChar(255)
   nombres_apellidos   String   @db.VarChar(180)
   telefono            String   @db.VarChar(30)
   fecha_creacion      DateTime @default(now()) @db.Timestamptz(6)
@@ -204,22 +206,21 @@ model Cliente {
 }
 
 // ========================================================
-// 8. TABLA: tb_ordenes (VENTAS, GUÍAS Y PASARELA BOLD)
+// 8. TABLA: tb_ordenes (ÓRDENES CON ID ENTERO)
 // ========================================================
-/// Tabla tb_ordenes: Registra cada venta realizada, genera el número de guía único (ND-2026-XXXXXX),
-/// el método de entrega (con dirección nula si es recogida en tienda) y el enlace / transacción de Bold.
+/// Tabla tb_ordenes: Registra cada venta realizada con clave entera y número de guía único oficial (ND-2026-XXXXXX).
 model Orden {
-  id                  String         @id @default(uuid()) @db.Uuid
+  id                  Int            @id @default(autoincrement())
   numero_guia         String         @unique @db.VarChar(40) // Número de guía único: ND-2026-XXXXXX
   referencia_bold     String         @unique @db.VarChar(80)
-  id_cliente          String         @db.Uuid
+  id_cliente          Int            @db.Integer
   metodo_entrega      MetodoEntrega
   direccion_envio     String?        @db.VarChar(300) // NULL sistemático si es RECOGIDA_TIENDA
   ciudad_envio        String?        @db.VarChar(100)
   metodo_pago         MetodoPago
   estado_pago         EstadoPago     @default(PENDIENTE)
   id_transaccion_bold String?        @unique @db.VarChar(100)
-  url_pago_bold       String?        @db.VarChar(500) // URL generada directamente por la API de Bold
+  url_pago_bold       String?        @db.VarChar(500)
   monto_total         Decimal        @db.Decimal(12, 2)
   fecha_creacion      DateTime       @default(now()) @db.Timestamptz(6)
   fecha_actualizacion DateTime       @updatedAt @db.Timestamptz(6)
@@ -235,15 +236,14 @@ model Orden {
 }
 
 // ========================================================
-// 9. TABLA: tb_items_orden (LÍNEAS DE ARTÍCULOS COMPRADOS)
+// 9. TABLA: tb_items_orden (LÍNEAS DE ARTÍCULOS CON ID ENTERO)
 // ========================================================
-/// Tabla tb_items_orden: Detalles específicos de cada producto y variante adquirida en una orden,
-/// congelando el precio unitario en el momento de la transacción para auditoría contable.
+/// Tabla tb_items_orden: Detalles específicos de cada producto y variante en una orden, con claves enteras.
 model ItemOrden {
-  id              String   @id @default(uuid()) @db.Uuid
-  id_orden        String   @db.Uuid
-  id_producto     String   @db.Uuid
-  id_variante     String?  @db.Uuid
+  id              Int      @id @default(autoincrement())
+  id_orden        Int      @db.Integer
+  id_producto     Int      @db.Integer
+  id_variante     Int?     @db.Integer
   nombre_producto String   @db.VarChar(180)
   nombre_variante String?  @db.VarChar(50)
   cantidad        Int      @db.Integer
@@ -259,13 +259,12 @@ model ItemOrden {
 }
 
 // ========================================================
-// 10. TABLA: tb_notificaciones_admin (ALERTAS EN TIEMPO REAL)
+// 10. TABLA: tb_notificaciones_admin (ALERTAS CON ID ENTERO)
 // ========================================================
-/// Tabla tb_notificaciones_admin: Notificaciones generadas automáticamente tras cada orden creada
-/// o pago conciliado por Bold, visibles en el panel de control del administrador.
+/// Tabla tb_notificaciones_admin: Notificaciones administrativas vinculadas con id_orden entero.
 model NotificacionAdmin {
-  id             String   @id @default(uuid()) @db.Uuid
-  id_orden       String   @unique @db.Uuid
+  id             Int      @id @default(autoincrement())
+  id_orden       Int      @unique @db.Integer
   titulo         String   @db.VarChar(180)
   resumen        String   @db.Text
   esta_leida     Boolean  @default(false)

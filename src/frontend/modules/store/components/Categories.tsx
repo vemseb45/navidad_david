@@ -60,15 +60,15 @@ export function Categories({ onSelectCategory }: { onSelectCategory: (slug: stri
           <div className="w-16 sm:w-24 h-1 bg-[#ffe088] mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-10 max-w-5xl mx-auto">
           {CATEGORIES_DATA.map((cat) => (
             <div
               key={cat.id}
               onClick={() => onSelectCategory(cat.slug)}
-              className="group block text-center cursor-pointer p-4 rounded-3xl bg-white border border-[#e4e2de] shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+              className="group block text-center cursor-pointer p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-[#e4e2de] shadow-sm hover:shadow-xl transition-all duration-300 active:scale-98 hover:-translate-y-1"
             >
               <div
-                className={`relative overflow-hidden ${cat.radius} aspect-square max-w-[280px] mx-auto mb-5 shadow-lg transition-transform duration-500 group-hover:scale-[1.04] bg-emerald-50`}
+                className={`relative overflow-hidden ${cat.radius} aspect-square max-w-[220px] sm:max-w-[280px] mx-auto mb-3.5 sm:mb-5 shadow-lg transition-transform duration-500 group-hover:scale-[1.04] bg-emerald-50`}
               >
                 <img
                   alt={cat.title}

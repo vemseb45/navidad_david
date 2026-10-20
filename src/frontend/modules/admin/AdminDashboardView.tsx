@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Menu } from 'lucide-react';
 import { DashboardMetrics, AdminCustomerRecord, StoreSection } from '@/types/domain.types';
 import { AdminAuthView } from './components/AdminAuthView';
 import { AdminSidebar, AdminTab } from './components/AdminSidebar';
@@ -30,6 +31,7 @@ export function AdminDashboardView({
   } | null>(null);
 
   const [activeTab, setActiveTab] = useState<AdminTab>('inicio');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [metrics, setMetrics] = useState<DashboardMetrics>(initialMetrics);
   const [customers, setCustomers] = useState<AdminCustomerRecord[]>(initialCustomers);
   const [sections, setSections] = useState<StoreSection[]>(initialSections);
@@ -136,17 +138,39 @@ export function AdminDashboardView({
   }
 
   return (
-    <div className="flex h-screen bg-[#f5f3ef] text-[#1b1c1a] font-sans overflow-hidden">
-      {/* SIDEBAR CON MENÚS (Estilo Barber_Tech_BF) */}
+    <div className="flex flex-col lg:flex-row h-screen bg-[#f5f3ef] text-[#1b1c1a] font-sans overflow-hidden">
+      {/* HEADER SUPERIOR EN MÓVIL */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-[#e4e2de] shadow-xs shrink-0 z-30">
+        <button
+          onClick={() => setMobileSidebarOpen(true)}
+          aria-label="Abrir menú"
+          className="w-10 h-10 rounded-xl bg-[#f5f3ef] active:bg-[#e4e2de] flex items-center justify-center text-[#002718] transition-colors"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-[#002718]/15 bg-white flex items-center justify-center shrink-0">
+            <img src="/Logo_david.png" alt="Logo" className="w-full h-full object-cover rounded-full" />
+          </div>
+          <span className="font-serif font-bold text-sm text-[#002718]">Navidad David</span>
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#b90d1c] bg-[#b90d1c]/10 px-2.5 py-1 rounded-full">
+          {activeTab}
+        </span>
+      </div>
+
+      {/* SIDEBAR CON MENÚS (Estilo Barber_Tech_BF + Drawer en Móvil) */}
       <AdminSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         currentUser={currentUser}
         onLogout={handleLogout}
+        isOpen={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
       />
 
       {/* ÁREA DE CONTENIDO PRINCIPAL */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+      <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8">
         <div className="max-w-7xl mx-auto space-y-6">
           {activeTab === 'inicio' && (
             <ViewInicioAdmin

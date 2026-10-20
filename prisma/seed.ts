@@ -30,6 +30,17 @@ async function main() {
   const adminPrincipal = await prisma.usuario.create({
     data: {
       nombres_apellidos: 'David Administrador Principal',
+      correo_electronico: 'sebastiansanchez1236@gmail.com',
+      contrasena_hash: hashPassword('Admin123'),
+      rol: 'ADMIN',
+      activacion_2fa: true,
+      esta_activo: true,
+    },
+  });
+
+  const adminSecundario = await prisma.usuario.create({
+    data: {
+      nombres_apellidos: 'David Admin Secundario',
       correo_electronico: 'admin@navidaddavid.com',
       contrasena_hash: hashPassword('NavidadDavid2026*'),
       rol: 'ADMIN',
@@ -50,7 +61,8 @@ async function main() {
   });
 
   console.log('👤 Usuarios administradores creados en tb_users:');
-  console.log(` - Admin: ${adminPrincipal.correo_electronico} (Clave: NavidadDavid2026* | 2FA: Activo)`);
+  console.log(` - Admin Principal: ${adminPrincipal.correo_electronico} (Clave: Admin123 | 2FA: Activo)`);
+  console.log(` - Admin Secundario: ${adminSecundario.correo_electronico} (Clave: NavidadDavid2026* | 2FA: Activo)`);
   console.log(` - Operador: ${operadorVentas.correo_electronico} (Clave: VentasDavid2026* | 2FA: Activo)`);
 
   // ==========================================

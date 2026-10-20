@@ -74,13 +74,13 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     setIsCheckoutOpen(true);
   };
 
-  const handleRemoveFromCart = (productId: string, variantId?: string) => {
+  const handleRemoveFromCart = (productId: number, variantId?: number) => {
     setCart((prev) =>
       prev.filter((i) => !(i.productId === productId && i.variantId === variantId))
     );
   };
 
-  const handleUpdateQuantity = (productId: string, quantity: number, variantId?: string) => {
+  const handleUpdateQuantity = (productId: number, quantity: number, variantId?: number) => {
     if (quantity <= 0) {
       handleRemoveFromCart(productId, variantId);
       return;
@@ -131,7 +131,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
-      <main className="pt-24 flex-1">
+      <main className="pt-16 sm:pt-24 flex-1">
         {/* HERO VISUAL DE ALTO IMPACTO */}
         <Hero
           onExploreClick={() => {

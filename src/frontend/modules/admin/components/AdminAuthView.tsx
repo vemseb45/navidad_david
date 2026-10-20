@@ -75,18 +75,18 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#002718] via-[#093522] to-[#133e2b] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl border border-white/20 animate-in fade-in zoom-in-95 duration-300">
+      <div className="w-full max-w-md bg-white rounded-3xl p-5 sm:p-8 shadow-2xl border border-white/20 animate-in fade-in zoom-in-95 duration-300">
         {/* LOGO OFICIAL MEJORADO */}
-        <div className="text-center mb-6">
-          <div className="w-24 h-24 mx-auto mb-3 p-2 rounded-2xl bg-white shadow-md border border-gray-100 flex items-center justify-center">
+        <div className="text-center mb-5 sm:mb-6">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-2.5 sm:mb-3 p-1 rounded-full bg-white shadow-md ring-2 ring-[#002718]/20 flex items-center justify-center overflow-hidden">
             <img
               src="/Logo_david.png"
               alt="Logo Oficial Navidad David"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover rounded-full"
             />
           </div>
-          <h2 className="font-serif text-2xl font-bold text-[#002718]">Navidad David</h2>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#b90d1c] block mt-0.5">
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#002718]">Navidad David</h2>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#b90d1c] block mt-0.5">
             Acceso Panel de Control • 2FA + JWT Cookie Only
           </span>
         </div>
@@ -112,7 +112,7 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@navidaddavid.com"
-                  className="w-full h-11 pl-10 pr-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#133e2b] focus:outline-none transition-all"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl border border-gray-200 text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b] focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -129,7 +129,7 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full h-11 pl-10 pr-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-[#133e2b] focus:outline-none transition-all"
+                  className="w-full h-11 pl-10 pr-3 rounded-xl border border-gray-200 text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b] focus:outline-none transition-all"
                 />
               </div>
             </div>

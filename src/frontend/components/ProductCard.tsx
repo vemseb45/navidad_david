@@ -64,13 +64,13 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
 
         {/* BADGES SUPERIORES */}
         {product.badgeTop && (
-          <span className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-[#b90d1c] text-white text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
+          <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#b90d1c] text-white text-[9px] sm:text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
             {product.badgeTop}
           </span>
         )}
 
         {product.badgeBottom && (
-          <span className="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-full bg-[#002718]/90 backdrop-blur-sm text-[#ffe088] text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
+          <span className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#002718]/90 backdrop-blur-sm text-[#ffe088] text-[9px] sm:text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
             {product.badgeBottom}
           </span>
         )}
@@ -85,26 +85,26 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
       </div>
 
       {/* INFORMACIÓN DEL PRODUCTO */}
-      <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+      <div className="p-2.5 sm:p-4 flex flex-col flex-1 justify-between gap-2 sm:gap-3">
         <div>
           <h3
             onClick={() => onOpenQuickView(product)}
-            className="font-serif text-base sm:text-lg text-[#002718] font-bold leading-tight hover:text-[#b90d1c] transition-colors cursor-pointer line-clamp-1"
+            className="font-serif text-xs sm:text-base font-bold text-[#002718] leading-snug hover:text-[#b90d1c] transition-colors cursor-pointer line-clamp-2"
             title={product.name}
           >
             {product.name}
           </h3>
-          <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed font-light">
+          <p className="hidden sm:block text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed font-light">
             {product.description}
           </p>
 
           {/* SELECTOR DE MEDIDAS / ALTURAS (1-clic interactivo) */}
           {product.variants && product.variants.length > 0 && (
-            <div className="mt-3 pt-2 border-t border-[#f0eee9]">
-              <span className="text-[10px] uppercase font-bold text-gray-500 block mb-1.5 tracking-wider">
-                Seleccionar Altura:
+            <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-[#f0eee9]">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 block mb-1 tracking-wider">
+                Altura:
               </span>
-              <div className="flex items-center flex-wrap gap-1.5">
+              <div className="flex items-center flex-wrap gap-1 sm:gap-1.5">
                 {product.variants.map((v) => {
                   const isSelected = selectedVariant?.id === v.id;
                   return (
@@ -115,13 +115,13 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
                         e.stopPropagation();
                         setSelectedVariant(v);
                       }}
-                      className={`px-2.5 py-1 text-xs rounded-lg transition-all flex items-center gap-1 ${
+                      className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-md sm:rounded-lg transition-all flex items-center gap-0.5 sm:gap-1 ${
                         isSelected
-                          ? 'bg-[#133e2b] text-white font-bold shadow-sm ring-2 ring-[#002718]/30 scale-102'
+                          ? 'bg-[#133e2b] text-white font-bold shadow-xs ring-1 sm:ring-2 ring-[#002718]/30 scale-102'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      <TreePine className="w-3 h-3 text-[#ffe088]" />
+                      <TreePine className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#ffe088]" />
                       <span>{v.label}</span>
                     </button>
                   );
@@ -132,14 +132,14 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
         </div>
 
         {/* PRECIO Y ACCIONES */}
-        <div className="pt-2 border-t border-[#f0eee9] flex flex-col gap-2">
-          <div className="flex items-baseline justify-between">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg sm:text-xl font-bold text-[#002718]">
+        <div className="pt-1.5 sm:pt-2 border-t border-[#f0eee9] flex flex-col gap-1.5 sm:gap-2">
+          <div className="flex items-baseline justify-between gap-1">
+            <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
+              <span className="text-sm sm:text-lg lg:text-xl font-bold text-[#002718]">
                 ${currentPrice.toLocaleString('es-CO')}
               </span>
               {product.compareAtPrice && Number(product.compareAtPrice) > currentPrice && (
-                <span className="text-xs text-gray-400 line-through">
+                <span className="text-[10px] sm:text-xs text-gray-400 line-through">
                   ${Number(product.compareAtPrice).toLocaleString('es-CO')}
                 </span>
               )}
@@ -150,26 +150,26 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               title="Preguntar por WhatsApp"
-              className="text-emerald-600 hover:text-emerald-700 p-1.5 rounded-full hover:bg-emerald-50 transition-colors"
+              className="text-emerald-600 hover:text-emerald-700 p-1 sm:p-1.5 rounded-full hover:bg-emerald-50 transition-colors shrink-0"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 sm:w-4 sm:h-4" />
             </a>
           </div>
 
           <button
             type="button"
             onClick={handleAdd}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#133e2b] hover:bg-[#002718] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:shadow-md active:scale-98 flex items-center justify-center gap-2"
+            className="w-full py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-[#133e2b] hover:bg-[#002718] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1 sm:gap-2"
           >
             {isAdded ? (
               <>
-                <Check className="w-4 h-4 text-[#ffe088]" />
-                <span>¡Agregado al Carrito!</span>
+                <Check className="w-3.5 h-3.5 text-[#ffe088]" />
+                <span className="truncate">¡Agregado!</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-4 h-4" />
-                <span>Agregar al Carrito</span>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span className="truncate">Agregar</span>
               </>
             )}
           </button>

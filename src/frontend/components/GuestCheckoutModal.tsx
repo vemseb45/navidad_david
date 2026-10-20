@@ -72,8 +72,8 @@ export function GuestCheckoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white rounded-t-[28px] sm:rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl max-h-[94vh] sm:max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
         {orderConfirmation ? (
           <div className="text-center py-6 space-y-4">
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 mx-auto flex items-center justify-center font-bold text-3xl">
@@ -82,7 +82,7 @@ export function GuestCheckoutModal({
             <h3 className="font-serif text-2xl font-bold text-[#002718]">
               ¡Orden Creada y Guía Generada!
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Hemos asociado esta compra a tu correo <strong>{email}</strong> y notificado al equipo de Navidad David.
             </p>
             <div className="p-4 rounded-xl bg-[#f5f3ef] border border-[#133e2b]/20">
@@ -104,91 +104,96 @@ export function GuestCheckoutModal({
           <form onSubmit={handleCheckoutSubmit} className="space-y-4">
             <div className="flex items-center justify-between border-b border-[#e4e2de] pb-3">
               <div>
-                <h3 className="font-serif text-xl font-bold text-[#002718]">
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-[#002718]">
                   Compra Rápida Sin Registro
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-[11px] sm:text-xs text-gray-500">
                   Tus compras quedan agrupadas con tu correo electrónico
                 </p>
               </div>
-              <button type="button" onClick={onClose} className="text-gray-400 hover:text-black font-bold">
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Cerrar checkout"
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm"
+              >
                 ✕
               </button>
             </div>
 
             {/* DATOS BÁSICOS DEL CLIENTE */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <input
                 required
                 type="text"
                 placeholder="Nombres y Apellidos completos"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
+                className="w-full h-11 sm:h-10 px-3 rounded-xl border border-gray-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
               />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <input
                   required
                   type="email"
-                  placeholder="Correo electrónico (ID de cliente)"
+                  placeholder="Correo electrónico (ID cliente)"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
+                  className="w-full h-11 sm:h-10 px-3 rounded-xl border border-gray-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
                 />
                 <input
                   required
                   type="tel"
-                  placeholder="Número de celular (WhatsApp)"
+                  placeholder="Celular / WhatsApp"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
+                  className="w-full h-11 sm:h-10 px-3 rounded-xl border border-gray-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
                 />
               </div>
             </div>
 
             {/* MODALIDAD DE ENTREGA: ENVÍO O IR POR EL ARBOLITO */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase text-[#002718]">
-                ¿Cómo deseas recibir tu pedido?
+            <div className="space-y-1.5">
+              <label className="text-[11px] sm:text-xs font-bold uppercase text-[#002718]">
+                Modalidad de Entrega:
               </label>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setDeliveryMethod('DOMICILIO')}
-                  className={`p-3 rounded-xl border text-left transition-all ${
+                  className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all ${
                     deliveryMethod === 'DOMICILIO'
-                      ? 'border-[#133e2b] bg-[#133e2b]/5 font-bold shadow-sm'
+                      ? 'border-[#133e2b] bg-[#133e2b]/5 font-bold shadow-xs'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <span className="block text-xs text-[#002718]">🚚 Envío a Domicilio</span>
-                  <span className="text-[11px] text-gray-500">Despacho con número de guía</span>
+                  <span className="block text-xs text-[#002718]">🚚 Envío Domicilio</span>
+                  <span className="text-[10px] sm:text-[11px] text-gray-500">Con número de guía</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setDeliveryMethod('RECOGIDA_TIENDA')}
-                  className={`p-3 rounded-xl border text-left transition-all ${
+                  className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all ${
                     deliveryMethod === 'RECOGIDA_TIENDA'
-                      ? 'border-[#133e2b] bg-[#133e2b]/5 font-bold shadow-sm'
+                      ? 'border-[#133e2b] bg-[#133e2b]/5 font-bold shadow-xs'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
                   <span className="block text-xs text-[#002718]">🎄 Ir por el arbolito</span>
-                  <span className="text-[11px] text-gray-500">Recoger en tienda física</span>
+                  <span className="text-[10px] sm:text-[11px] text-gray-500">Recogida en tienda</span>
                 </button>
               </div>
             </div>
 
             {deliveryMethod === 'DOMICILIO' && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <input
                   required
                   type="text"
                   placeholder="Ciudad"
                   value={shippingCity}
                   onChange={(e) => setShippingCity(e.target.value)}
-                  className="h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
+                  className="h-11 sm:h-10 px-3 rounded-xl border border-gray-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
                 />
                 <input
                   required
@@ -196,17 +201,17 @@ export function GuestCheckoutModal({
                   placeholder="Dirección exacta (Barrio, Calle, Apto)"
                   value={shippingAddress}
                   onChange={(e) => setShippingAddress(e.target.value)}
-                  className="sm:col-span-2 h-10 px-3 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
+                  className="sm:col-span-2 h-11 sm:h-10 px-3 rounded-xl border border-gray-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
                 />
               </div>
             )}
 
             {/* MÉTODO DE PAGO INTEGRADO CON BOLD */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase text-[#002718]">
-                Pasarela de Pagos Bold
+            <div className="space-y-1.5">
+              <label className="text-[11px] sm:text-xs font-bold uppercase text-[#002718]">
+                Pasarela de Pagos Segura Bold:
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {[
                   { id: 'PSE', label: '🏦 PSE Bancos' },
                   { id: 'TARJETA_CREDITO', label: '💳 T. Crédito' },
@@ -216,9 +221,9 @@ export function GuestCheckoutModal({
                     key={m.id}
                     type="button"
                     onClick={() => setPaymentMethod(m.id as 'PSE' | 'TARJETA_CREDITO' | 'TARJETA_DEBITO')}
-                    className={`py-2.5 px-2 rounded-lg border text-xs font-semibold transition-all ${
+                    className={`py-2 px-1 rounded-xl border text-[11px] sm:text-xs font-semibold transition-all text-center ${
                       paymentMethod === m.id
-                        ? 'bg-[#133e2b] text-white border-[#133e2b] shadow-sm'
+                        ? 'bg-[#133e2b] text-white border-[#133e2b] shadow-xs'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
                     }`}
                   >
@@ -231,7 +236,7 @@ export function GuestCheckoutModal({
             <button
               disabled={loading}
               type="submit"
-              className="w-full h-12 rounded-xl bg-[#b90d1c] hover:bg-[#930011] text-white font-bold text-sm shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+              className="w-full h-12 rounded-xl bg-[#b90d1c] hover:bg-[#930011] text-white font-bold text-sm shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading
                 ? 'Conectando con Bold Gateway...'

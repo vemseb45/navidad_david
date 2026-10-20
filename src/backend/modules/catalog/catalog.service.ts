@@ -82,7 +82,7 @@ export class CatalogService {
 
   // Agrega un producto a una sección existente y reconfigura la sección si el producto trae variantes
   public async createProductInSection(input: {
-    sectionId: string;
+    sectionId: number;
     subcategoryName?: string;
     name: string;
     description: string;
@@ -103,7 +103,7 @@ export class CatalogService {
 
     return prisma.$transaction(async (tx) => {
       // 2. Si incluye subcategoría nueva o existente, resolverla automáticamente
-      let subcategoryId: string | undefined;
+      let subcategoryId: number | undefined;
       if (input.subcategoryName) {
         const subSlug = input.subcategoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         const sub = await tx.subcategoria.upsert({
@@ -145,7 +145,7 @@ export class CatalogService {
           precio_comparacion: input.compareAtPrice,
           badge_superior: input.badgeTop,
           badge_inferior: input.badgeBottom,
-          orden_visualizacion: (maxProdOrder._max.orden_visualizacion ?? 0) + 1,
+          orden_visualizacion: (maxProdOrder._max?.orden_visualizacion ?? 0) + 1,
           imagenes: {
             create: processedImages.map((img, idx) => ({
               ruta_almacenamiento: img.storagePath,
@@ -174,7 +174,7 @@ export class CatalogService {
   }
 
   public async updateProduct(
-    productId: string,
+    productId: number,
     data: {
       name?: string;
       description?: string;
@@ -206,7 +206,7 @@ export class CatalogService {
     });
   }
 
-  public async addProductImage(productId: string, fileBuffer: Buffer) {
+  public async addProductImage(productId: number, fileBuffer: Buffer) {
     const product = await prisma.producto.findUniqueOrThrow({ where: { id: productId } });
     const slug = product.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const processed = await this.mediaService.compressAndStoreBinary(fileBuffer, slug);
@@ -225,18 +225,18 @@ export class CatalogService {
         alto_px: processed.heightPx,
         tamano_bytes: processed.sizeBytes,
         checksum_sha256: processed.checksumSha256,
-        orden: (maxSort._max.orden ?? 0) + 1,
+        orden: (maxSort._max?.orden ?? 0) + 1,
       },
     });
   }
 
-  public async deleteProductImage(imageId: string) {
+  public async deleteProductImage(imageId: number) {
     const img = await prisma.imagenProducto.findUniqueOrThrow({ where: { id: imageId } });
     await this.mediaService.deleteBinaryFromDisk(img.ruta_almacenamiento);
     return prisma.imagenProducto.delete({ where: { id: imageId } });
   }
 
-  public async deleteProduct(productId: string) {
+  public async deleteProduct(productId: number) {
     const product = await prisma.producto.findUnique({
       where: { id: productId },
       include: { imagenes: true },

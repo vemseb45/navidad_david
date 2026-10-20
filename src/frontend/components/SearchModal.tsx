@@ -50,23 +50,23 @@ export function SearchModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-[#e4e2de] overflow-hidden"
+        className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-[#e4e2de] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* BARRA DE ENTRADA */}
-        <div className="p-4 border-b border-[#e4e2de] flex items-center gap-3">
+        <div className="p-3 sm:p-4 border-b border-[#e4e2de] flex items-center gap-2 sm:gap-3">
           <Search className="w-5 h-5 text-gray-400 shrink-0" />
           <input
             autoFocus
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar árboles por nombre, estilo (nevado, fibra óptica, clásico)..."
-            className="w-full text-sm outline-none text-gray-800 placeholder-gray-400 bg-transparent font-medium"
+            placeholder="Buscar árboles por nombre, estilo (nevado, fibra óptica)..."
+            className="w-full text-base sm:text-sm outline-none text-gray-800 placeholder-gray-400 bg-transparent font-medium"
           />
           {searchTerm && (
             <button
@@ -78,9 +78,11 @@ export function SearchModal({
           )}
           <button
             onClick={handleClose}
-            className="text-xs font-bold text-gray-500 hover:text-black px-2 py-1 rounded-lg bg-gray-100"
+            aria-label="Cerrar búsqueda"
+            className="text-xs font-bold text-gray-500 hover:text-black px-2.5 py-1.5 rounded-lg bg-gray-100 flex items-center justify-center"
           >
-            ESC
+            <span className="hidden sm:inline">ESC</span>
+            <X className="w-4 h-4 sm:hidden" />
           </button>
         </div>
 

@@ -39,7 +39,7 @@ export class CatalogRepository {
     });
   }
 
-  public async getProductById(id: string) {
+  public async getProductById(id: number) {
     return prisma.producto.findUnique({
       where: { id },
       include: {
@@ -52,7 +52,7 @@ export class CatalogRepository {
   }
 
   public async updateProduct(
-    id: string,
+    id: number,
     data: {
       nombre?: string;
       descripcion?: string;
@@ -75,7 +75,7 @@ export class CatalogRepository {
     });
   }
 
-  public async deleteProduct(id: string) {
+  public async deleteProduct(id: number) {
     return prisma.producto.delete({
       where: { id },
     });

@@ -12,8 +12,8 @@ interface CartContextType {
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
   addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
-  removeFromCart: (productId: string, variantId?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  removeFromCart: (productId: number, variantId?: number) => void;
+  updateQuantity: (productId: number, quantity: number, variantId?: number) => void;
   clearCart: () => void;
 }
 
@@ -63,13 +63,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromCart = (productId: string, variantId?: string) => {
+  const removeFromCart = (productId: number, variantId?: number) => {
     setCart((prev) =>
       prev.filter((i) => !(i.productId === productId && i.variantId === variantId))
     );
   };
 
-  const updateQuantity = (productId: string, quantity: number, variantId?: string) => {
+  const updateQuantity = (productId: number, quantity: number, variantId?: number) => {
     if (quantity <= 0) {
       removeFromCart(productId, variantId);
       return;

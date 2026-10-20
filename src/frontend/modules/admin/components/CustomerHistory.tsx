@@ -14,13 +14,13 @@ export function CustomerHistory({ customers }: { customers: AdminCustomerRecord[
   );
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-[#e4e2de] shadow-sm space-y-4">
+    <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#e4e2de] shadow-sm space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
         <div>
-          <h2 className="font-serif text-xl font-bold text-[#002718]">
+          <h2 className="font-serif text-lg sm:text-xl font-bold text-[#002718]">
             Directorio Único de Clientes e Historial Consolidado
           </h2>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             Identificación por correo electrónico. Todas las compras de un mismo cliente se agrupan aquí automáticamente.
           </p>
         </div>
@@ -31,7 +31,7 @@ export function CustomerHistory({ customers }: { customers: AdminCustomerRecord[
             placeholder="Buscar por email, nombre o celular..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-9 px-3 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-[#133e2b]"
+            className="w-full h-10 sm:h-9 px-3 rounded-xl border border-gray-300 text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b]"
           />
         </div>
       </div>

@@ -14,8 +14,8 @@ export const guestCheckoutSchema = z.object({
   items: z
     .array(
       z.object({
-        productId: z.string().uuid('ID de producto inválido'),
-        variantId: z.string().uuid().optional(),
+        productId: z.coerce.number().int().positive('ID de producto inválido'),
+        variantId: z.coerce.number().int().positive().optional().nullable(),
         quantity: z.number().int().positive('La cantidad debe ser al menos 1'),
       })
     )

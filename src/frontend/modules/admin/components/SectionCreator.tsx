@@ -20,7 +20,9 @@ export function SectionCreator({
   const [creatingSection, setCreatingSection] = useState(false);
 
   // Estado para añadir producto
-  const [selectedSectionId, setSelectedSectionId] = useState(sections[0]?.id || '');
+  const [selectedSectionId, setSelectedSectionId] = useState<string>(
+    sections[0]?.id ? String(sections[0].id) : ''
+  );
   const [prodName, setProdName] = useState('');
   const [prodDescription, setProdDescription] = useState('');
   const [prodBasePrice, setProdBasePrice] = useState<number>(0);
@@ -75,7 +77,7 @@ export function SectionCreator({
     setCreatingProduct(true);
     try {
       const formData = new FormData();
-      formData.append('sectionId', selectedSectionId);
+      formData.append('sectionId', String(selectedSectionId));
       formData.append('name', prodName);
       formData.append('description', prodDescription);
       formData.append('basePrice', prodBasePrice.toString());
@@ -112,9 +114,9 @@ export function SectionCreator({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       {/* CREADOR INTELIGENTE DE SECCIONES */}
-      <div className="bg-white p-6 rounded-2xl border border-[#e4e2de] shadow-sm space-y-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#e4e2de] shadow-sm space-y-4">
         <div className="border-b pb-3">
           <h3 className="font-serif text-lg font-bold text-[#002718]">
             Creador Inteligente de Secciones
@@ -135,7 +137,7 @@ export function SectionCreator({
               value={sectionTitle}
               onChange={(e) => setSectionTitle(e.target.value)}
               placeholder="Nombre de la sección..."
-              className="w-full h-10 px-3 rounded-lg border text-xs focus:ring-2 focus:ring-[#133e2b]"
+              className="w-full h-11 sm:h-10 px-3 rounded-lg border text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b]"
             />
           </div>
 
@@ -146,7 +148,7 @@ export function SectionCreator({
               value={sectionSubtitle}
               onChange={(e) => setSectionSubtitle(e.target.value)}
               placeholder="Breve frase que describe la categoría..."
-              className="w-full h-10 px-3 rounded-lg border text-xs focus:ring-2 focus:ring-[#133e2b]"
+              className="w-full h-11 sm:h-10 px-3 rounded-lg border text-base sm:text-xs focus:ring-2 focus:ring-[#133e2b]"
             />
           </div>
 

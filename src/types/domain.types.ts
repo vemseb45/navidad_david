@@ -41,7 +41,7 @@ export interface ProcessedBinaryImage {
 }
 
 export interface StoreVariant {
-  id: string;
+  id: number;
   label: string;
   price: number;
   stock?: number;
@@ -49,7 +49,7 @@ export interface StoreVariant {
 }
 
 export interface StoreProductImage {
-  id: string;
+  id: number;
   storagePath: string;
   altText: string;
   widthPx?: number;
@@ -58,7 +58,7 @@ export interface StoreProductImage {
 }
 
 export interface StoreProduct {
-  id: string;
+  id: number;
   sku: string;
   name: string;
   description: string;
@@ -68,8 +68,8 @@ export interface StoreProduct {
   badgeBottom?: string | null;
   stock: number;
   isPublished: boolean;
-  sectionId: string;
-  subcategoryId?: string | null;
+  sectionId: number;
+  subcategoryId?: number | null;
   subcategorySlug?: string;
   subcategoryName?: string;
   images: StoreProductImage[];
@@ -77,7 +77,7 @@ export interface StoreProduct {
 }
 
 export interface StoreSection {
-  id: string;
+  id: number;
   slug: string;
   title: string;
   subtitle?: string | null;
@@ -86,13 +86,13 @@ export interface StoreSection {
   accentColor?: string;
   layoutType: TipoLayoutSeccion;
   displayOrder: number;
-  subcategories: Array<{ id: string; slug: string; name: string }>;
+  subcategories: Array<{ id: number; slug: string; name: string }>;
   products: StoreProduct[];
 }
 
 export interface CartItem {
-  productId: string;
-  variantId?: string;
+  productId: number;
+  variantId?: number;
   name: string;
   variantLabel?: string;
   unitPrice: number;
@@ -111,14 +111,14 @@ export interface CreateOrderPayload {
   shippingCity?: string;
   paymentMethod: MetodoPago;
   items: Array<{
-    productId: string;
-    variantId?: string;
+    productId: number;
+    variantId?: number | null;
     quantity: number;
   }>;
 }
 
 export interface UserRecord {
-  id: string;
+  id: string; // Mantiene UUID para los usuarios de tb_users
   nombres_apellidos: string;
   correo_electronico: string;
   rol: string;
@@ -129,12 +129,12 @@ export interface UserRecord {
 }
 
 export interface AdminCustomerRecord {
-  id: string;
+  id: number;
   email: string;
   fullName: string;
   phone: string;
   orders: Array<{
-    id: string;
+    id: number;
     trackingNumber: string;
     totalAmount: number;
     deliveryMethod: string;
@@ -149,29 +149,27 @@ export interface AdminCustomerRecord {
   }>;
 }
 
-export interface FrequentCustomer {
-  email: string;
-  fullName: string;
-  phone: string;
-  totalOrders: number;
-  totalSpent: number;
-  lastPurchaseDate: string;
-}
-
 export interface DashboardMetrics {
   totalRevenue: number;
   totalOrders: number;
   totalUniqueCustomers: number;
   bestSellingProduct: {
-    productId: string;
+    productId: number;
     name: string;
     unitsSold: number;
     revenue: number;
   } | null;
-  frequentCustomer: FrequentCustomer | null;
+  frequentCustomer: {
+    email: string;
+    fullName: string;
+    phone: string;
+    totalOrders: number;
+    totalSpent: number;
+    lastPurchaseDate: string;
+  } | null;
   notifications: Array<{
-    id: string;
-    orderId: string;
+    id: number;
+    orderId: number;
     title: string;
     summary: string;
     isRead: boolean;

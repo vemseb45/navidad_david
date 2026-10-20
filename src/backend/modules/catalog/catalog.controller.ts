@@ -103,7 +103,7 @@ export class CatalogController {
       // CASO A: Creación de Producto mediante FormData con compresión Sharp WebP
       if (contentType.includes('multipart/form-data')) {
         const formData = await req.formData();
-        const sectionId = formData.get('sectionId') as string;
+        const sectionId = Number(formData.get('sectionId'));
         const name = formData.get('name') as string;
         const description = (formData.get('description') as string) || '';
         const basePrice = Number(formData.get('basePrice'));
@@ -119,7 +119,7 @@ export class CatalogController {
         }
 
         // Resolver o crear subcategoría si se especificó
-        let subcategoryId: string | null = null;
+        let subcategoryId: number | null = null;
         if (subcategoryName?.trim()) {
           const subSlug = subcategoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
           const existingSub = await prisma.subcategoria.findUnique({
@@ -219,8 +219,13 @@ export class CatalogController {
   async getProductById(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
       const { id } = await context.params;
+      const numId = Number(id);
+      if (isNaN(numId)) {
+        return apiResponse(false, 'ID de producto inválido', null, 400);
+      }
+
       const product = await prisma.producto.findUnique({
-        where: { id },
+        where: { id: numId },
         include: {
           imagenes: { orderBy: { orden: 'asc' } },
           variantes: { orderBy: { precio: 'asc' } },
@@ -249,6 +254,11 @@ export class CatalogController {
       }
 
       const { id } = await context.params;
+      const numId = Number(id);
+      if (isNaN(numId)) {
+        return apiResponse(false, 'ID de producto inválido', null, 400);
+      }
+
       const raw = await parseBody(req);
       const parsed = updateProductSchema.safeParse(raw);
 
@@ -256,7 +266,7 @@ export class CatalogController {
         return apiResponse(false, 'Datos de actualización inválidos', null, 400, parsed.error.flatten());
       }
 
-      const updated = await this.service.updateProduct(id, parsed.data);
+      const updated = await this.service.updateProduct(numId, parsed.data);
       return apiResponse(true, 'Producto actualizado exitosamente', updated, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error actualizando producto';
@@ -273,15 +283,20 @@ export class CatalogController {
       }
 
       const { id } = await context.params;
+      const numId = Number(id);
+      if (isNaN(numId)) {
+        return apiResponse(false, 'ID de producto inválido', null, 400);
+      }
+
       const { searchParams } = new URL(req.url);
       const imageId = searchParams.get('imageId');
 
       if (imageId) {
-        await this.service.deleteProductImage(imageId);
+        await this.service.deleteProductImage(Number(imageId));
         return apiResponse(true, 'Imagen de producto eliminada correctamente', null, 200);
       }
 
-      await this.service.deleteProduct(id);
+      await this.service.deleteProduct(numId);
       return apiResponse(true, 'Producto eliminado correctamente', null, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al eliminar producto o imagen';
@@ -298,6 +313,11 @@ export class CatalogController {
       }
 
       const { id } = await context.params;
+      const numId = Number(id);
+      if (isNaN(numId)) {
+        return apiResponse(false, 'ID de producto inválido', null, 400);
+      }
+
       const formData = await req.formData();
       const file = formData.get('image') as File | null;
       const altText = (formData.get('altText') as string) || 'Imagen del producto';
@@ -312,11 +332,11 @@ export class CatalogController {
       const cleanSlug = file.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const compressed = await this.mediaService.compressAndStoreBinary(buffer, cleanSlug);
 
-      const countImages = await prisma.imagenProducto.count({ where: { id_producto: id } });
+      const countImages = await prisma.imagenProducto.count({ where: { id_producto: numId } });
 
       const newImage = await prisma.imagenProducto.create({
         data: {
-          id_producto: id,
+          id_producto: numId,
           ruta_almacenamiento: compressed.storagePath,
           texto_alternativo: altText,
           ancho_px: compressed.widthPx,

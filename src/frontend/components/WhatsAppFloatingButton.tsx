@@ -15,7 +15,7 @@ export function WhatsAppFloatingButton() {
       rel="noopener noreferrer"
       aria-label="Contactar por WhatsApp"
       title="Asesoría personalizada por WhatsApp"
-      className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-[#25D366] text-white rounded-full shadow-2xl hover:bg-[#20ba5a] hover:scale-105 active:scale-95 transition-all duration-300 group ring-4 ring-white/50"
+      className="fixed bottom-5 left-4 sm:bottom-6 sm:left-6 z-40 flex items-center gap-2 sm:gap-2.5 px-3.5 py-2.5 sm:px-4 sm:py-3 bg-[#25D366] text-white rounded-full shadow-2xl hover:bg-[#20ba5a] hover:scale-105 active:scale-95 transition-all duration-300 group ring-4 ring-white/60"
     >
       <MessageCircle className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" />
       <span className="text-xs font-bold tracking-wider uppercase hidden sm:inline">

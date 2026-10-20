@@ -32,7 +32,7 @@ export class OrderRepository {
   }
 
   public async updatePaymentStatus(
-    orderId: string,
+    orderId: number,
     estado: EstadoPago,
     idTransaccionBold?: string
   ) {

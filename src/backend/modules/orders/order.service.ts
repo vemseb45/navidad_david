@@ -22,7 +22,7 @@ export class OrderService {
     shippingAddress?: string;
     shippingCity?: string;
     paymentMethod: MetodoPago;
-    items: Array<{ productId: string; variantId?: string; quantity: number }>;
+    items: Array<{ productId: number; variantId?: number | null; quantity: number }>;
   }) {
     // 1. Validar que si elige envío a domicilio exista dirección
     if (payload.deliveryMethod === MetodoEntrega.DOMICILIO && !payload.shippingAddress?.trim()) {
@@ -42,8 +42,8 @@ export class OrderService {
     // 3. Calcular totales desde la base de datos (Seguridad contra manipulación en frontend)
     let totalAmount = 0;
     const preparedItems: Array<{
-      id_producto: string;
-      id_variante?: string;
+      id_producto: number;
+      id_variante?: number;
       nombre_producto: string;
       nombre_variante?: string;
       cantidad: number;
