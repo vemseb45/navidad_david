@@ -1,15 +1,8 @@
-import { NextResponse } from 'next/server';
-import { clearSessionCookie } from '@/backend/modules/auth/security/session.service';
+import { NextRequest } from 'next/server';
+import { AuthController } from '@/backend/modules/auth/auth.controller';
 
-export async function POST() {
-  try {
-    await clearSessionCookie();
-    return NextResponse.json({
-      success: true,
-      message: 'Sesión cerrada exitosamente y cookie HttpOnly eliminada',
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Error al cerrar sesión';
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
-  }
+const controller = new AuthController();
+
+export async function POST(req: NextRequest) {
+  return controller.logout(req);
 }

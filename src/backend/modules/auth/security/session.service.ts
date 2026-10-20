@@ -1,9 +1,15 @@
 import { cookies } from 'next/headers';
-import { readToken, SessionUser } from './token.service';
+import {
+  AUTH_COOKIE_NAME,
+  AUTH_COOKIE_SECURE,
+  AUTH_COOKIE_SAME_SITE,
+  AUTH_COOKIE_PATH,
+  AUTH_SESSION_MAX_AGE,
+} from '../auth.constants';
 
-export const AUTH_COOKIE_NAME = 'nd_admin_session';
-export const AUTH_SESSION_MAX_AGE = 24 * 60 * 60; // 24 horas
-
+/**
+ * Establece la cookie de sesión HttpOnly segura
+ */
 export async function setSessionCookie(token: string): Promise<void> {
   const cookieStore = await cookies();
 
@@ -11,25 +17,17 @@ export async function setSessionCookie(token: string): Promise<void> {
     name: AUTH_COOKIE_NAME,
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: AUTH_COOKIE_SECURE,
+    sameSite: AUTH_COOKIE_SAME_SITE,
     maxAge: AUTH_SESSION_MAX_AGE,
-    path: '/',
+    path: AUTH_COOKIE_PATH,
   });
 }
 
+/**
+ * Elimina la cookie de sesión al cerrar sesión
+ */
 export async function clearSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(AUTH_COOKIE_NAME);
-}
-
-export async function getSessionCookie(): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  return cookieStore.get(AUTH_COOKIE_NAME)?.value;
-}
-
-export async function getSessionUser(): Promise<SessionUser | null> {
-  const token = await getSessionCookie();
-  if (!token) return null;
-  return readToken(token);
 }

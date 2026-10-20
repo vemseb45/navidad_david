@@ -9,12 +9,11 @@ interface AdminAuthViewProps {
 
 export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
   const [step, setStep] = useState<'CREDENTIALS' | '2FA'>('CREDENTIALS');
-  const [email, setEmail] = useState('admin@navidaddavid.com');
-  const [password, setPassword] = useState('NavidadDavid2026*');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [code2FA, setCode2FA] = useState('');
   const [userId, setUserId] = useState('');
   const [preAuthToken, setPreAuthToken] = useState<string | undefined>(undefined);
-  const [demoCode, setDemoCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,19 +29,18 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
         body: JSON.stringify({ correo: email, contrasena: password }),
       });
 
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || json.error || 'Error al iniciar sesión');
 
-      if (data.requiere2FA) {
-        setUserId(data.usuarioId);
-        setPreAuthToken(data.preAuthToken);
-        if (data.codigoDemo) {
-          setDemoCode(data.codigoDemo);
-          setCode2FA(data.codigoDemo);
-        }
+      const payload = json.data || json;
+
+      if (payload.requiere2FA) {
+        setUserId(payload.usuarioId);
+        setPreAuthToken(payload.preAuthToken);
+        setCode2FA('');
         setStep('2FA');
       } else {
-        onSuccess(data.token, data.usuario);
+        onSuccess(payload.token, payload.usuario);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
@@ -63,10 +61,11 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
         body: JSON.stringify({ usuarioId: userId, codigo: code2FA, preAuthToken }),
       });
 
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || json.error || 'Código 2FA incorrecto o expirado');
 
-      onSuccess(data.token, data.usuario);
+      const payload = json.data || json;
+      onSuccess(payload.token, payload.usuario);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Código 2FA incorrecto o expirado');
     } finally {
@@ -156,16 +155,9 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
               <ShieldCheck className="w-8 h-8 text-[#133e2b] mx-auto" />
               <p className="font-bold text-sm text-[#002718]">Doble Factor de Autenticación (2FA)</p>
               <p className="text-[11px] text-gray-600">
-                Se ha enviado un código de seguridad de 6 dígitos a tu correo{' '}
-                <strong className="text-[#133e2b]">{email}</strong>. Válido por 5 minutos.
+                Hemos enviado un código OTP de 6 dígitos a tu correo{' '}
+                <strong className="text-[#133e2b]">{email}</strong>. Revisa tu bandeja de entrada o spam. Válido por 5 minutos.
               </p>
-              {demoCode && (
-                <div className="pt-2">
-                  <span className="text-[10px] text-emerald-800 font-mono bg-emerald-100 px-2.5 py-1 rounded-full font-bold inline-block">
-                    Código de verificación: {demoCode}
-                  </span>
-                </div>
-              )}
             </div>
 
             <div>

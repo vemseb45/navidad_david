@@ -1,22 +1,67 @@
 import crypto from 'crypto';
-import { prisma } from '@/backend/config/prisma';
+import { AuthRepository } from './auth.repository';
 import { createToken, createPreAuthToken, readPreAuthToken, SessionUser } from './security/token.service';
 import { send2FAEmail } from './security/email-otp.service';
+import { LoginInput, Verify2faInput, CreateUserInput, Toggle2faInput } from './validators/auth.validator';
 
 export class AuthService {
-  // Hasheo de contraseña con salt seguro usando PBKDF2
+  private repo: AuthRepository;
+
+  constructor() {
+    this.repo = new AuthRepository();
+  }
+
+  // Hasheo seguro de contraseña con PBKDF2
   public static hashPassword(password: string): string {
     const salt = crypto.randomBytes(16).toString('hex');
     const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
     return `${salt}:${hash}`;
   }
 
-  // Verificación de contraseña hasheada
+  // Verificación constante contra timing attacks con soporte para texto plano y migración automática
   public static verifyPassword(password: string, storedHash: string): boolean {
-    const [salt, key] = storedHash.split(':');
-    if (!salt || !key) return false;
-    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-    return hash === key;
+    if (!storedHash || !password) return false;
+
+    // 1. Si la contraseña en base de datos es texto plano (por cambio manual en DB)
+    if (storedHash === password) {
+      return true;
+    }
+
+    // 2. Si tiene formato con delimitador salt:hash
+    if (storedHash.includes(':')) {
+      const parts = storedHash.split(':');
+
+      // Formato PBKDF2 estándar (salt:hash)
+      if (parts.length === 2) {
+        const [salt, key] = parts;
+        if (!salt || !key) return false;
+        try {
+          const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+          if (hash.length === key.length) {
+            return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(key, 'hex'));
+          }
+        } catch {
+          return false;
+        }
+      }
+
+      // Formato scrypt (scrypt:salt:key) como en Barber_Tech_BF
+      if (parts.length === 3 && parts[0] === 'scrypt') {
+        const [, salt, key] = parts;
+        try {
+          const derivedKey = crypto.scryptSync(password, salt, 64) as Buffer;
+          const storedKey = Buffer.from(key, 'hex');
+          if (storedKey.length === derivedKey.length) {
+            return crypto.timingSafeEqual(storedKey, derivedKey);
+          }
+        } catch {
+          return false;
+        }
+      }
+    }
+
+    // 3. Fallback final
+    return storedHash === password;
   }
 
   // Generación de código numérico de 6 dígitos para 2FA
@@ -24,19 +69,24 @@ export class AuthService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  // Paso 1 de Login: Validar correo y contraseña
-  public async iniciarLogin(correo: string, contrasena: string) {
-    const usuario = await prisma.usuario.findUnique({
-      where: { correo_electronico: correo.trim().toLowerCase() },
-    });
+  // Paso 1 de Login: Validar credenciales y enviar OTP por SMTP si requiere 2FA
+  public async loginUser(input: LoginInput) {
+    const usuario = await this.repo.findByEmail(input.correo);
 
     if (!usuario || !usuario.esta_activo) {
       throw new Error('Credenciales inválidas o usuario inactivo');
     }
 
-    const esValida = AuthService.verifyPassword(contrasena, usuario.contrasena_hash);
+    const esValida = AuthService.verifyPassword(input.contrasena, usuario.contrasena_hash);
     if (!esValida) {
       throw new Error('Credenciales inválidas');
+    }
+
+    // Si la contraseña en la base de datos era texto plano (por cambio manual del admin/DBA), la migramos automáticamente a hash seguro
+    if (usuario.contrasena_hash === input.contrasena) {
+      const nuevoHash = AuthService.hashPassword(input.contrasena);
+      await this.repo.updatePasswordHash(usuario.id, nuevoHash);
+      console.log(`🔒 [Auto-Hash] Contraseña plana de ${usuario.correo_electronico} actualizada a hash PBKDF2 automáticamente.`);
     }
 
     const sessionUser: SessionUser = {
@@ -46,23 +96,16 @@ export class AuthService {
       rol: usuario.rol,
     };
 
-    // Si tiene 2FA activado, generamos código temporal y preAuthToken JWT de 5 minutos
+    // Si tiene 2FA activado
     if (usuario.activacion_2fa) {
       const codigo2FA = AuthService.generate2FACode();
       const expiracion = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
       const preAuthToken = createPreAuthToken(usuario.id);
 
-      await prisma.usuario.update({
-        where: { id: usuario.id },
-        data: {
-          codigo_2fa_temporal: codigo2FA,
-          expiracion_codigo_2fa: expiracion,
-        },
-      });
-
+      await this.repo.set2FACode(usuario.id, codigo2FA, expiracion);
       console.log(`🔐 [2FA NAVIDAD DAVID] Código para ${usuario.correo_electronico}: ${codigo2FA}`);
 
-      // Envío real del código por correo mediante SMTP
+      // Despacho real mediante SMTP
       await send2FAEmail(usuario.correo_electronico, usuario.nombres_apellidos, codigo2FA);
 
       return {
@@ -70,16 +113,11 @@ export class AuthService {
         usuarioId: usuario.id,
         preAuthToken,
         correo: usuario.correo_electronico,
-        codigoDemo: process.env.NODE_ENV !== 'production' ? codigo2FA : undefined,
       };
     }
 
-    // Si no tiene 2FA, emite sesión JWT directamente
-    await prisma.usuario.update({
-      where: { id: usuario.id },
-      data: { ultimo_login: new Date() },
-    });
-
+    // Si no tiene 2FA activado
+    await this.repo.updateLastLogin(usuario.id);
     const token = createToken(sessionUser);
 
     return {
@@ -90,44 +128,33 @@ export class AuthService {
   }
 
   // Paso 2 de Login: Validar código 2FA
-  public async verificar2FA(usuarioId: string, codigo: string, preAuthToken?: string) {
-    // Si viene preAuthToken, podemos verificar su validez adicional
-    if (preAuthToken) {
-      const decoded = readPreAuthToken(preAuthToken);
-      if (!decoded || decoded.userId !== usuarioId) {
-        throw new Error('Token de pre-autenticación 2FA inválido o expirado');
+  public async verify2fa(input: Verify2faInput) {
+    if (input.preAuthToken) {
+      const decoded = readPreAuthToken(input.preAuthToken);
+      if (!decoded || decoded.usuarioId !== input.usuarioId) {
+        throw new Error('Token previo de 2FA inválido o expirado');
       }
     }
 
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: usuarioId },
-    });
-
+    const usuario = await this.repo.findById(input.usuarioId);
     if (!usuario || !usuario.esta_activo) {
-      throw new Error('Usuario no encontrado');
+      throw new Error('Usuario no encontrado o inactivo');
     }
 
     if (!usuario.codigo_2fa_temporal || !usuario.expiracion_codigo_2fa) {
-      throw new Error('No hay solicitud de 2FA pendiente o ha expirado');
+      throw new Error('No hay solicitud de 2FA activa para este usuario');
     }
 
-    if (new Date() > usuario.expiracion_codigo_2fa) {
-      throw new Error('El código 2FA ha expirado. Solicita uno nuevo.');
+    if (new Date() > new Date(usuario.expiracion_codigo_2fa)) {
+      throw new Error('El código 2FA ha expirado. Por favor inicia sesión nuevamente');
     }
 
-    if (usuario.codigo_2fa_temporal.trim() !== codigo.trim()) {
-      throw new Error('Código de verificación 2FA incorrecto');
+    if (usuario.codigo_2fa_temporal !== input.codigo) {
+      throw new Error('Código 2FA incorrecto');
     }
 
-    // Limpiar código temporal y actualizar último login
-    await prisma.usuario.update({
-      where: { id: usuario.id },
-      data: {
-        codigo_2fa_temporal: null,
-        expiracion_codigo_2fa: null,
-        ultimo_login: new Date(),
-      },
-    });
+    // Limpiar código temporal y registrar login
+    await this.repo.clear2FACode(usuario.id);
 
     const sessionUser: SessionUser = {
       id: usuario.id,
@@ -144,75 +171,42 @@ export class AuthService {
     };
   }
 
-  // Gestión de Usuarios en tb_users por el Administrador
-  public async listarUsuarios() {
-    return prisma.usuario.findMany({
-      orderBy: { fecha_creacion: 'desc' },
-      select: {
-        id: true,
-        nombres_apellidos: true,
-        correo_electronico: true,
-        rol: true,
-        activacion_2fa: true,
-        ultimo_login: true,
-        esta_activo: true,
-        fecha_creacion: true,
-        fecha_actualizacion: true,
-      },
-    });
+  // Listar usuarios para el panel admin
+  public async listUsers() {
+    return this.repo.listUsers();
   }
 
-  public async crearUsuario(data: {
-    nombres_apellidos: string;
-    correo_electronico: string;
-    contrasena: string;
-    rol?: string;
-    activacion_2fa?: boolean;
-  }) {
-    const correoNormalizado = data.correo_electronico.trim().toLowerCase();
-    const existe = await prisma.usuario.findUnique({
-      where: { correo_electronico: correoNormalizado },
-    });
-
-    if (existe) {
+  // Crear nuevo usuario en tb_users
+  public async createUser(input: CreateUserInput) {
+    const existente = await this.repo.findByEmail(input.correo_electronico);
+    if (existente) {
       throw new Error('Ya existe un usuario registrado con este correo electrónico');
     }
 
-    const contrasenaHash = AuthService.hashPassword(data.contrasena);
-
-    return prisma.usuario.create({
-      data: {
-        nombres_apellidos: data.nombres_apellidos.trim(),
-        correo_electronico: correoNormalizado,
-        contrasena_hash: contrasenaHash,
-        rol: data.rol || 'ADMIN',
-        activacion_2fa: data.activacion_2fa !== undefined ? data.activacion_2fa : true,
-      },
-      select: {
-        id: true,
-        nombres_apellidos: true,
-        correo_electronico: true,
-        rol: true,
-        activacion_2fa: true,
-        fecha_creacion: true,
-      },
+    const hash = AuthService.hashPassword(input.contrasena);
+    return this.repo.createUser({
+      nombres_apellidos: input.nombres_apellidos,
+      correo_electronico: input.correo_electronico,
+      contrasena_hash: hash,
+      rol: input.rol,
+      activacion_2fa: input.activacion_2fa,
     });
   }
 
-  public async alternar2FA(usuarioId: string, activacion_2fa: boolean) {
-    return prisma.usuario.update({
-      where: { id: usuarioId },
-      data: { activacion_2fa },
-      select: {
-        id: true,
-        activacion_2fa: true,
-      },
-    });
+  // Conmutar 2FA
+  public async toggle2FA(input: Toggle2faInput) {
+    return this.repo.update2FAStatus(input.usuarioId, input.activo);
   }
 
-  public async eliminarUsuario(usuarioId: string) {
-    return prisma.usuario.delete({
-      where: { id: usuarioId },
-    });
+  // Eliminar usuario
+  public async deleteUser(id: string, currentUserId?: string) {
+    if (currentUserId && id === currentUserId) {
+      throw new Error('No puedes eliminar tu propio usuario en sesión activa');
+    }
+    const total = await this.repo.countUsers();
+    if (total <= 1) {
+      throw new Error('Debe existir al menos un usuario administrador en el sistema');
+    }
+    return this.repo.deleteUser(id);
   }
 }

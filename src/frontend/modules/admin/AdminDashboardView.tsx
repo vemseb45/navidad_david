@@ -41,9 +41,10 @@ export function AdminDashboardView({
       try {
         const res = await fetch('/api/auth/me');
         if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.user) {
-            setCurrentUser(data.user);
+          const json = await res.json();
+          const user = json.data?.usuario || json.user || json.usuario;
+          if (json.success && user) {
+            setCurrentUser(user);
             setIsAuthenticated(true);
             return;
           }

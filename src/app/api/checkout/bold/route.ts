@@ -1,15 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { OrderService } from '@/backend/modules/orders/order.service';
+import { NextRequest } from 'next/server';
+import { OrderController } from '@/backend/modules/orders/order.controller';
 
-const orderService = new OrderService();
+const controller = new OrderController();
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const result = await orderService.createGuestOrderAndBoldSession(body);
-    return NextResponse.json({ success: true, data: result }, { status: 201 });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Error procesando la compra';
-    return NextResponse.json({ success: false, error: message }, { status: 400 });
-  }
+  return controller.checkoutBold(req);
 }

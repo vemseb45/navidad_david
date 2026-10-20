@@ -1,29 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { NextRequest } from 'next/server';
+import { MediaController } from '@/backend/modules/catalog/media.controller';
+
+const controller = new MediaController();
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
-  try {
-    const { path: pathSegments } = await context.params;
-    if (!pathSegments || pathSegments.length === 0) {
-      return NextResponse.json({ error: 'Ruta no válida' }, { status: 400 });
-    }
-
-    const safeRelativePath = pathSegments.join('/').replace(/\.\./g, '');
-    const binaryFilePath = path.join(process.cwd(), 'storage', 'binaries', safeRelativePath);
-
-    const fileBuffer = await fs.readFile(binaryFilePath);
-    return new NextResponse(fileBuffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'image/webp',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    });
-  } catch {
-    return NextResponse.json({ error: 'Binario de imagen no encontrado' }, { status: 404 });
-  }
+  return controller.serveBinary(req, context);
 }

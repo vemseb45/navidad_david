@@ -4,11 +4,16 @@ import React, { useState, useMemo } from 'react';
 import { StoreSection, StoreProduct, StoreVariant, CartItem } from '@/types/domain.types';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { FeaturesBanner } from './components/FeaturesBanner';
+import { Categories } from './components/Categories';
 import { DynamicSectionBar } from './components/DynamicSectionBar';
 import { DynamicSectionGrid } from './components/DynamicSectionGrid';
 import { Footer } from './components/Footer';
 import { CartDrawer } from '@/frontend/components/CartDrawer';
 import { GuestCheckoutModal } from '@/frontend/components/GuestCheckoutModal';
+import { ProductDetailModal } from '@/frontend/components/ProductDetailModal';
+import { WhatsAppFloatingButton } from '@/frontend/components/WhatsAppFloatingButton';
+import { SearchModal } from '@/frontend/components/SearchModal';
 
 export function StorefrontView({ initialSections }: { initialSections: StoreSection[] }) {
   const [activeSectionSlug, setActiveSectionSlug] = useState<string>('all');
@@ -16,10 +21,17 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [selectedProductForDetail, setSelectedProductForDetail] = useState<StoreProduct | null>(null);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  const allProducts = useMemo(
+    () => initialSections.flatMap((sec) => sec.products),
+    [initialSections]
+  );
 
   const totalProductsCount = useMemo(
-    () => initialSections.reduce((acc, sec) => acc + sec.products.length, 0),
-    [initialSections]
+    () => allProducts.length,
+    [allProducts]
   );
 
   const cartCount = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
@@ -31,7 +43,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
   const handleAddToCart = (product: StoreProduct, variant?: StoreVariant) => {
     const selectedVariant = variant || product.variants.find((v) => v.isDefault) || product.variants[0];
     const unitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice);
-    const imageUrl = product.images[0]?.storagePath || '/placeholder-tree.svg';
+    const imageUrl = product.images[0]?.storagePath || '/img/cat-arboles-tradicionales.webp';
 
     setCart((prev) => {
       const existingIndex = prev.findIndex(
@@ -57,6 +69,11 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     });
   };
 
+  const handleBuyNow = (product: StoreProduct, variant?: StoreVariant) => {
+    handleAddToCart(product, variant);
+    setIsCheckoutOpen(true);
+  };
+
   const handleRemoveFromCart = (productId: string, variantId?: string) => {
     setCart((prev) =>
       prev.filter((i) => !(i.productId === productId && i.variantId === variantId))
@@ -77,6 +94,14 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     );
   };
 
+  const handleSelectCategory = (slug: string) => {
+    setActiveSectionSlug(slug);
+    const el = document.getElementById(slug);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const visibleSections = useMemo(() => {
     return initialSections
       .filter((sec) => activeSectionSlug === 'all' || sec.slug === activeSectionSlug)
@@ -88,13 +113,12 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
             : prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
               prod.description.toLowerCase().includes(searchQuery.toLowerCase())
         ),
-      }))
-      .filter((sec) => sec.products.length > 0);
+      }));
   }, [initialSections, activeSectionSlug, searchQuery]);
 
   return (
-    <div className="bg-[#fbf9f5] text-[#1b1c1a] min-h-screen font-sans antialiased flex flex-col justify-between">
-      {/* NAVBAR */}
+    <div className="min-h-screen bg-[#fbf9f5] flex flex-col justify-between selection:bg-[#002718]/15 selection:text-[#002718]">
+      {/* NAVBAR OFICIAL */}
       <Navbar
         sections={initialSections}
         activeSectionSlug={activeSectionSlug}
@@ -104,18 +128,25 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         cartCount={cartCount}
         cartTotal={cartTotal}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
-      <main className="pt-28 flex-1">
-        {/* HERO */}
+      <main className="pt-24 flex-1">
+        {/* HERO VISUAL DE ALTO IMPACTO */}
         <Hero
           onExploreClick={() => {
-            const el = document.getElementById('arboles-tradicionales') || document.querySelector('section[id]');
+            const el = document.getElementById('categorias') || document.querySelector('section[id]');
             el?.scrollIntoView({ behavior: 'smooth' });
           }}
         />
 
-        {/* BARRA DE FILTROS DINÁMICA */}
+        {/* PILARES DE LA MARCA (Garantías, Frondosidad, Fibra Óptica, Bold) */}
+        <FeaturesBanner />
+
+        {/* CATEGORÍAS DESTACADAS CON CURVAS ORGÁNICAS (Estilo Nana.col) */}
+        <Categories onSelectCategory={handleSelectCategory} />
+
+        {/* BARRA DE NAVEGACIÓN Y FILTROS POR SECCIÓN DINÁMICA */}
         <DynamicSectionBar
           sections={initialSections}
           activeSectionSlug={activeSectionSlug}
@@ -123,7 +154,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
           onSelectSection={(slug) => setActiveSectionSlug(slug)}
         />
 
-        {/* SECCIONES RENDERIZADAS */}
+        {/* SECCIONES Y CATÁLOGO DE PRODUCTOS */}
         {visibleSections.length === 0 ? (
           <div className="text-center py-20">
             <span className="material-symbols-outlined text-5xl text-gray-400">search_off</span>
@@ -135,9 +166,9 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
                 setSearchQuery('');
                 setActiveSectionSlug('all');
               }}
-              className="mt-4 px-4 py-2 rounded-xl bg-[#133e2b] text-white text-xs font-bold"
+              className="mt-4 px-5 py-2.5 rounded-full bg-[#133e2b] text-white text-xs font-bold shadow-md hover:bg-[#002718] transition-colors"
             >
-              Restablecer búsqueda
+              Restablecer filtros y ver todo el catálogo
             </button>
           </div>
         ) : (
@@ -147,6 +178,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
               section={section}
               index={idx}
               onAddToCart={handleAddToCart}
+              onOpenQuickView={(prod) => setSelectedProductForDetail(prod)}
             />
           ))
         )}
@@ -155,7 +187,26 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
       {/* FOOTER */}
       <Footer />
 
-      {/* DRAWER CARRITO */}
+      {/* MODAL DETALLE DE PRODUCTO CON ZOOM INTERACTIVO */}
+      <ProductDetailModal
+        product={selectedProductForDetail}
+        onClose={() => setSelectedProductForDetail(null)}
+        onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
+      />
+
+      {/* MODAL DE BÚSQUEDA PREDICTIVA */}
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        products={allProducts}
+        onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
+      />
+
+      {/* BOTÓN FLOTANTE OFICIAL DE WHATSAPP CON PULSO VERDE */}
+      <WhatsAppFloatingButton />
+
+      {/* DRAWER CARRITO DE COMPRAS */}
       <CartDrawer
         isOpen={isCartOpen}
         cart={cart}
@@ -166,7 +217,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         onOpenCheckout={() => setIsCheckoutOpen(true)}
       />
 
-      {/* MODAL CHECKOUT */}
+      {/* MODAL CHECKOUT CON PASARELA BOLD */}
       {isCheckoutOpen && (
         <GuestCheckoutModal
           cart={cart}

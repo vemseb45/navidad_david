@@ -50,7 +50,7 @@ export function GuestCheckoutModal({
       });
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error);
+      if (!result.success) throw new Error(result.message || result.error || 'Error al procesar el pago');
 
       // Si la API de Bold generó una URL de pago, podemos redirigir al link de Bold
       if (result.data.boldPaymentUrl && result.data.boldPaymentUrl.startsWith('https://')) {

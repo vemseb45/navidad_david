@@ -8,12 +8,14 @@ interface DynamicSectionGridProps {
   section: StoreSection;
   index: number;
   onAddToCart: (product: StoreProduct, variant?: StoreVariant) => void;
+  onOpenQuickView: (product: StoreProduct) => void;
 }
 
 export function DynamicSectionGrid({
   section,
   index,
   onAddToCart,
+  onOpenQuickView,
 }: DynamicSectionGridProps) {
   const [activeSubcatSlug, setActiveSubcatSlug] = useState<string>('all');
 
@@ -92,6 +94,7 @@ export function DynamicSectionGrid({
                 key={product.id}
                 product={product}
                 onAddToCart={onAddToCart}
+                onOpenQuickView={onOpenQuickView}
               />
             ))}
           </div>

@@ -12,6 +12,7 @@ interface NavbarProps {
   cartCount: number;
   cartTotal: number;
   onOpenCart: () => void;
+  onOpenSearch?: () => void;
 }
 
 export function Navbar({
@@ -23,6 +24,7 @@ export function Navbar({
   cartCount,
   cartTotal,
   onOpenCart,
+  onOpenSearch,
 }: NavbarProps) {
   return (
     <header className="fixed top-0 inset-x-0 z-50 shadow-[0_4px_20px_-2px_rgba(19,62,43,0.08)]">
@@ -85,23 +87,22 @@ export function Navbar({
         </nav>
 
         {/* BÚSQUEDA Y ACCIONES */}
-        <div className="flex items-center gap-3">
-          <div className="relative hidden sm:block w-52">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#414943] text-base">
-              search
-            </span>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar pino, fibra, luces..."
-              className="w-full h-9 pl-9 pr-3 rounded-full bg-[#f5f3ef] text-xs focus:outline-none focus:ring-2 focus:ring-[#133e2b]"
-            />
-          </div>
+        <div className="flex items-center gap-2.5">
+          {onOpenSearch && (
+            <button
+              onClick={onOpenSearch}
+              aria-label="Abrir buscador predictivo"
+              title="Buscar en todo el catálogo"
+              className="p-2 sm:px-3 sm:py-2 rounded-full bg-[#f5f3ef] hover:bg-[#efeeea] text-[#002718] text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">search</span>
+              <span className="hidden sm:inline">Buscar</span>
+            </button>
+          )}
 
           <a
             href="/admin"
-            className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#efeeea] text-[#002718] hover:bg-[#e4e2de] transition-colors"
+            className="text-xs font-bold px-3 py-2 rounded-full bg-[#efeeea] text-[#002718] hover:bg-[#e4e2de] transition-colors"
           >
             Panel Admin
           </a>
