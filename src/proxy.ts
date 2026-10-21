@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
-
-const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'barber_tech_session';
-const AUTH_TOKEN_SECRET =
-  process.env.NEXTAUTH_SECRET || 'c4@fwiuso=a)2xkw5+)4+j0&$bs2=)0$%%8r+@4dfpx$p_rv$q';
+import { AUTH_COOKIE_NAME, AUTH_TOKEN_SECRET } from '@/backend/modules/auth/auth.constants';
 
 /**
  * Rutas de la API que requieren autenticación administrativa obligatoria por JWT en Cookie HttpOnly
@@ -188,24 +185,20 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // 4. Limpieza preventiva de cookie corrupta en visita directa a /admin
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-request-id', requestId);
-
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  // 4. Peticiones regulares: continuar con NextResponse.next()
+  const response = NextResponse.next();
 
   if (pathname.startsWith('/admin')) {
-    const sessionCookie = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+    const sessionCookie =
+      request.cookies.get(AUTH_COOKIE_NAME)?.value ||
+      request.cookies.get('barber_tech_session')?.value;
     if (sessionCookie) {
       try {
         jwt.verify(sessionCookie, AUTH_TOKEN_SECRET);
       } catch {
         // La cookie está corrupta o expiró, la limpiamos proactivamente
         response.cookies.delete(AUTH_COOKIE_NAME);
+        response.cookies.delete('barber_tech_session');
       }
     }
   }

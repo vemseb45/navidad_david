@@ -43,6 +43,7 @@ navidad_david/
 ├── storage/
 │   └── binaries/products/         # Binarios WebP fuera de Git (.gitignore)
 ├── src/
+│   ├── proxy.ts                   # Proxy de Seguridad Next.js 16 (Cabeceras OWASP, CSRF, Cookie/JWT Auth)
 │   ├── app/                       # Capa de Enrutamiento (Next.js 16 App Router)
 │   │   ├── (store)/               # Tienda pública (Navbar, Hero, Categorías, Grilla, Carrito)
 │   │   ├── admin/                 # Panel de Control Administrativo protegido con 2FA
@@ -119,6 +120,14 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
 4. **Flujo de 2FA**:
    * Al ingresar usuario y clave válidos, si `activacion_2fa = true`, se genera un código de 6 dígitos con validez de 5 minutos y se envía exclusivamente al correo por SMTP.
    * **NUNCA** retornar el código 2FA en la respuesta JSON ni autollenarlo en el formulario del frontend.
+5. **Proxy de Seguridad Next.js 16 (`src/proxy.ts`)**:
+   * En Next.js 16, la convención `middleware.ts` fue renombrada a `proxy.ts` y corre por defecto sobre el runtime de Node.js.
+   * Ubicación oficial: `src/proxy.ts` (al mismo nivel que `src/app`).
+   * Aplica cabeceras de seguridad OWASP Defense-in-Depth (`Content-Security-Policy`, `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `X-XSS-Protection`, `Strict-Transport-Security`).
+   * Protege rutas administrativas de API (`/api/admin/*`, `/api/auth/users/*`) validando la cookie HttpOnly `barber_tech_session` y firma JWT con `NEXTAUTH_SECRET`.
+   * Bloquea ataques CSRF en métodos de mutación (`POST`, `PUT`, `DELETE`, `PATCH`) comparando el Origin del cliente contra el Host (eximiendo webhooks de pasarelas como `/api/webhooks/bold`).
+   * Inyecta `x-request-id` único para trazabilidad y propaga datos de sesión autenticada (`x-user-id`, `x-user-role`, `x-user-email`) hacia los controladores.
+   * Si la cookie de sesión está corrupta o expiró, responde 401 y la limpia automáticamente con `Set-Cookie: Max-Age=0`.
 
 ---
 
