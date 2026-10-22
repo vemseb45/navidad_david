@@ -175,4 +175,51 @@ export interface DashboardMetrics {
     isRead: boolean;
     createdAt: string;
   }>;
+  treesSold: {
+    total: number;
+    tradicionales: number;
+    fibraOptica: number;
+    criticalStockCount: number;
+  };
+  ordersConversion: {
+    approvedOrders: number;
+    pendingOrders: number;
+    conversionRate: number;
+    whatsappSharePercent: number;
+    webSharePercent: number;
+  };
+  pendingDispatch: {
+    count: number;
+    todayCount: number;
+  };
+  topProducts: Array<{
+    ranking: number;
+    id: number;
+    name: string;
+    unitsSold: number;
+    revenue: number;
+    percentage: number;
+    badge: string;
+  }>;
+  categorySales: Array<{
+    name: string;
+    slug: string;
+    revenue: number;
+    percentage: number;
+    color: string;
+  }>;
+  recentOrdersList: Array<{
+    id: number;
+    trackingNumber: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    totalAmount: number;
+    paymentStatus: string;
+    deliveryMethod: string;
+    city: string;
+    createdAt: string;
+    itemsSummary: string;
+    itemCount: number;
+  }>;
 }

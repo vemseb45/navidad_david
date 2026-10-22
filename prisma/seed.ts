@@ -646,8 +646,18 @@ async function main() {
   });
 
   // ==========================================
-  // 5. CLIENTE INICIAL, COMPRA Y CLIENTE FRECUENTE
+  // 5. CLIENTES Y ÓRDENES MULTI-CATEGORÍA
   // ==========================================
+  const pTrad1 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-TRAD-001' } });
+  const pTrad2 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-TRAD-002' } });
+  const pFibra1 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-FO-001' } });
+  const pFibra2 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-FO-002' } });
+  const pAcc1 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-ACC-001' } });
+  const pAcc2 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-ACC-002' } });
+  const pAcc4 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-ACC-004' } });
+  const pAcc5 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-ACC-005' } });
+  const pAcc6 = await prisma.producto.findUniqueOrThrow({ where: { sku: 'ND-ACC-006' } });
+
   const clienteEjemplo = await prisma.cliente.create({
     data: {
       correo_electronico: 'carolina.gomez@gmail.com',
@@ -671,8 +681,8 @@ async function main() {
       items: {
         create: [
           {
-            id_producto: arbolTrad1.id,
-            nombre_producto: arbolTrad1.nombre,
+            id_producto: pTrad1.id,
+            nombre_producto: pTrad1.nombre,
             nombre_variante: '1.80m',
             cantidad: 1,
             precio_unitario: 420000,
@@ -700,7 +710,7 @@ async function main() {
       items: {
         create: [
           {
-            id_producto: arbolTrad1.id,
+            id_producto: pTrad1.id,
             nombre_producto: 'Corona Navideña Real Imperial 60cm',
             nombre_variante: 'Artesanal 60cm',
             cantidad: 1,
@@ -712,6 +722,181 @@ async function main() {
     },
   });
 
+  // Clientes adicionales con compras en diferentes categorías
+  const cliente2 = await prisma.cliente.create({
+    data: {
+      correo_electronico: 'alejandro.mejia@gmail.com',
+      nombres_apellidos: 'Alejandro Mejía Salgar',
+      telefono: '+57 300 234 5678',
+    },
+  });
+
+  await prisma.orden.create({
+    data: {
+      numero_guia: 'ND-2026-M45K88',
+      referencia_bold: 'BOLD-ND-2026-M45K88',
+      id_cliente: cliente2.id,
+      metodo_entrega: MetodoEntrega.DOMICILIO,
+      direccion_envio: 'Carrera 43A #7-50 El Poblado',
+      ciudad_envio: 'Medellín',
+      metodo_pago: MetodoPago.PSE,
+      estado_pago: EstadoPago.APROBADO,
+      id_transaccion_bold: 'TX-BOLD-66554433',
+      url_pago_bold: 'https://checkout.bold.co/mock/ND-2026-M45K88',
+      monto_total: 545000,
+      items: {
+        create: [
+          {
+            id_producto: pFibra1.id,
+            nombre_producto: pFibra1.nombre,
+            nombre_variante: '1.80m',
+            cantidad: 1,
+            precio_unitario: 480000,
+            subtotal: 480000,
+          },
+          {
+            id_producto: pAcc4.id,
+            nombre_producto: pAcc4.nombre,
+            nombre_variante: 'MicroLED 50m',
+            cantidad: 1,
+            precio_unitario: 65000,
+            subtotal: 65000,
+          },
+        ],
+      },
+    },
+  });
+
+  const cliente3 = await prisma.cliente.create({
+    data: {
+      correo_electronico: 'valentina.ospina@outlook.com',
+      nombres_apellidos: 'Valentina Ospina Londoño',
+      telefono: '+57 312 987 6543',
+    },
+  });
+
+  await prisma.orden.create({
+    data: {
+      numero_guia: 'ND-2026-V12P34',
+      referencia_bold: 'BOLD-ND-2026-V12P34',
+      id_cliente: cliente3.id,
+      metodo_entrega: MetodoEntrega.RECOGIDA_TIENDA,
+      ciudad_envio: 'Bogotá',
+      metodo_pago: MetodoPago.TARJETA_DEBITO,
+      estado_pago: EstadoPago.APROBADO,
+      id_transaccion_bold: 'TX-BOLD-11223344',
+      url_pago_bold: 'https://checkout.bold.co/mock/ND-2026-V12P34',
+      monto_total: 695000,
+      items: {
+        create: [
+          {
+            id_producto: pTrad2.id,
+            nombre_producto: pTrad2.nombre,
+            nombre_variante: '2.10m',
+            cantidad: 1,
+            precio_unitario: 580000,
+            subtotal: 580000,
+          },
+          {
+            id_producto: pAcc6.id,
+            nombre_producto: pAcc6.nombre,
+            nombre_variante: 'Terciopelo 120cm',
+            cantidad: 1,
+            precio_unitario: 115000,
+            subtotal: 115000,
+          },
+        ],
+      },
+    },
+  });
+
+  const cliente4 = await prisma.cliente.create({
+    data: {
+      correo_electronico: 'santiago.morales@hotmail.com',
+      nombres_apellidos: 'Santiago Morales Echeverri',
+      telefono: '+57 315 444 8899',
+    },
+  });
+
+  await prisma.orden.create({
+    data: {
+      numero_guia: 'ND-2026-S78T90',
+      referencia_bold: 'BOLD-ND-2026-S78T90',
+      id_cliente: cliente4.id,
+      metodo_entrega: MetodoEntrega.DOMICILIO,
+      direccion_envio: 'Avenida San Joaquín #14-22',
+      ciudad_envio: 'Cali',
+      metodo_pago: MetodoPago.PSE,
+      estado_pago: EstadoPago.APROBADO,
+      id_transaccion_bold: 'TX-BOLD-55667788',
+      url_pago_bold: 'https://checkout.bold.co/mock/ND-2026-S78T90',
+      monto_total: 590000,
+      items: {
+        create: [
+          {
+            id_producto: pFibra2.id,
+            nombre_producto: pFibra2.nombre,
+            nombre_variante: '2.10m',
+            cantidad: 1,
+            precio_unitario: 590000,
+            subtotal: 590000,
+          },
+        ],
+      },
+    },
+  });
+
+  const cliente5 = await prisma.cliente.create({
+    data: {
+      correo_electronico: 'mariana.duque@gmail.com',
+      nombres_apellidos: 'Mariana Duque Castro',
+      telefono: '+57 318 777 9922',
+    },
+  });
+
+  await prisma.orden.create({
+    data: {
+      numero_guia: 'ND-2026-D90L11',
+      referencia_bold: 'BOLD-ND-2026-D90L11',
+      id_cliente: cliente5.id,
+      metodo_entrega: MetodoEntrega.DOMICILIO,
+      direccion_envio: 'Calle 84 #51B-30',
+      ciudad_envio: 'Barranquilla',
+      metodo_pago: MetodoPago.TARJETA_CREDITO,
+      estado_pago: EstadoPago.APROBADO,
+      id_transaccion_bold: 'TX-BOLD-99001122',
+      url_pago_bold: 'https://checkout.bold.co/mock/ND-2026-D90L11',
+      monto_total: 260000,
+      items: {
+        create: [
+          {
+            id_producto: pAcc1.id,
+            nombre_producto: pAcc1.nombre,
+            nombre_variante: '2.7m Ultra Tupida',
+            cantidad: 1,
+            precio_unitario: 85000,
+            subtotal: 85000,
+          },
+          {
+            id_producto: pAcc2.id,
+            nombre_producto: pAcc2.nombre,
+            nombre_variante: 'Set x24 Marsala',
+            cantidad: 1,
+            precio_unitario: 89000,
+            subtotal: 89000,
+          },
+          {
+            id_producto: pAcc5.id,
+            nombre_producto: pAcc5.nombre,
+            nombre_variante: 'Estrella Belén',
+            cantidad: 1,
+            precio_unitario: 86000,
+            subtotal: 86000,
+          },
+        ],
+      },
+    },
+  });
   await prisma.notificacionAdmin.create({
     data: {
       id_orden: ordenEjemplo1.id,

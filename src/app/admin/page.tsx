@@ -18,6 +18,26 @@ export default async function AdminPage() {
     bestSellingProduct: null,
     frequentCustomer: null,
     notifications: [],
+    treesSold: {
+      total: 0,
+      tradicionales: 0,
+      fibraOptica: 0,
+      criticalStockCount: 0,
+    },
+    ordersConversion: {
+      approvedOrders: 0,
+      pendingOrders: 0,
+      conversionRate: 0,
+      whatsappSharePercent: 58,
+      webSharePercent: 42,
+    },
+    pendingDispatch: {
+      count: 0,
+      todayCount: 0,
+    },
+    topProducts: [],
+    categorySales: [],
+    recentOrdersList: [],
   };
 
   let customers: AdminCustomerRecord[] = [];

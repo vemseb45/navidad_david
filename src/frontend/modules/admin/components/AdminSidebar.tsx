@@ -1,20 +1,9 @@
 'use client';
 
 import React from 'react';
-import {
-  Home,
-  Package,
-  Layers,
-  Users,
-  UserCog,
-  Store,
-  LogOut,
-  ShieldCheck,
-  ChevronRight,
-  X,
-} from 'lucide-react';
+import { X } from 'lucide-react';
 
-export type AdminTab = 'inicio' | 'productos' | 'secciones' | 'clientes' | 'usuarios';
+export type AdminTab = 'inicio' | 'pedidos' | 'productos' | 'secciones' | 'clientes' | 'usuarios';
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
@@ -27,6 +16,7 @@ interface AdminSidebarProps {
   onLogout: () => void;
   isOpen?: boolean;
   onClose?: () => void;
+  newOrdersCount?: number;
 }
 
 export function AdminSidebar({
@@ -36,15 +26,25 @@ export function AdminSidebar({
   onLogout,
   isOpen = false,
   onClose,
+  newOrdersCount = 2,
 }: AdminSidebarProps) {
-  const initial = currentUser.nombres_apellidos?.charAt(0).toUpperCase() || 'A';
-
-  const menuItems: Array<{ id: AdminTab; label: string; icon: React.ElementType }> = [
-    { id: 'inicio', label: 'Panel Principal (Inicio)', icon: Home },
-    { id: 'productos', label: 'Gestión de Productos', icon: Package },
-    { id: 'secciones', label: 'Secciones del Catálogo', icon: Layers },
-    { id: 'clientes', label: 'Directorio de Clientes', icon: Users },
-    { id: 'usuarios', label: 'Usuarios & 2FA (tb_users)', icon: UserCog },
+  const navItems: Array<{
+    id: AdminTab;
+    label: string;
+    icon: string;
+    badge?: string;
+  }> = [
+    { id: 'inicio', label: 'Panel General', icon: 'dashboard' },
+    {
+      id: 'pedidos',
+      label: 'Ventas y Pedidos',
+      icon: 'receipt_long',
+      badge: newOrdersCount > 0 ? `+${newOrdersCount} nuevos` : undefined,
+    },
+    { id: 'productos', label: 'Catálogo Productos', icon: 'forest' },
+    { id: 'secciones', label: 'Inventario y Stock', icon: 'inventory_2' },
+    { id: 'clientes', label: 'Clientes & Leads', icon: 'forum' },
+    { id: 'usuarios', label: 'Configuración & 2FA', icon: 'tune' },
   ];
 
   const handleTabClick = (tabId: AdminTab) => {
@@ -72,112 +72,107 @@ export function AdminSidebar({
         />
       )}
 
-      {/* ASIDE SIDEBAR RESPONSIVE */}
+      {/* ASIDE SIDEBAR OFICIAL NAVIDAD DAVID */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-[#e4e2de] flex flex-col h-full transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
-          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
-        } shrink-0`}
+        className={`fixed top-0 left-0 h-full w-72 bg-[#002718] text-white z-50 flex flex-col justify-between shadow-[0_12px_28px_-4px_rgba(19,62,43,0.12)] transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
-        {/* BRANDING CON LOGO MEJORADO Y BOTÓN CERRAR EN MÓVIL */}
-        <div className="px-5 py-4 flex items-center justify-between border-b border-[#e4e2de]/60">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-white p-0.5 ring-2 ring-[#002718]/15 flex items-center justify-center shadow-xs shrink-0 overflow-hidden">
-              <img
-                src="/Logo_david.png"
-                alt="Logo Navidad David"
-                className="w-full h-full object-cover rounded-full"
-              />
+        <div className="flex flex-col h-full">
+          {/* HEADER DEL SIDEBAR */}
+          <div className="h-20 px-6 flex items-center justify-between border-b border-[#133e2b]/60">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white p-0.5 ring-2 ring-[#ffe088]/40 shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
+                <img
+                  src="/Logo_david.png"
+                  alt="Logo Navidad David"
+                  className="w-full h-full object-cover rounded-full"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-serif text-lg font-bold tracking-tight text-[#fbf9f5] leading-none">
+                  Navidad David
+                </span>
+                <span className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#ffe088] opacity-90 mt-1">
+                  Boutique Festiva
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col justify-center">
-              <h1 className="font-serif text-base font-bold text-[#002718] leading-tight">
-                Navidad David
-              </h1>
-              <span className="text-[9px] font-bold text-[#b90d1c] uppercase tracking-widest">
-                Control Panel • 2FA + Cookie
+
+            {/* BOTÓN CERRAR EN PANTALLAS MÓVILES */}
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-[#133e2b] transition-colors"
+              aria-label="Cerrar barra lateral"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* MODO PRODUCCIÓN ACTIVO */}
+          <div className="px-4 py-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#133e2b]/40 text-[#a3d1b6]">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="font-sans text-xs font-semibold text-[#f5f3ef]">
+                Modo Producción Activo
               </span>
             </div>
           </div>
 
-          {/* BOTÓN CERRAR EN MÓVIL */}
-          {onClose && (
-            <button
-              onClick={onClose}
-              aria-label="Cerrar menú"
-              className="lg:hidden w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-sm"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
+          {/* MENÚ DE NAVEGACIÓN */}
+          <nav className="flex-1 px-4 py-1 space-y-1 overflow-y-auto no-scrollbar">
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabClick(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
+                    isActive
+                      ? 'bg-[#133e2b] text-[#fbf9f5] font-bold shadow-sm'
+                      : 'text-[#eae8e4] hover:bg-[#133e2b]/50 hover:text-[#fbf9f5]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`material-symbols-outlined text-xl ${
+                        isActive ? 'text-[#e9c349]' : 'text-[#c1c8c1]'
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                    <span className="font-sans text-sm font-semibold">{item.label}</span>
+                  </div>
 
-        {/* MENÚS DE NAVEGACIÓN */}
-        <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
-          <p className="px-4 text-[10px] font-black text-[#414943]/70 uppercase tracking-widest mb-2">
-            Módulos del Sistema
-          </p>
+                  {item.badge && (
+                    <span className="px-2 py-0.5 rounded-full bg-[#b90d1c] text-white font-sans text-[10px] font-bold tracking-wider">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
 
-          {menuItems.map((item) => {
-            const isActive = activeTab === item.id;
-            const Icon = item.icon;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleTabClick(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
-                  isActive
-                    ? 'bg-[#133e2b] text-white shadow-md'
-                    : 'text-[#414943] hover:bg-[#efeeea] hover:text-[#002718]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </div>
-                {isActive && <ChevronRight size={14} className="text-[#ffe088]" />}
-              </button>
-            );
-          })}
-
-          <div className="pt-3 mt-3 border-t border-gray-100">
+          {/* ACCIONES INFERIORES */}
+          <div className="p-4 space-y-1 border-t border-[#133e2b]/60">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-[#414943] hover:bg-[#efeeea] hover:text-[#002718] transition-all"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#eae8e4] hover:bg-[#133e2b] hover:text-[#fbf9f5] transition-all"
             >
-              <Store size={18} />
-              <span>Ver Tienda Online</span>
+              <span className="material-symbols-outlined text-xl text-[#ffe088]">storefront</span>
+              <span className="font-sans text-xs font-semibold">Ver Tienda Online</span>
             </a>
-          </div>
-        </nav>
-
-        {/* PERFIL DEL ADMINISTRADOR & LOGOUT */}
-        <div className="p-3.5 border-t border-[#e4e2de] bg-[#fbf9f5]">
-          <div className="flex items-center justify-between gap-2.5 p-2 rounded-2xl bg-white border border-[#e4e2de]">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-[#133e2b] text-[#ffe088] font-bold text-xs flex items-center justify-center shrink-0">
-                {initial}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-[#002718] truncate leading-tight">
-                  {currentUser.nombres_apellidos}
-                </p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <ShieldCheck size={11} className="text-emerald-600 shrink-0" />
-                  <span className="text-[9px] font-mono text-gray-500 truncate block">
-                    {currentUser.rol} • 2FA Activo
-                  </span>
-                </div>
-              </div>
-            </div>
 
             <button
               onClick={handleLogoutClick}
-              title="Cerrar Sesión Segura y Limpiar Cookie"
-              className="w-8 h-8 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all shrink-0"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#ffb3ad] hover:bg-[#b90d1c]/20 hover:text-[#ffdad6] transition-all text-left"
             >
-              <LogOut size={14} />
+              <span className="material-symbols-outlined text-xl">logout</span>
+              <span className="font-sans text-xs font-semibold">Cerrar Sesión</span>
             </button>
           </div>
         </div>
