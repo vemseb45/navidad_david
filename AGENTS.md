@@ -213,6 +213,54 @@ El smartphone es el **dispositivo principal** de los clientes y administradores.
    * Las carpetas `prisma/migrations/` están listadas en `.gitignore`.
    * **NUNCA** subir archivos de migración SQL al repositorio Git.
 
+---
+
+## 9. Dashboard Administrativo Ejecutivo (Dark Luxury Christmas)
+
+El panel de control en `/admin` implementa la estética de alta gama **Dark Luxury Christmas** y métricas de hiperestacionalidad (temporada de árboles en Colombia, Octubre - Diciembre):
+
+### Tokens de Diseño y Colores
+* **Fondo Principal**: `#040d0a` con degradado radial `radial-gradient(circle at 50% 10%, #0d2c20 0%, #05140e 65%, #020806 100%)`.
+* **Cards y Superficies**: `--app-bg-dark: #081a13` y `--app-bg-card: #0d281e`.
+* **Acentos Festivos**:
+  * Verde Esmeralda (`#22c55e`): Facturación, cumplimiento de metas y navegación activa.
+  * Oro Navideño (`#eab308`): Árboles vendidos, temporada 2026 y pickup en tienda.
+  * Rojo Alerta (`#ef4444`): Stock crítico, productos agotados y badges de urgencia.
+  * Cian Logística (`#06b6d4`): Despachos y envíos con guía a domicilio.
+* **Tipografías**: `Cinzel` (títulos, guías y logo) y `Plus Jakarta Sans` (interfaz y datos numéricos).
+
+### Arquitectura de Componentes (`src/frontend/modules/admin/components/`)
+1. **`AdminSidebar.tsx`**: Barra lateral de 250px con degradado sutil, navegación con badges de conteo dinámico, link rápido a tienda pública y comportamiento tipo drawer en móviles y tablets.
+2. **`TopKpiCards.tsx`**: 3 tarjetas con anillos circulares SVG interactivos:
+   * Facturación de Temporada (Oct – Dic) con % de cumplimiento sobre la meta diaria.
+   * Árboles Vendidos vs Capacidad de Bodega (118 / 180 un.).
+   * Logística Activa del Día (Envíos a Domicilio vs Retiro en Tienda "Ir por el arbolito").
+3. **`SeasonSalesChart.tsx`**: Gráfica de `Chart.js` enfocada en las 12 semanas críticas (Oct S1 a Dic S4) con degradado verde esmeralda y destrucción obligatoria de la instancia en React 19 (`chartInstance.destroy()` en el cleanup de `useEffect`).
+4. **`CategoryMixBar.tsx`**: Barra de progreso segmentada por categoría (Pinos Tradicionales 46%, Fibra Óptica 38%, Luces LED 11%, Pies de Árbol 5%).
+5. **`CriticalStockList.tsx`**: Listado de árboles más demandados con variantes de altura (`2.10m`, `1.80m`, `2.40m`) y badges de urgencia (`¡AGOTADO!`, `Se agota hoy`, `Últimos`, `11 disp.`).
+
+### Sincronización de URL en el Panel Administrativo
+* La navegación entre pestañas actualiza la barra del navegador de forma bidireccional mediante `window.history.pushState` y escucha del evento `popstate`:
+  * Panel General: `/admin`
+  * Pedidos y Despachos: `/admin?tab=pedidos`
+  * Catálogo de Árboles: `/admin?tab=productos`
+  * Inventario y Secciones: `/admin?tab=secciones`
+  * Clientes y Leads: `/admin?tab=clientes`
+  * Configuración y 2FA: `/admin?tab=usuarios`
+
+### Control Individual de 2FA por Usuario en Base de Datos (`tb_users.activacion_2fa`)
+* El 2FA **NO es una configuración global** de la tienda, sino un atributo individual por cada cuenta (`tb_users.activacion_2fa`).
+* En la pestaña **Configuración & 2FA** (`ViewUsuariosAdmin.tsx`), cada usuario cuenta con su propio conmutador (switch interactivo táctil) en la tabla y en las tarjetas móviles.
+* Al presionar el conmutador de cualquier usuario:
+  * Se despacha `PATCH /api/auth/users` con `{ id: usuario.id, activacion_2fa: boolean }`.
+  * El controlador valida con Zod (`toggle2faSchema`), invoca `AuthService.toggle2FA` y actualiza la fila específica en `tb_users`.
+* **Si para ese usuario `activacion_2fa = true`**: Al iniciar sesión con sus credenciales se genera un OTP de 6 dígitos enviado a su correo personal por SMTP (Gmail).
+* **Si para ese usuario `activacion_2fa = false`**: Ese usuario específico ingresa directamente solo con su correo y contraseña, recibiendo su cookie de sesión de inmediato sin requerir código OTP.
+
+### Limpieza de Consultas SQL en Servidor
+* En `src/backend/config/prisma.ts`, el cliente de Prisma está configurado exclusivamente con `log: ['error', 'warn']`.
+* Las sentencias internas `prisma:query BEGIN`, `SELECT`, `INSERT` y `COMMIT` quedan suprimidas de la consola de desarrollo, garantizando logs limpios y trazabilidad estricta.
+
 <!-- BEGIN:nextjs-agent-feedback -->
 
 ## Report Next.js feedback

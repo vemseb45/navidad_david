@@ -1,18 +1,28 @@
 'use client';
 
 import React from 'react';
-import { X } from 'lucide-react';
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Trees,
+  Layers,
+  Users2,
+  ShieldCheck,
+  LogOut,
+  X,
+  Sparkles,
+} from 'lucide-react';
 
 export type AdminTab = 'inicio' | 'pedidos' | 'productos' | 'secciones' | 'clientes' | 'usuarios';
 
 interface AdminSidebarProps {
   activeTab: AdminTab;
   onTabChange: (tab: AdminTab) => void;
-  currentUser: {
+  currentUser?: {
     nombres_apellidos: string;
     correo_electronico: string;
     rol: string;
-  };
+  } | null;
   onLogout: () => void;
   isOpen?: boolean;
   onClose?: () => void;
@@ -31,20 +41,40 @@ export function AdminSidebar({
   const navItems: Array<{
     id: AdminTab;
     label: string;
-    icon: string;
+    icon: React.ReactNode;
     badge?: string;
   }> = [
-    { id: 'inicio', label: 'Panel General', icon: 'dashboard' },
+    {
+      id: 'inicio',
+      label: 'Dashboard Ventas',
+      icon: <LayoutDashboard size={18} />,
+    },
     {
       id: 'pedidos',
       label: 'Ventas y Pedidos',
-      icon: 'receipt_long',
-      badge: newOrdersCount > 0 ? `+${newOrdersCount} nuevos` : undefined,
+      icon: <ShoppingBag size={18} />,
+      badge: newOrdersCount > 0 ? `+${newOrdersCount}` : undefined,
     },
-    { id: 'productos', label: 'Catálogo Productos', icon: 'forest' },
-    { id: 'secciones', label: 'Inventario y Stock', icon: 'inventory_2' },
-    { id: 'clientes', label: 'Clientes & Leads', icon: 'forum' },
-    { id: 'usuarios', label: 'Configuración & 2FA', icon: 'tune' },
+    {
+      id: 'productos',
+      label: 'Catálogo Árboles',
+      icon: <Trees size={18} />,
+    },
+    {
+      id: 'secciones',
+      label: 'Secciones e Inventario',
+      icon: <Layers size={18} />,
+    },
+    {
+      id: 'clientes',
+      label: 'Clientes & Leads',
+      icon: <Users2 size={18} />,
+    },
+    {
+      id: 'usuarios',
+      label: 'Configuración & 2FA',
+      icon: <ShieldCheck size={18} />,
+    },
   ];
 
   const handleTabClick = (tabId: AdminTab) => {
@@ -63,38 +93,38 @@ export function AdminSidebar({
 
   return (
     <>
-      {/* BACKDROP PARA MÓVIL */}
+      {/* BACKDROP PARA MÓVIL Y TABLET */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 lg:hidden transition-opacity"
           onClick={onClose}
-          aria-label="Cerrar navegación"
+          aria-label="Cerrar menú"
         />
       )}
 
-      {/* ASIDE SIDEBAR OFICIAL NAVIDAD DAVID */}
+      {/* ASIDE SIDEBAR OFICIAL NAVIDAD DAVID (DARK LUXURY CHRISTMAS) */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 bg-[#002718] text-white z-50 flex flex-col justify-between shadow-[0_12px_28px_-4px_rgba(19,62,43,0.12)] transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 h-full w-[250px] bg-[#081a13] border-r border-white/5 text-[#8ca398] z-50 flex flex-col justify-between transition-all duration-300 ease-in-out lg:translate-x-0 ${
+          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex flex-col h-full">
-          {/* HEADER DEL SIDEBAR */}
-          <div className="h-20 px-6 flex items-center justify-between border-b border-[#133e2b]/60">
+        <div className="flex flex-col h-full overflow-y-auto no-scrollbar">
+          {/* HEADER DEL SIDEBAR CON LOGO OFICIAL */}
+          <div className="h-20 px-5 flex items-center justify-between border-b border-white/5 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white p-0.5 ring-2 ring-[#ffe088]/40 shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#15803d] to-[#166534] flex items-center justify-center text-[#fef08a] shadow-[0_4px_12px_rgba(22,101,52,0.4)] shrink-0 overflow-hidden p-0.5">
                 <img
                   src="/Logo_david.png"
                   alt="Logo Navidad David"
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-serif text-lg font-bold tracking-tight text-[#fbf9f5] leading-none">
+                <span className="font-serif text-[15px] font-bold tracking-wide text-white leading-tight">
                   Navidad David
                 </span>
-                <span className="font-sans text-[11px] font-bold uppercase tracking-wider text-[#ffe088] opacity-90 mt-1">
-                  Boutique Festiva
+                <span className="text-[10px] font-bold tracking-widest text-[#22c55e] uppercase mt-0.5">
+                  Boutique & Árboles
                 </span>
               </div>
             </div>
@@ -102,51 +132,38 @@ export function AdminSidebar({
             {/* BOTÓN CERRAR EN PANTALLAS MÓVILES */}
             <button
               onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-[#133e2b] transition-colors"
+              className="lg:hidden p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
               aria-label="Cerrar barra lateral"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
-          {/* MODO PRODUCCIÓN ACTIVO */}
-          <div className="px-4 py-3">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#133e2b]/40 text-[#a3d1b6]">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="font-sans text-xs font-semibold text-[#f5f3ef]">
-                Modo Producción Activo
-              </span>
-            </div>
-          </div>
-
-          {/* MENÚ DE NAVEGACIÓN */}
-          <nav className="flex-1 px-4 py-1 space-y-1 overflow-y-auto no-scrollbar">
+          {/* LISTA DE NAVEGACIÓN */}
+          <nav className="flex-1 px-3 py-4 space-y-1">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
+
               return (
                 <button
                   key={item.id}
                   onClick={() => handleTabClick(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all text-left ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all text-left ${
                     isActive
-                      ? 'bg-[#133e2b] text-[#fbf9f5] font-bold shadow-sm'
-                      : 'text-[#eae8e4] hover:bg-[#133e2b]/50 hover:text-[#fbf9f5]'
+                      ? 'bg-gradient-to-r from-[#22c55e]/15 to-[#22c55e]/5 text-white font-semibold border border-[#22c55e]/25 shadow-xs'
+                      : 'text-[#8ca398] hover:bg-[#123427] hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`material-symbols-outlined text-xl ${
-                        isActive ? 'text-[#e9c349]' : 'text-[#c1c8c1]'
-                      }`}
-                    >
+                    <span className={isActive ? 'text-[#22c55e]' : 'text-[#8ca398]'}>
                       {item.icon}
                     </span>
-                    <span className="font-sans text-sm font-semibold">{item.label}</span>
+                    <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#b90d1c] text-white font-sans text-[10px] font-bold tracking-wider">
+                    <span className="px-2 py-0.5 rounded-full bg-[#dc2626] text-white font-sans text-[10px] font-bold tracking-wider">
                       {item.badge}
                     </span>
                   )}
@@ -155,24 +172,39 @@ export function AdminSidebar({
             })}
           </nav>
 
-          {/* ACCIONES INFERIORES */}
-          <div className="p-4 space-y-1 border-t border-[#133e2b]/60">
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#eae8e4] hover:bg-[#133e2b] hover:text-[#fbf9f5] transition-all"
-            >
-              <span className="material-symbols-outlined text-xl text-[#ffe088]">storefront</span>
-              <span className="font-sans text-xs font-semibold">Ver Tienda Online</span>
-            </a>
+          {/* TARJETA ACCESO RÁPIDO A TIENDA PÚBLICA */}
+          <div className="px-3 pt-2 pb-3 shrink-0">
+            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/20 text-xs">
+              <div className="flex items-center justify-between text-[#86efac] font-semibold mb-1">
+                <span className="flex items-center gap-1.5 text-xs">
+                  <Sparkles size={12} className="text-[#fef08a]" />
+                  Tienda Online
+                </span>
+                <span className="inline-block w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
+              </div>
+              <p className="text-slate-400 text-[11px] mb-2 leading-relaxed">
+                Temporada Alta 2026 activa. Carrito y pasarela Bold listos.
+              </p>
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#86efac] font-bold hover:underline flex items-center gap-1 text-[11px]"
+              >
+                <span>Ver catálogo público</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
 
+          {/* BOTÓN CERRAR SESIÓN */}
+          <div className="p-3 border-t border-white/5 shrink-0">
             <button
               onClick={handleLogoutClick}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#ffb3ad] hover:bg-[#b90d1c]/20 hover:text-[#ffdad6] transition-all text-left"
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[#ffb3ad] hover:bg-red-950/40 hover:text-red-300 transition-colors text-xs font-semibold"
             >
-              <span className="material-symbols-outlined text-xl">logout</span>
-              <span className="font-sans text-xs font-semibold">Cerrar Sesión</span>
+              <LogOut size={16} />
+              <span>Cerrar Sesión</span>
             </button>
           </div>
         </div>

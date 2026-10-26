@@ -193,8 +193,12 @@ export class AuthService {
     });
   }
 
-  // Conmutar 2FA
+  // Conmutar 2FA individual por usuario
   public async toggle2FA(input: Toggle2faInput) {
+    const usuario = await this.repo.findById(input.usuarioId);
+    if (!usuario) {
+      throw new Error('El usuario especificado no existe en tb_users');
+    }
     return this.repo.update2FAStatus(input.usuarioId, input.activo);
   }
 

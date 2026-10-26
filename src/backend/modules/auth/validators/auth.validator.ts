@@ -19,10 +19,20 @@ export const createUserSchema = z.object({
   activacion_2fa: z.boolean().default(true),
 });
 
-export const toggle2faSchema = z.object({
-  usuarioId: z.string().uuid('ID de usuario inválido'),
-  activo: z.boolean(),
-});
+export const toggle2faSchema = z
+  .object({
+    usuarioId: z.string().uuid('ID de usuario inválido').optional(),
+    id: z.string().uuid('ID de usuario inválido').optional(),
+    activo: z.boolean().optional(),
+    activacion_2fa: z.boolean().optional(),
+  })
+  .refine((data) => data.usuarioId || data.id, {
+    message: 'Debe especificar el ID del usuario',
+  })
+  .transform((data) => ({
+    usuarioId: (data.usuarioId || data.id) as string,
+    activo: (data.activo !== undefined ? data.activo : data.activacion_2fa) ?? true,
+  }));
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type Verify2faInput = z.infer<typeof verify2faSchema>;

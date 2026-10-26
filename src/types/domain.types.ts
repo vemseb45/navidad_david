@@ -222,4 +222,11 @@ export interface DashboardMetrics {
     itemsSummary: string;
     itemCount: number;
   }>;
+  executiveOverview?: import('./admin-dashboard.types').DashboardMetricOverview;
+  treeStockDemand?: import('./admin-dashboard.types').TreeStockDemandItem[];
+  recentOrderNotifications?: import('./admin-dashboard.types').RecentOrderNotification[];
+  categoryMix?: import('./admin-dashboard.types').CategoryMixItem[];
+  weeklySalesCurve?: import('./admin-dashboard.types').WeeklySalesPoint[];
 }
+
+export * from './admin-dashboard.types';

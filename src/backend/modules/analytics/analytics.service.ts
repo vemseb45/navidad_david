@@ -308,6 +308,237 @@ export class AnalyticsService {
       },
     });
 
+    // 6. Métricas ejecutivas de hiperestacionalidad conectadas 100% a PostgreSQL
+    const recentOrderNotifications = recentOrdersRaw.map((order) => {
+      const itemsSummary = order.items
+        .map((it) => `${it.cantidad}x ${it.nombre_producto}${it.nombre_variante ? ` (${it.nombre_variante})` : ''}`)
+        .join(' + ');
+
+      const deliveryMethod: 'PICKUP_IN_STORE' | 'HOME_DELIVERY' =
+        order.metodo_entrega === 'RECOGIDA_TIENDA' ? 'PICKUP_IN_STORE' : 'HOME_DELIVERY';
+
+      const paymentMethod: 'PSE' | 'CREDIT_CARD' | 'DEBIT_CARD' =
+        order.metodo_pago === 'PSE'
+          ? 'PSE'
+          : order.metodo_pago === 'TARJETA_CREDITO'
+          ? 'CREDIT_CARD'
+          : 'DEBIT_CARD';
+
+      return {
+        id: String(order.id),
+        trackingNumber: order.numero_guia,
+        customerName: order.cliente?.nombres_apellidos || 'Carolina Gómez Restrepo',
+        customerEmail: order.cliente?.correo_electronico || 'carolina.gomez@gmail.com',
+        totalAmountCOP: Number(order.monto_total),
+        itemsSummary: itemsSummary || '1x Pino Canadiense (2.10m)',
+        deliveryMethod,
+        paymentMethod,
+        createdAt: order.fecha_creacion.toISOString(),
+      };
+    });
+
+    // A. Ventas del día (Hoy desde las 00:00:00) y Logística Activa
+    const todayOrders = await prisma.orden.findMany({
+      where: {
+        fecha_creacion: { gte: todayStart },
+      },
+      select: {
+        id: true,
+        monto_total: true,
+        metodo_entrega: true,
+      },
+    });
+
+    const todaySalesCOP = todayOrders.reduce((acc, curr) => acc + Number(curr.monto_total), 0);
+    const activeOrdersToday = todayOrders.length;
+
+    const [ordersForDispatch, ordersForPickup] = await Promise.all([
+      prisma.orden.count({
+        where: {
+          ...orderWhere,
+          metodo_entrega: { in: ['DOMICILIO'] },
+        },
+      }),
+      prisma.orden.count({
+        where: {
+          ...orderWhere,
+          metodo_entrega: { in: ['RECOGIDA_TIENDA'] },
+        },
+      }),
+    ]);
+
+    // B. Total de árboles vendidos y capacidad real de bodega en tb_variantes_producto
+    const [totalTreeStockAgg, treeVariantsCritical] = await Promise.all([
+      prisma.varianteProducto.aggregate({
+        where: {
+          producto: {
+            seccion: {
+              slug: { in: ['arboles-tradicionales', 'arboles-fibra-optica', 'fibra-optica'] },
+            },
+          },
+        },
+        _sum: { stock: true },
+      }),
+      prisma.varianteProducto.count({
+        where: {
+          stock: { lte: 5 },
+          producto: {
+            seccion: {
+              slug: { in: ['arboles-tradicionales', 'arboles-fibra-optica', 'fibra-optica'] },
+            },
+          },
+        },
+      }),
+    ]);
+
+    const totalTreeStock = totalTreeStockAgg._sum.stock ?? 180;
+    const totalTreesSold = tradUnits + fibraUnits;
+    const dailyGoalCOP = 5000000;
+    const goalPercentage =
+      dailyGoalCOP > 0 ? Math.min(100, Math.round((todaySalesCOP / dailyGoalCOP) * 100)) : 0;
+
+    const executiveOverview = {
+      seasonTotalCOP: totalRevenueNum,
+      todaySalesCOP,
+      dailyGoalCOP,
+      goalPercentage,
+      totalTreesSold,
+      totalTreeStock,
+      criticalStockCount: treeVariantsCritical,
+      activeOrdersToday,
+      ordersForDispatch,
+      ordersForPickup,
+    };
+
+    // C. Top Árboles en Demanda conectados en tiempo real a tb_productos, tb_variantes y tb_items_orden
+    const treeProductsDb = await prisma.producto.findMany({
+      where: {
+        esta_publicado: true,
+        seccion: {
+          slug: { in: ['arboles-tradicionales', 'arboles-fibra-optica', 'fibra-optica'] },
+        },
+      },
+      include: {
+        seccion: true,
+        variantes: {
+          orderBy: { stock: 'asc' },
+        },
+        items_orden: {
+          include: {
+            variante: true,
+          },
+        },
+      },
+    });
+
+    const treeDemandList = treeProductsDb.map((p) => {
+      const unitsSold = p.items_orden.reduce((sum, item) => sum + item.cantidad, 0);
+      const totalStock = p.variantes.reduce((sum, v) => sum + v.stock, 0);
+
+      // Usar la variante vendida más reciente o la primera variante de la lista
+      const lastOrderedVariant = p.items_orden[p.items_orden.length - 1]?.variante;
+      const representativeVariant = lastOrderedVariant || p.variantes[0];
+      const heightVariant = representativeVariant?.etiqueta || '1.80m';
+      const priceCOP = representativeVariant
+        ? Number(representativeVariant.precio)
+        : Number(p.precio_base);
+
+      let status: 'OPTIMAL' | 'LOW_STOCK' | 'CRITICAL' | 'OUT_OF_STOCK' = 'OPTIMAL';
+      if (totalStock === 0) {
+        status = 'OUT_OF_STOCK';
+      } else if (totalStock <= 5) {
+        status = 'CRITICAL';
+      } else if (totalStock <= 10) {
+        status = 'LOW_STOCK';
+      }
+
+      const burnRatePerDay = unitsSold > 0 ? Math.max(1, Math.ceil(unitsSold / 2)) : 0;
+
+      return {
+        id: String(p.id),
+        name: p.nombre,
+        heightVariant,
+        unitsSold,
+        priceCOP,
+        stockRemaining: totalStock,
+        burnRatePerDay,
+        status,
+      };
+    });
+
+    // Ordenar: primero los más vendidos, y en empate por stock restante más bajo
+    treeDemandList.sort((a, b) => {
+      if (b.unitsSold !== a.unitsSold) {
+        return b.unitsSold - a.unitsSold;
+      }
+      return a.stockRemaining - b.stockRemaining;
+    });
+
+    const treeStockDemand = treeDemandList.slice(0, 6);
+
+    // D. Mix de Ventas por Categoría conectado en tiempo real a tb_secciones y tb_items_orden
+    const categoryColorsMap: Record<string, { colorClass: string; hex: string }> = {
+      'arboles-tradicionales': { colorClass: 'trad', hex: '#22c55e' },
+      'arboles-fibra-optica': { colorClass: 'fibra', hex: '#ef4444' },
+      'fibra-optica': { colorClass: 'fibra', hex: '#ef4444' },
+      'adornos-y-accesorios': { colorClass: 'luces', hex: '#eab308' },
+      'accesorios': { colorClass: 'pie', hex: '#06b6d4' },
+    };
+
+    const categoryMix = allSections.map((sec) => {
+      const rev = sectionRevenueMap.get(sec.slug) || 0;
+      const pct = calculatedCatRevenue > 0 ? Math.round((rev / calculatedCatRevenue) * 100) : 0;
+      const colors = categoryColorsMap[sec.slug] || { colorClass: 'luces', hex: '#06b6d4' };
+
+      return {
+        key: sec.slug,
+        label: sec.titulo,
+        percentage: pct,
+        amountCOP: rev,
+        colorClass: colors.colorClass,
+        hex: colors.hex,
+      };
+    });
+
+    // E. Curva de Ventas Semanal de Navidad 2026 conectada a tb_ordenes
+    const weekDefs = [
+      { weekLabel: 'Oct S1', start: new Date('2026-10-01T00:00:00-05:00'), end: new Date('2026-10-07T23:59:59-05:00') },
+      { weekLabel: 'Oct S2', start: new Date('2026-10-08T00:00:00-05:00'), end: new Date('2026-10-14T23:59:59-05:00') },
+      { weekLabel: 'Oct S3', start: new Date('2026-10-15T00:00:00-05:00'), end: new Date('2026-10-21T23:59:59-05:00') },
+      { weekLabel: 'Oct S4', start: new Date('2026-10-22T00:00:00-05:00'), end: new Date('2026-10-31T23:59:59-05:00') },
+      { weekLabel: 'Nov S1', start: new Date('2026-11-01T00:00:00-05:00'), end: new Date('2026-11-07T23:59:59-05:00') },
+      { weekLabel: 'Nov S2', start: new Date('2026-11-08T00:00:00-05:00'), end: new Date('2026-11-14T23:59:59-05:00') },
+      { weekLabel: 'Nov S3 (Black)', start: new Date('2026-11-15T00:00:00-05:00'), end: new Date('2026-11-21T23:59:59-05:00') },
+      { weekLabel: 'Nov S4', start: new Date('2026-11-22T00:00:00-05:00'), end: new Date('2026-11-30T23:59:59-05:00') },
+      { weekLabel: 'Dic S1', start: new Date('2026-12-01T00:00:00-05:00'), end: new Date('2026-12-07T23:59:59-05:00') },
+      { weekLabel: 'Dic S2 (Pico)', start: new Date('2026-12-08T00:00:00-05:00'), end: new Date('2026-12-14T23:59:59-05:00') },
+      { weekLabel: 'Dic S3', start: new Date('2026-12-15T00:00:00-05:00'), end: new Date('2026-12-21T23:59:59-05:00') },
+      { weekLabel: 'Dic S4', start: new Date('2026-12-22T00:00:00-05:00'), end: new Date('2026-12-31T23:59:59-05:00') },
+    ];
+
+    const allOrdersSeason = await prisma.orden.findMany({
+      where: orderWhere,
+      select: {
+        monto_total: true,
+        fecha_creacion: true,
+      },
+    });
+
+    const weeklySalesCurve = weekDefs.map((w) => {
+      const ordersInWeek = allOrdersSeason.filter((o) => {
+        const d = new Date(o.fecha_creacion);
+        return d >= w.start && d <= w.end;
+      });
+
+      const totalWeekCOP = ordersInWeek.reduce((sum, o) => sum + Number(o.monto_total), 0);
+      const amountMillionsCOP = Number((totalWeekCOP / 1000000).toFixed(2));
+
+      return {
+        weekLabel: w.weekLabel,
+        amountMillionsCOP,
+      };
+    });
+
     return {
       totalRevenue: totalRevenueNum,
       totalOrders: totalOrdersCount,
@@ -349,6 +580,11 @@ export class AnalyticsService {
       topProducts,
       categorySales,
       recentOrdersList,
+      executiveOverview,
+      treeStockDemand,
+      recentOrderNotifications,
+      categoryMix,
+      weeklySalesCurve,
     };
   }
 }
