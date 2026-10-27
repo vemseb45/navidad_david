@@ -159,7 +159,7 @@ export function ProductDetailModal({
           <div className="space-y-3 sm:space-y-4">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#b90d1c] block mb-0.5 sm:mb-1">
-                Navidad David • Artisan Christmas Co.
+                Navidad David • Árboles & Decoración
               </span>
               <h2 className="font-serif text-xl sm:text-3xl font-bold text-[#002718] leading-tight">
                 {product.name}

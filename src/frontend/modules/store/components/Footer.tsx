@@ -21,7 +21,7 @@ export function Footer() {
                 Navidad David
               </span>
               <span className="text-[10px] text-[#ffe088] uppercase tracking-widest font-bold">
-                Artisan Christmas Co.
+                Árboles & Decoración Navideña
               </span>
             </div>
           </div>

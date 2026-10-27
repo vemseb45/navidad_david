@@ -17,7 +17,7 @@ export function DynamicSectionBar({
   onSelectSection,
 }: DynamicSectionBarProps) {
   return (
-    <section className="sticky top-[64px] sm:top-24 z-30 bg-white/95 backdrop-blur-md border-b border-[#e4e2de] py-2 sm:py-3 shadow-xs">
+    <section className="sticky top-[84px] sm:top-[104px] z-30 bg-white/95 backdrop-blur-md border-b border-[#e4e2de] py-2 sm:py-3 shadow-xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-12 flex items-center justify-between gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* BOTÓN TODOS */}

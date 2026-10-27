@@ -9,22 +9,13 @@ interface TopKpiCardsProps {
 
 export function TopKpiCards({ overview }: TopKpiCardsProps) {
   const seasonTotal = overview?.seasonTotalCOP ?? 0;
-  const seasonTotalFormatted =
-    seasonTotal >= 1000000
-      ? `$${(seasonTotal / 1000000).toFixed(1)}M`
-      : `$${seasonTotal.toLocaleString('es-CO')}`;
+  const seasonTotalFormatted = `$${seasonTotal.toLocaleString('es-CO')}`;
 
   const todaySales = overview?.todaySalesCOP ?? 0;
-  const todaySalesFormatted =
-    todaySales >= 1000000
-      ? `$${(todaySales / 1000000).toFixed(1)}M`
-      : `$${todaySales.toLocaleString('es-CO')}`;
+  const todaySalesFormatted = `$${todaySales.toLocaleString('es-CO')}`;
 
   const dailyGoal = overview?.dailyGoalCOP ?? 5000000;
-  const dailyGoalFormatted =
-    dailyGoal >= 1000000
-      ? `$${(dailyGoal / 1000000).toFixed(1)}M`
-      : `$${dailyGoal.toLocaleString('es-CO')}`;
+  const dailyGoalFormatted = `$${dailyGoal.toLocaleString('es-CO')}`;
 
   const goalPercent =
     overview?.goalPercentage ??

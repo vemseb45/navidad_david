@@ -27,7 +27,7 @@ export function DynamicSectionGrid({
   return (
     <section
       id={section.slug}
-      className={`w-full py-8 sm:py-12 ${index % 2 === 1 ? 'bg-[#f5f3ef]/80' : 'bg-[#fbf9f5]'}`}
+      className={`w-full py-8 sm:py-14 scroll-mt-24 sm:scroll-mt-32 ${index % 2 === 1 ? 'bg-[#f5f3ef]/80' : 'bg-[#fbf9f5]'}`}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-12">
         {/* HEADER DE LA SECCIÓN */}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { StoreSection, StoreProduct, StoreVariant, CartItem } from '@/types/domain.types';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -94,35 +94,73 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     );
   };
 
-  const handleSelectCategory = (slug: string) => {
+  // NAVEGACIÓN SUAVE ENTRE SECCIONES SIN OCULTAR CONTENIDO (No-Filter Navigation)
+  const handleScrollToSection = (slug: string) => {
     setActiveSectionSlug(slug);
+    if (slug === 'all') {
+      const el = document.getElementById('catalogo') || document.getElementById('arboles-tradicionales');
+      if (el) {
+        const yOffset = -85;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+      return;
+    }
+
     const el = document.getElementById(slug);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const yOffset = -85;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
+  // DETECCIÓN AUTOMÁTICA DE SECCIÓN VISIBLE MEDIANTE OBSERVER AL HACER SCROLL
+  useEffect(() => {
+    const handleScroll = () => {
+      const sectionElements = initialSections
+        .map((s) => document.getElementById(s.slug))
+        .filter(Boolean) as HTMLElement[];
+
+      const scrollPosition = window.scrollY + 140;
+
+      for (let i = sectionElements.length - 1; i >= 0; i--) {
+        const el = sectionElements[i];
+        if (el.offsetTop <= scrollPosition) {
+          setActiveSectionSlug(el.id);
+          return;
+        }
+      }
+
+      if (window.scrollY < 400) {
+        setActiveSectionSlug('all');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [initialSections]);
+
+  // TODAS LAS SECCIONES PERMANECEN SIEMPRE VISIBLES (Solo se filtran productos al escribir en el buscador)
   const visibleSections = useMemo(() => {
-    return initialSections
-      .filter((sec) => activeSectionSlug === 'all' || sec.slug === activeSectionSlug)
-      .map((sec) => ({
-        ...sec,
-        products: sec.products.filter((prod) =>
-          searchQuery.trim() === ''
-            ? true
-            : prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              prod.description.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-      }));
-  }, [initialSections, activeSectionSlug, searchQuery]);
+    return initialSections.map((sec) => ({
+      ...sec,
+      products: sec.products.filter((prod) =>
+        searchQuery.trim() === ''
+          ? true
+          : prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            prod.description.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }));
+  }, [initialSections, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[#fbf9f5] flex flex-col justify-between selection:bg-[#002718]/15 selection:text-[#002718]">
-      {/* NAVBAR OFICIAL */}
+      {/* NAVBAR OFICIAL - LOGO REDIRIGE A /admin (LOGIN), SIN BOTONES DE ADMIN EXTRA */}
       <Navbar
         sections={initialSections}
         activeSectionSlug={activeSectionSlug}
-        onSelectSection={(slug) => setActiveSectionSlug(slug)}
+        onNavigateToSection={handleScrollToSection}
         searchQuery={searchQuery}
         onSearchChange={(q) => setSearchQuery(q)}
         cartCount={cartCount}
@@ -131,31 +169,30 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
-      <main className="pt-16 sm:pt-24 flex-1">
+      <main className="pt-16 sm:pt-20 flex-1">
         {/* HERO VISUAL DE ALTO IMPACTO */}
         <Hero
-          onExploreClick={() => {
-            const el = document.getElementById('categorias') || document.querySelector('section[id]');
-            el?.scrollIntoView({ behavior: 'smooth' });
-          }}
+          onExploreClick={() => handleScrollToSection('arboles-tradicionales')}
         />
 
         {/* PILARES DE LA MARCA (Garantías, Frondosidad, Fibra Óptica, Bold) */}
         <FeaturesBanner />
 
-        {/* CATEGORÍAS DESTACADAS CON CURVAS ORGÁNICAS (Estilo Nana.col) */}
-        <Categories onSelectCategory={handleSelectCategory} />
+        {/* GUÍA VISUAL DE COLECCIONES (DESPLAZA DIRECTAMENTE A LA SECCIÓN) */}
+        <Categories onSelectCategory={handleScrollToSection} />
 
-        {/* BARRA DE NAVEGACIÓN Y FILTROS POR SECCIÓN DINÁMICA */}
-        <DynamicSectionBar
-          sections={initialSections}
-          activeSectionSlug={activeSectionSlug}
-          totalProductsCount={totalProductsCount}
-          onSelectSection={(slug) => setActiveSectionSlug(slug)}
-        />
+        {/* BARRA STICKY DE NAVEGACIÓN Y ACCESO RÁPIDO */}
+        <div id="catalogo">
+          <DynamicSectionBar
+            sections={initialSections}
+            activeSectionSlug={activeSectionSlug}
+            totalProductsCount={totalProductsCount}
+            onSelectSection={handleScrollToSection}
+          />
+        </div>
 
-        {/* SECCIONES Y CATÁLOGO DE PRODUCTOS */}
-        {visibleSections.length === 0 ? (
+        {/* SECCIONES Y CATÁLOGO COMPLETO DE PRODUCTOS */}
+        {visibleSections.every((s) => s.products.length === 0) ? (
           <div className="text-center py-20">
             <span className="material-symbols-outlined text-5xl text-gray-400">search_off</span>
             <p className="text-base font-bold text-gray-700 mt-2">
@@ -168,7 +205,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
               }}
               className="mt-4 px-5 py-2.5 rounded-full bg-[#133e2b] text-white text-xs font-bold shadow-md hover:bg-[#002718] transition-colors"
             >
-              Restablecer filtros y ver todo el catálogo
+              Restablecer búsqueda y ver todo el catálogo
             </button>
           </div>
         ) : (

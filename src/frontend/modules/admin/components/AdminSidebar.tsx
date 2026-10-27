@@ -123,9 +123,6 @@ export function AdminSidebar({
                 <span className="font-serif text-[15px] font-bold tracking-wide text-white leading-tight">
                   Navidad David
                 </span>
-                <span className="text-[10px] font-bold tracking-widest text-[#22c55e] uppercase mt-0.5">
-                  Boutique & Árboles
-                </span>
               </div>
             </div>
 

@@ -78,7 +78,7 @@ export async function send2FAEmail(
         <tr>
           <td style="background-color: #f8f7f4; padding: 20px 24px; text-align: center; border-top: 1px solid #e4e2de;">
             <p style="color: #a0aec0; font-size: 11px; margin: 0;">
-              Navidad David — Artisan Christmas Co. &copy; 2026. Todos los derechos reservados.
+              Navidad David &copy; 2026. Todos los derechos reservados.
             </p>
           </td>
         </tr>

@@ -23,7 +23,7 @@ export function Hero({ onExploreClick }: { onExploreClick: () => void }) {
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-2 sm:mt-8">
         <div className="inline-flex items-center gap-1.5 sm:gap-2 py-1 px-3 sm:py-1.5 sm:px-4 rounded-full bg-white/15 backdrop-blur-md border border-[#ffe088]/40 text-[10px] sm:text-xs uppercase tracking-widest mb-3 sm:mb-6 text-[#ffe088] font-bold shadow-lg max-w-[92vw]">
           <Sparkles className="w-3.5 h-3.5 text-[#ffe088] animate-pulse shrink-0" />
-          <span className="truncate">Temporada 2026 • Colección Exclusiva Artisan Co.</span>
+          <span className="truncate">Temporada Navideña 2026 • Colección Exclusiva</span>
         </div>
 
         <h1 className="font-serif text-2xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-bold tracking-tight mb-2.5 sm:mb-6 leading-tight drop-shadow-md">
