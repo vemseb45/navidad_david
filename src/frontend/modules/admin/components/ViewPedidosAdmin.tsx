@@ -39,33 +39,33 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* HEADER DE VENTAS Y PEDIDOS */}
-      <div className="bg-[#f5f3ef] p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#e4e2de] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-[#081a13] p-5 sm:p-6 rounded-2xl border border-white/10 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#133e2b] text-[#ffe088] text-[11px] font-sans font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#22c55e]/15 border border-[#22c55e]/30 text-[#22c55e] text-[11px] font-sans font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-sm">receipt_long</span>
             Gestión de Ventas & Despachos
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#002718] mt-1">
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mt-1">
             Ventas y Pedidos de Temporada
           </h2>
-          <p className="font-sans text-xs sm:text-sm text-[#414943] mt-0.5">
+          <p className="font-sans text-xs sm:text-sm text-slate-400 mt-0.5">
             Registro unificado de compras por pasarela Bold, pedidos manuales y recogida en tienda física.
           </p>
         </div>
 
         <button
           onClick={onRefresh}
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#002718] text-white font-sans text-xs sm:text-sm font-semibold hover:bg-[#133e2b] transition-all"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#0d281e] text-white border border-white/10 font-sans text-xs sm:text-sm font-semibold hover:bg-[#123427] hover:border-[#22c55e]/40 transition-all shadow-md"
         >
-          <span className="material-symbols-outlined text-lg">refresh</span>
+          <span className="material-symbols-outlined text-lg text-[#22c55e]">refresh</span>
           <span>Actualizar Lista</span>
         </button>
       </div>
 
       {/* FILTROS Y BÚSQUEDA */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#e4e2de] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-[#081a13] p-4 sm:p-5 rounded-2xl border border-white/10 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">
             search
           </span>
           <input
@@ -73,7 +73,7 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar por guía, cliente o teléfono..."
-            className="w-full h-10 pl-9 pr-4 bg-[#fbf9f5] rounded-xl border border-[#e4e2de] font-sans text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#002718] focus:border-[#002718]"
+            className="w-full h-10 pl-9 pr-4 bg-[#0d281e] rounded-xl border border-white/10 text-white placeholder-slate-500 font-sans text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#22c55e] focus:border-[#22c55e]"
           />
         </div>
 
@@ -84,8 +84,8 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1.5 rounded-lg font-sans text-xs font-semibold transition-all whitespace-nowrap ${
                 statusFilter === st
-                  ? 'bg-[#133e2b] text-white'
-                  : 'bg-[#efeeea] text-[#414943] hover:text-[#1b1c1a]'
+                  ? 'bg-[#22c55e] text-[#040d0a] font-bold shadow-sm'
+                  : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/5'
               }`}
             >
               {st === 'TODOS' ? 'Todos los Estados' : st}
@@ -94,11 +94,11 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
         </div>
       </div>
 
-      {/* TABLA PRINCIPAL */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-[#e4e2de] shadow-xs overflow-hidden">
+      {/* TABLA PRINCIPAL CON ESTILO DARK LUXURY */}
+      <div className="bg-[#081a13] rounded-2xl border border-white/10 shadow-xl overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left font-sans text-xs sm:text-sm">
-            <thead className="bg-[#f5f3ef] border-b border-[#e4e2de] text-[#414943] uppercase text-[10px] font-bold tracking-wider">
+            <thead className="bg-[#05140e] border-b border-white/10 text-[#94a3b8] uppercase text-[10px] font-bold tracking-wider">
               <tr>
                 <th className="py-3 px-4">Guía Oficial</th>
                 <th className="py-3 px-4">Cliente</th>
@@ -109,16 +109,16 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#efeeea]">
+            <tbody className="divide-y divide-white/5">
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((ord) => (
-                  <tr key={ord.id} className="hover:bg-[#fbf9f5] transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#b90d1c]">
+                  <tr key={ord.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#eab308]">
                       <div className="flex items-center gap-1.5">
                         <span>{ord.trackingNumber}</span>
                         <button
                           onClick={() => handleCopyGuide(ord.trackingNumber)}
-                          className="p-1 text-gray-400 hover:text-[#002718] transition-colors"
+                          className="p-1 text-slate-400 hover:text-[#22c55e] transition-colors"
                           title="Copiar número de guía"
                         >
                           <span className="material-symbols-outlined text-sm">
@@ -126,7 +126,7 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                           </span>
                         </button>
                       </div>
-                      <span className="text-[10px] text-gray-400 block font-sans font-normal">
+                      <span className="text-[10px] text-slate-400 block font-sans font-normal">
                         {new Date(ord.createdAt).toLocaleDateString('es-CO', {
                           day: '2-digit',
                           month: 'short',
@@ -137,23 +137,23 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <p className="font-semibold text-[#002718]">{ord.customerName}</p>
-                      <p className="text-[11px] text-[#414943]">{ord.customerEmail}</p>
-                      <p className="text-[11px] text-gray-400">{ord.customerPhone}</p>
+                      <p className="font-semibold text-white">{ord.customerName}</p>
+                      <p className="text-[11px] text-slate-400 font-mono">{ord.customerEmail}</p>
+                      <p className="text-[11px] text-slate-500">{ord.customerPhone}</p>
                     </td>
 
                     <td className="py-3.5 px-4 max-w-sm truncate" title={ord.itemsSummary}>
-                      <span className="font-medium text-[#1b1c1a] block truncate">
+                      <span className="font-medium text-slate-200 block truncate">
                         {ord.itemsSummary}
                       </span>
-                      <span className="text-[10px] text-[#735c00] font-bold block mt-0.5">
+                      <span className="text-[10px] text-[#ffe088] font-bold block mt-0.5">
                         {ord.itemCount} artículo(s) en total
                       </span>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#efeeea] text-[#002718] text-[10px] font-bold uppercase tracking-wider">
-                        <span className="material-symbols-outlined text-xs">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 text-[10px] font-bold uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-xs text-[#22c55e]">
                           {ord.deliveryMethod === 'RECOGIDA_TIENDA' ? 'storefront' : 'local_shipping'}
                         </span>
                         {ord.deliveryMethod === 'RECOGIDA_TIENDA'
@@ -166,18 +166,18 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                       <span
                         className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           ord.paymentStatus === 'APROBADO'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-500/20 text-[#22c55e] border border-emerald-500/30'
                             : ord.paymentStatus === 'PENDIENTE'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-amber-500/20 text-[#eab308] border border-amber-500/30'
+                            : 'bg-rose-500/20 text-[#ef4444] border border-rose-500/30'
                         }`}
                       >
                         {ord.paymentStatus}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-bold text-[#002718] text-sm">
-                      ${ord.totalAmount.toLocaleString('es-CO')} COP
+                    <td className="py-3.5 px-4 text-right font-bold text-[#22c55e] text-sm">
+                      ${ord.totalAmount.toLocaleString('es-CO')} <span className="text-xs text-slate-400">COP</span>
                     </td>
 
                     <td className="py-3.5 px-4 text-center">
@@ -187,7 +187,7 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366]/10 text-[#075E54] hover:bg-[#25D366]/20 font-semibold text-[11px] transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 text-[#22c55e] hover:bg-emerald-500/25 border border-emerald-500/20 font-semibold text-[11px] transition-colors"
                         title="Contactar al cliente por WhatsApp"
                       >
                         <span className="material-symbols-outlined text-sm">chat</span>
@@ -198,7 +198,7 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-gray-500 font-sans text-xs">
+                  <td colSpan={7} className="py-10 text-center text-slate-400 font-sans text-xs">
                     No se encontraron órdenes que coincidan con la búsqueda.
                   </td>
                 </tr>

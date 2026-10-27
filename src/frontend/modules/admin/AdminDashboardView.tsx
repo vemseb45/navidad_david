@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Menu, Sparkles } from 'lucide-react';
-import { DashboardMetrics, AdminCustomerRecord, StoreSection } from '@/types/domain.types';
+import { DashboardMetrics, AdminCustomerRecord, StoreSection, UserRecord } from '@/types/domain.types';
 import { AdminAuthView } from './components/AdminAuthView';
 import { AdminSidebar, AdminTab } from './components/AdminSidebar';
 import { TopKpiCards } from './components/TopKpiCards';
@@ -16,36 +16,53 @@ import { CustomerHistory } from './components/CustomerHistory';
 import { ViewUsuariosAdmin } from './components/ViewUsuariosAdmin';
 
 interface AdminDashboardViewProps {
+  initialTab?: AdminTab;
   initialMetrics: DashboardMetrics;
   initialCustomers: AdminCustomerRecord[];
   initialSections: StoreSection[];
+  initialUsers?: UserRecord[];
+  serverSessionUser?: {
+    id: string;
+    nombres_apellidos: string;
+    correo_electronico: string;
+    rol: string;
+  } | null;
 }
 
 export function AdminDashboardView({
+  initialTab = 'inicio',
   initialMetrics,
   initialCustomers,
   initialSections,
+  initialUsers = [],
+  serverSessionUser,
 }: AdminDashboardViewProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(Boolean(serverSessionUser));
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     nombres_apellidos: string;
     correo_electronico: string;
     rol: string;
-  } | null>(null);
+  } | null>(serverSessionUser || null);
 
-  const [activeTab, setActiveTab] = useState<AdminTab>('inicio');
+  const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [metrics, setMetrics] = useState<DashboardMetrics>(initialMetrics);
   const [customers, setCustomers] = useState<AdminCustomerRecord[]>(initialCustomers);
   const [sections, setSections] = useState<StoreSection[]>(initialSections);
-  const [headerSearch, setHeaderSearch] = useState('');
+  const [users, setUsers] = useState<UserRecord[]>(initialUsers);
 
-  // 1. SINCRONIZACIÓN DE PESTAÑAS CON LA BARRA DE URL DEL NAVEGADOR (/admin?tab=...)
+  useEffect(() => {
+    if (initialUsers && initialUsers.length > 0) {
+      setUsers(initialUsers);
+    }
+  }, [initialUsers]);
+
+  // 1. SINCRONIZACIÓN DE ENDPOINTS EN LA URL (/admin/pedidos, /admin/productos, etc.)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tabParam = params.get('tab') as AdminTab | null;
+      const segments = window.location.pathname.split('/').filter(Boolean);
+      const pathTab = segments[1] as AdminTab | undefined;
       const validTabs: AdminTab[] = [
         'inicio',
         'pedidos',
@@ -54,14 +71,23 @@ export function AdminDashboardView({
         'clientes',
         'usuarios',
       ];
-      if (tabParam && validTabs.includes(tabParam)) {
-        setActiveTab(tabParam);
+
+      if (pathTab && validTabs.includes(pathTab)) {
+        setActiveTab(pathTab);
+      } else {
+        // Compatibilidad con URLs legacy ?tab=...
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab') as AdminTab | null;
+        if (tabParam && validTabs.includes(tabParam)) {
+          setActiveTab(tabParam);
+          window.history.replaceState({ tab: tabParam }, '', `/admin/${tabParam}`);
+        }
       }
     }
 
     const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const tab = (params.get('tab') as AdminTab) || 'inicio';
+      const segments = window.location.pathname.split('/').filter(Boolean);
+      const tab = (segments[1] as AdminTab) || 'inicio';
       setActiveTab(tab);
     };
 
@@ -72,12 +98,12 @@ export function AdminDashboardView({
   const handleTabChange = (newTab: AdminTab) => {
     setActiveTab(newTab);
     if (typeof window !== 'undefined') {
-      const url = newTab === 'inicio' ? '/admin' : `/admin?tab=${newTab}`;
+      const url = newTab === 'inicio' ? '/admin' : `/admin/${newTab}`;
       window.history.pushState({ tab: newTab }, '', url);
     }
   };
 
-  // 2. COMPROBACIÓN DE SESIÓN (HttpOnly Cookie con fallback de token)
+  // 2. COMPROBACIÓN DE SESIÓN (HttpOnly Cookie con fallback)
   useEffect(() => {
     const verificarSesionCookie = async () => {
       try {
@@ -92,21 +118,26 @@ export function AdminDashboardView({
           }
         }
 
-        // Fallback secundario de localStorage
+        // Fallback de localStorage
         const token = localStorage.getItem('navidad_admin_token');
         const userStr = localStorage.getItem('navidad_admin_user');
         if (token && userStr) {
           const user = JSON.parse(userStr);
           setCurrentUser(user);
           setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          setCurrentUser(null);
         }
       } catch {
         setIsAuthenticated(false);
       }
     };
 
-    verificarSesionCookie();
-  }, []);
+    if (!serverSessionUser) {
+      verificarSesionCookie();
+    }
+  }, [serverSessionUser]);
 
   const handleAuthSuccess = (
     token: string,
@@ -116,6 +147,7 @@ export function AdminDashboardView({
     localStorage.setItem('navidad_admin_user', JSON.stringify(user));
     setCurrentUser(user);
     setIsAuthenticated(true);
+    reloadAllData();
   };
 
   const handleLogout = async () => {
@@ -128,24 +160,36 @@ export function AdminDashboardView({
     localStorage.removeItem('navidad_admin_user');
     setIsAuthenticated(false);
     setCurrentUser(null);
+    window.location.href = '/admin';
   };
 
   const reloadAllData = useCallback(async () => {
     try {
-      const [dashRes, catRes] = await Promise.all([
-        fetch('/api/admin/dashboard'),
-        fetch('/api/catalog?admin=true'),
+      const token = typeof window !== 'undefined' ? localStorage.getItem('navidad_admin_token') : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const [dashRes, catRes, userRes] = await Promise.all([
+        fetch('/api/admin/dashboard', { headers, credentials: 'include' }),
+        fetch('/api/catalog?admin=true', { headers, credentials: 'include' }),
+        fetch('/api/auth/users', { headers, credentials: 'include' }),
       ]);
 
       const dashData = await dashRes.json();
       const catData = await catRes.json();
+      const userData = await userRes.json();
 
-      if (dashData.success) {
+      if (dashData.success && dashData.data) {
         setMetrics(dashData.data.metrics);
         setCustomers(dashData.data.customers);
       }
-      if (catData.success) {
+      if (catData.success && catData.data) {
         setSections(catData.data);
+      }
+      if (userData.success && Array.isArray(userData.data)) {
+        setUsers(userData.data);
       }
     } catch (err) {
       console.error('Error recargando dashboard:', err);
@@ -158,13 +202,13 @@ export function AdminDashboardView({
     }
   }, [isAuthenticated, reloadAllData]);
 
-  // Si no está autenticado, muestra la vista de Login + 2FA
+  // Si no está autenticado, muestra exclusivamente el Login 2FA (cero fugas de ventas o pedidos)
   if (!isAuthenticated || !currentUser) {
     return <AdminAuthView onSuccess={handleAuthSuccess} />;
   }
 
   const newOrdersCount =
-    metrics.executiveOverview?.activeOrdersToday || metrics.recentOrdersList?.length || 2;
+    metrics.executiveOverview?.activeOrdersToday || metrics.recentOrdersList?.length || 0;
 
   const getSectionTitle = () => {
     switch (activeTab) {
@@ -227,46 +271,13 @@ export function AdminDashboardView({
             </div>
           </div>
 
-          {/* BUSCADOR & PERFIL DE USUARIO */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            {/* INPUT DE BÚSQUEDA */}
-            <div className="relative hidden md:block">
-              <input
-                type="text"
-                value={headerSearch}
-                onChange={(e) => setHeaderSearch(e.target.value)}
-                placeholder="Buscar pedidos, árboles, SKU..."
-                className="w-56 lg:w-72 h-9 pl-9 pr-3 rounded-xl bg-[#0d281e]/90 border border-[#22c55e]/25 text-white placeholder:text-[#8ca398] text-xs focus:outline-none focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] transition-all"
-              />
-              <svg
-                className="absolute left-3 top-2.5 text-[#22c55e]"
-                fill="none"
-                height="15"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                width="15"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
-              </svg>
-            </div>
-
-            {/* BADGE TEMPORADA */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#eab308]/15 border border-[#eab308]/30 text-[#fde047] text-xs font-semibold">
-              <Sparkles size={12} className="text-[#eab308]" />
-              <span>Temporada 2026</span>
-            </div>
-
-            {/* PERFIL RÁPIDO ADMIN */}
-            <div className="flex items-center gap-2.5 pl-2 border-l border-white/10">
-              <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/15 bg-black/40 flex items-center justify-center p-0.5 shrink-0">
+          {/* PERFIL DE USUARIO */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#0d281e] border border-white/10">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#22c55e] to-[#15803d] flex items-center justify-center text-[#040d0a] font-bold text-xs ring-1 ring-[#22c55e]/40 overflow-hidden">
                 <img
                   src="/Logo_david.png"
-                  alt="Perfil Admin"
+                  alt="Avatar"
                   className="w-full h-full object-cover rounded-full"
                 />
               </div>
@@ -306,38 +317,38 @@ export function AdminDashboardView({
             </div>
           )}
 
-          {/* TAB 2: VENTAS Y PEDIDOS */}
+          {/* TAB 2: VENTAS Y PEDIDOS (/admin/pedidos) */}
           {activeTab === 'pedidos' && (
             <div className="animate-in fade-in duration-300">
               <ViewPedidosAdmin metrics={metrics} onRefresh={reloadAllData} />
             </div>
           )}
 
-          {/* TAB 3: CATÁLOGO PRODUCTOS */}
+          {/* TAB 3: CATÁLOGO PRODUCTOS (/admin/productos) */}
           {activeTab === 'productos' && (
             <div className="animate-in fade-in duration-300">
               <ViewProductosAdmin sections={sections} onRefresh={reloadAllData} />
             </div>
           )}
 
-          {/* TAB 4: SECCIONES E INVENTARIO */}
+          {/* TAB 4: SECCIONES E INVENTARIO (/admin/secciones) */}
           {activeTab === 'secciones' && (
             <div className="animate-in fade-in duration-300">
               <SectionCreator sections={sections} onCreated={reloadAllData} />
             </div>
           )}
 
-          {/* TAB 5: CLIENTES & LEADS */}
+          {/* TAB 5: CLIENTES & LEADS (/admin/clientes) */}
           {activeTab === 'clientes' && (
             <div className="animate-in fade-in duration-300">
               <CustomerHistory customers={customers} />
             </div>
           )}
 
-          {/* TAB 6: CONFIGURACIÓN & 2FA */}
+          {/* TAB 6: CONFIGURACIÓN & 2FA (/admin/usuarios) */}
           {activeTab === 'usuarios' && (
             <div className="animate-in fade-in duration-300">
-              <ViewUsuariosAdmin currentUserId={currentUser.id} />
+              <ViewUsuariosAdmin initialUsers={users} currentUserId={currentUser.id} />
             </div>
           )}
         </main>

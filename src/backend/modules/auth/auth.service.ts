@@ -176,6 +176,11 @@ export class AuthService {
     return this.repo.listUsers();
   }
 
+  // Obtener usuario por ID para verificación de permisos y sesión
+  public async getUserById(id: string) {
+    return this.repo.findById(id);
+  }
+
   // Crear nuevo usuario en tb_users
   public async createUser(input: CreateUserInput) {
     const existente = await this.repo.findByEmail(input.correo_electronico);

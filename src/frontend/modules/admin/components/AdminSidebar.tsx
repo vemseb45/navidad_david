@@ -70,11 +70,15 @@ export function AdminSidebar({
       label: 'Clientes & Leads',
       icon: <Users2 size={18} />,
     },
-    {
-      id: 'usuarios',
-      label: 'Configuración & 2FA',
-      icon: <ShieldCheck size={18} />,
-    },
+    ...(currentUser?.rol === 'ADMIN'
+      ? [
+          {
+            id: 'usuarios' as AdminTab,
+            label: 'Configuración & 2FA',
+            icon: <ShieldCheck size={18} />,
+          },
+        ]
+      : []),
   ];
 
   const handleTabClick = (tabId: AdminTab) => {

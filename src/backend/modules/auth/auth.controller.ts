@@ -1,6 +1,7 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { apiResponse } from '@/backend/shared/utils/apiResponse';
 import { getSessionUser } from '@/backend/shared/get-session-user';
+import { SessionUser } from './security/token.service';
 import { setSessionCookie, clearSessionCookie } from './security/session.service';
 import { AuthService } from './auth.service';
 import {
@@ -97,12 +98,60 @@ export class AuthController {
     }
   }
 
+  /**
+   * Validador robusto de sesión y permisos de Administrador para gestión de usuarios
+   */
+  private async checkAdminAccess(): Promise<{
+    authorized: boolean;
+    currentUser: SessionUser | null;
+    errorResponse?: NextResponse;
+  }> {
+    const currentUser = await getSessionUser();
+    if (!currentUser) {
+      return {
+        authorized: false,
+        currentUser: null,
+        errorResponse: apiResponse(false, 'No autorizado para consultar o gestionar usuarios', null, 401),
+      };
+    }
+
+    const roleUpper = (currentUser.rol || '').toUpperCase();
+    let isAdmin = roleUpper === 'ADMIN' || roleUpper === 'SUPERADMIN';
+
+    // Verificación adicional de respaldo en la base de datos tb_users
+    if (!isAdmin && currentUser.id) {
+      try {
+        const userInDb = await this.service.getUserById(currentUser.id);
+        if (userInDb && userInDb.rol.toUpperCase() === 'ADMIN') {
+          isAdmin = true;
+        }
+      } catch {
+        // En caso de fallo de red/DB, se mantiene el estado previo
+      }
+    }
+
+    if (!isAdmin) {
+      return {
+        authorized: false,
+        currentUser,
+        errorResponse: apiResponse(
+          false,
+          'Acceso denegado: se requiere rol de Administrador para gestionar usuarios',
+          null,
+          403
+        ),
+      };
+    }
+
+    return { authorized: true, currentUser };
+  }
+
   // GET /api/auth/users
   async getUsers(_req: NextRequest) {
     try {
-      const currentUser = await getSessionUser();
-      if (!currentUser) {
-        return apiResponse(false, 'No autorizado para consultar usuarios', null, 401);
+      const auth = await this.checkAdminAccess();
+      if (!auth.authorized) {
+        return auth.errorResponse!;
       }
 
       const users = await this.service.listUsers();
@@ -116,9 +165,9 @@ export class AuthController {
   // POST /api/auth/users
   async createUser(req: NextRequest) {
     try {
-      const currentUser = await getSessionUser();
-      if (!currentUser) {
-        return apiResponse(false, 'No autorizado para crear usuarios', null, 401);
+      const auth = await this.checkAdminAccess();
+      if (!auth.authorized) {
+        return auth.errorResponse!;
       }
 
       const raw = await parseBody(req);
@@ -139,9 +188,9 @@ export class AuthController {
   // PATCH /api/auth/users
   async updateUser(req: NextRequest) {
     try {
-      const currentUser = await getSessionUser();
-      if (!currentUser) {
-        return apiResponse(false, 'No autorizado', null, 401);
+      const auth = await this.checkAdminAccess();
+      if (!auth.authorized) {
+        return auth.errorResponse!;
       }
 
       const raw = await parseBody(req);
@@ -162,9 +211,9 @@ export class AuthController {
   // DELETE /api/auth/users?id=...
   async deleteUser(req: NextRequest) {
     try {
-      const currentUser = await getSessionUser();
-      if (!currentUser) {
-        return apiResponse(false, 'No autorizado', null, 401);
+      const auth = await this.checkAdminAccess();
+      if (!auth.authorized) {
+        return auth.errorResponse!;
       }
 
       const { searchParams } = new URL(req.url);
@@ -174,7 +223,7 @@ export class AuthController {
         return apiResponse(false, 'ID de usuario requerido', null, 400);
       }
 
-      await this.service.deleteUser(id, currentUser.id);
+      await this.service.deleteUser(id, auth.currentUser?.id);
       return apiResponse(true, 'Usuario eliminado correctamente', null, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al eliminar usuario';

@@ -123,16 +123,21 @@ export function proxy(request: NextRequest) {
   const isProtectedApi = PROTECTED_API_PATTERNS.some((pattern) => pattern.test(pathname));
 
   if (isProtectedApi) {
+    const authHeader = request.headers.get('authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7).trim() : null;
+
     const sessionCookie =
       request.cookies.get(AUTH_COOKIE_NAME)?.value ||
       request.cookies.get('barber_tech_session')?.value ||
       request.cookies.get('arbolitos_navidad_david')?.value;
 
-    if (!sessionCookie) {
+    const tokenToVerify = sessionCookie || bearerToken;
+
+    if (!tokenToVerify) {
       const unauthorized = NextResponse.json(
         {
           success: false,
-          error: 'Acceso no autorizado: Se requiere una sesión activa con Cookie HttpOnly.',
+          error: 'Acceso no autorizado: Se requiere una sesión activa con Cookie HttpOnly o Bearer Token.',
         },
         { status: 401 }
       );
@@ -141,7 +146,7 @@ export function proxy(request: NextRequest) {
     }
 
     try {
-      const decoded = jwt.verify(sessionCookie, AUTH_TOKEN_SECRET) as {
+      const decoded = jwt.verify(tokenToVerify, AUTH_TOKEN_SECRET) as {
         id?: string;
         correo_electronico?: string;
         rol?: string;
@@ -152,11 +157,13 @@ export function proxy(request: NextRequest) {
         throw new Error('Payload del token inválido');
       }
 
+      const normalizedRole = (decoded.rol || 'OPERADOR').toUpperCase();
+
       // Propagar identidad verificada en las cabeceras de la petición hacia el backend
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set('x-user-id', decoded.id);
       requestHeaders.set('x-user-email', decoded.correo_electronico);
-      requestHeaders.set('x-user-role', decoded.rol || 'OPERADOR');
+      requestHeaders.set('x-user-role', normalizedRole);
       requestHeaders.set('x-request-id', requestId);
 
       const response = NextResponse.next({
@@ -178,30 +185,64 @@ export function proxy(request: NextRequest) {
         { status: 401 }
       );
 
-      // Limpiar cookie corrupta para restaurar estado seguro
-      invalidTokenResponse.cookies.delete(AUTH_COOKIE_NAME);
+      if (sessionCookie) {
+        invalidTokenResponse.cookies.delete(AUTH_COOKIE_NAME);
+        invalidTokenResponse.cookies.delete('barber_tech_session');
+      }
       applySecurityHeaders(invalidTokenResponse);
       return invalidTokenResponse;
     }
   }
 
-  // 4. Peticiones regulares: continuar con NextResponse.next()
-  const response = NextResponse.next();
-
+  // 4. Verificación de Autenticación en Vistas Administrativas (/admin/*)
   if (pathname.startsWith('/admin')) {
+    const authHeader = request.headers.get('authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7).trim() : null;
+
     const sessionCookie =
       request.cookies.get(AUTH_COOKIE_NAME)?.value ||
-      request.cookies.get('barber_tech_session')?.value;
-    if (sessionCookie) {
+      request.cookies.get('barber_tech_session')?.value ||
+      request.cookies.get('arbolitos_navidad_david')?.value;
+
+    const tokenToVerify = sessionCookie || bearerToken;
+
+    let isValid = false;
+    let userRole: string | undefined = undefined;
+
+    if (tokenToVerify) {
       try {
-        jwt.verify(sessionCookie, AUTH_TOKEN_SECRET);
+        const decoded = jwt.verify(tokenToVerify, AUTH_TOKEN_SECRET) as {
+          id?: string;
+          rol?: string;
+        };
+        if (decoded?.id) {
+          isValid = true;
+          userRole = (decoded.rol || '').toUpperCase();
+        }
       } catch {
-        // La cookie está corrupta o expiró, la limpiamos proactivamente
-        response.cookies.delete(AUTH_COOKIE_NAME);
-        response.cookies.delete('barber_tech_session');
+        isValid = false;
       }
     }
+
+    // Protección de acceso exclusivo de ADMIN para /admin/usuarios
+    if (isValid && pathname === '/admin/usuarios' && userRole !== 'ADMIN' && userRole !== 'SUPERADMIN') {
+      const redirectAdmin = NextResponse.redirect(new URL('/admin', request.url));
+      applySecurityHeaders(redirectAdmin);
+      return redirectAdmin;
+    }
+
+    // Si está en /admin y la cookie expiró o está corrupta, limpiarla
+    if (!isValid && sessionCookie && pathname === '/admin') {
+      const response = NextResponse.next();
+      response.cookies.delete(AUTH_COOKIE_NAME);
+      response.cookies.delete('barber_tech_session');
+      applySecurityHeaders(response);
+      return response;
+    }
   }
+
+  // 5. Peticiones regulares: continuar con NextResponse.next()
+  const response = NextResponse.next();
 
   // 5. Aplicar cabeceras de seguridad a todas las respuestas
   applySecurityHeaders(response);
