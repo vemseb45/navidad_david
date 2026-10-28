@@ -155,7 +155,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
   }, [initialSections, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-[#fbf9f5] flex flex-col justify-between selection:bg-[#002718]/15 selection:text-[#002718]">
+    <div className="min-h-screen bg-[#03170e] text-white flex flex-col justify-between selection:bg-[#22c55e]/25 selection:text-[#22c55e]">
       {/* NAVBAR OFICIAL - LOGO REDIRIGE A /admin (LOGIN), SIN BOTONES DE ADMIN EXTRA */}
       <Navbar
         sections={initialSections}
@@ -194,8 +194,8 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         {/* SECCIONES Y CATÁLOGO COMPLETO DE PRODUCTOS */}
         {visibleSections.every((s) => s.products.length === 0) ? (
           <div className="text-center py-20">
-            <span className="material-symbols-outlined text-5xl text-gray-400">search_off</span>
-            <p className="text-base font-bold text-gray-700 mt-2">
+            <span className="material-symbols-outlined text-5xl text-slate-500">search_off</span>
+            <p className="text-base font-bold text-slate-300 mt-2">
               No encontramos productos que coincidan con &quot;{searchQuery}&quot;
             </p>
             <button
@@ -203,7 +203,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
                 setSearchQuery('');
                 setActiveSectionSlug('all');
               }}
-              className="mt-4 px-5 py-2.5 rounded-full bg-[#133e2b] text-white text-xs font-bold shadow-md hover:bg-[#002718] transition-colors"
+              className="mt-4 px-5 py-2.5 rounded-full bg-[#22c55e] text-[#03170e] text-xs font-bold shadow-md hover:bg-[#16a34a] transition-colors"
             >
               Restablecer búsqueda y ver todo el catálogo
             </button>

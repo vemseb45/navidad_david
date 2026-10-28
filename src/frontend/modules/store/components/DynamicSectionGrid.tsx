@@ -27,28 +27,30 @@ export function DynamicSectionGrid({
   return (
     <section
       id={section.slug}
-      className={`w-full py-8 sm:py-14 scroll-mt-24 sm:scroll-mt-32 ${index % 2 === 1 ? 'bg-[#f5f3ef]/80' : 'bg-[#fbf9f5]'}`}
+      className={`w-full py-8 sm:py-14 scroll-mt-24 sm:scroll-mt-32 text-white ${
+        index % 2 === 1 ? 'bg-[#041d12]/60' : 'bg-[#03170e]'
+      }`}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-12">
         {/* HEADER DE LA SECCIÓN */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 mb-4 sm:mb-6 border-b border-[#e4e2de] pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 mb-4 sm:mb-6 border-b border-white/10 pb-3 sm:pb-4">
           <div>
             {section.badgeText && (
               <div className="flex items-center gap-1.5 mb-0.5 sm:mb-1">
-                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#b90d1c]"></span>
-                <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#002718] font-bold">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#ef4444]"></span>
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#ffe088] font-bold">
                   {section.badgeText}
                 </span>
               </div>
             )}
-            <h2 className="font-serif text-xl sm:text-3xl text-[#002718] font-bold">
+            <h2 className="font-serif text-xl sm:text-3xl text-white font-bold">
               {section.title}
             </h2>
             {section.subtitle && (
-              <p className="text-xs sm:text-sm text-[#414943] mt-0.5">{section.subtitle}</p>
+              <p className="text-xs sm:text-sm text-[#c1c8c1] mt-0.5 font-light">{section.subtitle}</p>
             )}
           </div>
-          <span className="text-[11px] sm:text-xs font-semibold text-[#414943]">
+          <span className="text-[11px] sm:text-xs font-semibold text-[#ffe088]">
             {filteredProducts.length} artículo(s) disponibles
           </span>
         </div>
@@ -60,8 +62,8 @@ export function DynamicSectionGrid({
               onClick={() => setActiveSubcatSlug('all')}
               className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                 activeSubcatSlug === 'all'
-                  ? 'bg-[#133e2b] text-white shadow-xs'
-                  : 'bg-[#efeeea] text-[#414943] hover:text-[#002718]'
+                  ? 'bg-[#22c55e] text-[#03170e] font-bold shadow-xs'
+                  : 'bg-[#08281a] text-slate-300 hover:text-white border border-white/10'
               }`}
             >
               Todos los Adornos
@@ -72,8 +74,8 @@ export function DynamicSectionGrid({
                 onClick={() => setActiveSubcatSlug(sub.slug)}
                 className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                   activeSubcatSlug === sub.slug
-                    ? 'bg-[#133e2b] text-white shadow-xs'
-                    : 'bg-[#efeeea] text-[#414943] hover:text-[#002718]'
+                    ? 'bg-[#22c55e] text-[#03170e] font-bold shadow-xs'
+                    : 'bg-[#08281a] text-slate-300 hover:text-white border border-white/10'
                 }`}
               >
                 {sub.name}
@@ -84,7 +86,7 @@ export function DynamicSectionGrid({
 
         {/* GRILLA DE PRODUCTOS RESPONSIVE (2 Columnas en móvil, 4 en desktop) */}
         {filteredProducts.length === 0 ? (
-          <p className="text-sm text-gray-500 py-8 text-center">
+          <p className="text-sm text-slate-400 py-8 text-center font-light">
             No hay productos disponibles en esta selección.
           </p>
         ) : (

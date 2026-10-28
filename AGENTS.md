@@ -239,14 +239,19 @@ El panel de control en `/admin` implementa la estética de alta gama **Dark Luxu
 4. **`CategoryMixBar.tsx`**: Barra de progreso segmentada por categoría (Pinos Tradicionales 46%, Fibra Óptica 38%, Luces LED 11%, Pies de Árbol 5%).
 5. **`CriticalStockList.tsx`**: Listado de árboles más demandados con variantes de altura (`2.10m`, `1.80m`, `2.40m`) y badges de urgencia (`¡AGOTADO!`, `Se agota hoy`, `Últimos`, `11 disp.`).
 
-### Sincronización de URL en el Panel Administrativo
-* La navegación entre pestañas actualiza la barra del navegador de forma bidireccional mediante `window.history.pushState` y escucha del evento `popstate`:
+### Sincronización de Endpoints Limpios en el Panel Administrativo
+* La navegación administrativa utiliza rutas limpias dedicadas mediante la convención `src/app/admin/[tab]/page.tsx`:
   * Panel General: `/admin`
-  * Pedidos y Despachos: `/admin?tab=pedidos`
-  * Catálogo de Árboles: `/admin?tab=productos`
-  * Inventario y Secciones: `/admin?tab=secciones`
-  * Clientes y Leads: `/admin?tab=clientes`
-  * Configuración y 2FA: `/admin?tab=usuarios`
+  * Pedidos y Despachos: `/admin/pedidos`
+  * Catálogo de Árboles: `/admin/productos`
+  * Inventario y Secciones: `/admin/secciones`
+  * Clientes y Leads: `/admin/clientes`
+  * Configuración y 2FA: `/admin/usuarios`
+* Si el usuario ingresa por URL legacy con query param (`/admin?tab=...`), el frontend sincroniza automáticamente la URL limpia sin recarga mediante `window.history.replaceState`.
+* **Seguridad de Acceso**:
+  * Si el usuario no tiene sesión válida, ninguna métrica, pedido o catálogo es filtrado; se muestra estrictamente la pantalla de autenticación 2FA.
+  * La ruta `/admin/usuarios` está protegida por `proxy.ts` y controladores de API exclusivamente para roles `ADMIN` y `SUPERADMIN`.
+  * Duración de sesión en cookie HttpOnly `barber_tech_session`: **3 horas** (`AUTH_SESSION_HOURS=3`), configurada con `sameSite: "lax"` y `maxAge: 10800`.
 
 ### Control Individual de 2FA por Usuario en Base de Datos (`tb_users.activacion_2fa`)
 * El 2FA **NO es una configuración global** de la tienda, sino un atributo individual por cada cuenta (`tb_users.activacion_2fa`).
@@ -260,6 +265,65 @@ El panel de control en `/admin` implementa la estética de alta gama **Dark Luxu
 ### Limpieza de Consultas SQL en Servidor
 * En `src/backend/config/prisma.ts`, el cliente de Prisma está configurado exclusivamente con `log: ['error', 'warn']`.
 * Las sentencias internas `prisma:query BEGIN`, `SELECT`, `INSERT` y `COMMIT` quedan suprimidas de la consola de desarrollo, garantizando logs limpios y trazabilidad estricta.
+
+---
+
+## 10. Carga de Datos Server-Side (SSR) en Administración (`admin-loader.ts`)
+
+Para evitar pantallas en blanco, parpadeos y problemas de autorización por cookies en el cliente, la carga de datos del panel administrativo se centraliza en el servidor:
+
+* **Módulo Oficial**: `src/backend/modules/analytics/admin-loader.ts`.
+* **Función Central**: `getAdminInitialData()`.
+* **Carga en Paralelo**:
+  ```typescript
+  const [rawMetrics, rawCustomers, rawSections, rawUsers] = await Promise.all([
+    analyticsService.getDashboardMetrics(),
+    customerRepo.getAllCustomersWithPurchaseHistory(),
+    catalogService.getAllSectionsForAdmin(),
+    authRepo.listUsers(),
+  ]);
+  ```
+* **Ventajas**:
+  1. Las rutas `/admin` y `/admin/[tab]` inyectan las métricas, clientes, secciones y usuarios de `tb_users` directamente en el render inicial de React.
+  2. `ViewUsuariosAdmin` recibe `initialUsers` y no muestra estados vacíos ni depende de una llamada inicial asíncrona de cliente para pintar la lista de usuarios.
+  3. Los roles se normalizan a mayúsculas (`ADMIN`, `OPERADOR`, `SUPERADMIN`), y los controladores de autorización verifican contra la base de datos `tb_users` si existiera alguna discrepancia en el JWT.
+
+---
+
+## 11. Estética y Sistema Visual del Storefront (Dark Luxury Christmas Atelier)
+
+La tienda pública implementa una estética festiva nocturna de alta gama inspirada en el coleccionismo botánico:
+
+* **Paleta de Color Oficial**:
+  * **Fondo Principal**: Verde pino imperial nocturno (`#03170e`).
+  * **Superficies y Cards**: Terciopelo verde oscuro (`#062115`, `#08281a`) con bordes sutiles en `border-white/10`.
+  * **Acentos Lumínicos**:
+    * Oro Cálido Navideño (`#ffe088`, `#fde047`): Precios, estrellas, detalles de ribbon y badges.
+    * Verde Esmeralda Festivo (`#22c55e`, `#bfedd2`): Botones de acción, indicadores activos y micro-filamentos.
+    * Rojo Rubí Tradicional (`#b90d1c`, `#ef4444`): Badges destacados y CTA principal de la colección.
+    * Textos Secundarios: Gris plata sutil (`#c1c8c1`, `#94a3b8`).
+
+### Componentes de la Tienda
+1. **`Navbar.tsx`**: Ribbon superior festivo (`#0b281b`), barra principal con glassmorphism oscuro (`#03170e/95`), acceso al login de administración al tocar el logo, buscador predictivo, asesoría por WhatsApp y carrito accesible.
+2. **`FeaturesBanner.tsx`**: 4 pilares de marca con tarjetas en `#08281a`, iconos con resplandor neón festivo y tipografía contrastada.
+3. **`Categories.tsx`**: Navegación visual directa hacia las colecciones con tarjetas en `#08281a` y enlaces que desplazan suavemente sin ocultar el resto del catálogo.
+4. **`DynamicSectionBar.tsx`**: Barra de subsecciones sticky en `#062115/95` con botones de filtro rápido que desplazan suavemente.
+5. **`DynamicSectionGrid.tsx` & `ProductCard.tsx`**: Cuadrícula de 2 columnas en móviles y 4 en desktop, tarjetas en `#08281a`, selectores de altura táctiles y compra en 1 clic.
+
+---
+
+## 12. Efectos Interactivos del Hero (`Hero.tsx`)
+
+* **Escala Proporcionada (100% de Zoom)**: Altura máxima de `720px` y escala de contenedor de `440px` de ancho por `420px-500px` de alto, optimizada para que el usuario no necesite alejar el zoom de su navegador.
+* **Constelación y Silueta del Árbol**:
+  * Silueta vectorial en capas de pino imperial escandinavo en degradado verde esmeralda profundo (`#082b1c` a `#010d08`).
+  * 38 nodos lumínicos asimétricos con la animación CSS `needle-glow` (`needleTwinkle`).
+  * Estrella dorada apical pulsante (`tree-star-anim`).
+* **Pirotecnia y Serpentinas Dinámicas Detrás del Árbol (Arquitectura en 3 Capas de Profundidad)**:
+  * **Capa 1 (Fondo `z-10`)**: Lienzo `<canvas>` acelerado por hardware a 60 FPS con motor de partículas (`RibbonParticle`, `SparkParticle`, `StarParticle`, estrictamente sin globos). **Se ubica detrás del árbol**.
+  * **Capa 2 (Frente `z-20`)**: El árbol navideño botánico (silueta de pino opaca, resplandor interactivo, constelación de 38 filamentos y estrella apical dorada). Actúa como plano frontal que oculta el origen de los fuegos y permite ver cómo los cohetes, chispas y serpentinas ascienden y estallan por detrás en el cielo nocturno.
+  * **Capa 3 (Interacción `z-30`)**: Plano de captura táctil y de cursor sobre el árbol (`treeContainerRef`, `onMouseMove={handleTreeMouseMove}`). Despacha coordenadas relativas al escenario (`heroRef`) hacia el canvas inferior sin bloquear la lectura ni los botones CTA de la columna editorial derecha.
+  * El efecto se activa **exclusivamente cuando el cursor interactúa con el árbol**, y se limpia de forma automática para garantizar un rendimiento óptimo de 60 FPS sin fugas de memoria.
 
 <!-- BEGIN:nextjs-agent-feedback -->
 

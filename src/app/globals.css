@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #03170e;
+  --foreground: #fbf9f5;
 }
 
 @theme inline {
@@ -12,15 +12,61 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: #03170e;
+  color: #fbf9f5;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Animaciones y efectos luminosos de alta gama para el Hero Árbol Navideño */
+@keyframes needleTwinkle {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.4);
+    filter: drop-shadow(0 0 12px #a3ffc7);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes starPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 18px #ffe088);
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 35px #ffe088) drop-shadow(0 0 55px #bfedd2);
+  }
+}
+
+.needle-glow {
+  animation: needleTwinkle var(--duration, 2.4s) ease-in-out infinite var(--delay, 0s);
+}
+
+.tree-star-anim {
+  animation: starPulse 3s ease-in-out infinite;
+}
+
+/* Serpentinas y confeti festivo que vuelan al acercar el cursor al árbol */
+@keyframes streamerDrift {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.6) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(var(--tx, 40px), var(--ty, -40px)) scale(1.1) rotate(var(--rot, 180deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--tx, 40px) * 1.8), calc(var(--ty, -40px) * 2)) scale(0.65) rotate(calc(var(--rot, 180deg) * 2));
+  }
+}
+
+.serpentina-particle {
+  pointer-events: none;
+  animation: streamerDrift var(--duration, 1.4s) cubic-bezier(0.2, 0.8, 0.35, 1) forwards;
 }

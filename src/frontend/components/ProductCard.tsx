@@ -35,11 +35,11 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
   const whatsappUrl = `https://wa.me/573104567890?text=${whatsappMessage}`;
 
   return (
-    <article className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-[#e4e2de] shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-      {/* CONTENEDOR DE IMAGEN 3:4 CON HOVER REFINADO ESTILO NANA.COL */}
+    <article className="group relative flex flex-col h-full bg-[#08281a] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ffe088]/40 shadow-xl transition-all duration-300 hover:-translate-y-1 text-white">
+      {/* CONTENEDOR DE IMAGEN 3:4 CON HOVER REFINADO */}
       <div
         onClick={() => onOpenQuickView(product)}
-        className="relative aspect-[3/4] w-full overflow-hidden bg-[#f5f3ef] cursor-pointer select-none"
+        className="relative aspect-[3/4] w-full overflow-hidden bg-[#02130b] cursor-pointer select-none"
         title={`Ver detalles de ${product.name}`}
       >
         {/* IMAGEN PRINCIPAL */}
@@ -62,7 +62,7 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
           />
         )}
 
-        {/* BADGES SUPERIORES */}
+        {/* BADGES SUPERIORES FESTIVOS */}
         {product.badgeTop && (
           <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#b90d1c] text-white text-[9px] sm:text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
             {product.badgeTop}
@@ -70,15 +70,15 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
         )}
 
         {product.badgeBottom && (
-          <span className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#002718]/90 backdrop-blur-sm text-[#ffe088] text-[9px] sm:text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
+          <span className="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#03170e]/90 backdrop-blur-sm text-[#ffe088] border border-[#ffe088]/30 text-[9px] sm:text-[10px] font-bold tracking-wider uppercase shadow-md z-10 pointer-events-none">
             {product.badgeBottom}
           </span>
         )}
 
         {/* BOTÓN FLOTANTE EN HOVER PARA DESKTOP */}
         <div className="hidden md:flex absolute bottom-3 inset-x-3 z-20 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex-col gap-2 pointer-events-none">
-          <div className="w-full py-2.5 px-3 bg-white/95 backdrop-blur-md text-[#002718] rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 border border-[#ffe088]/40">
-            <Eye className="w-4 h-4 text-[#b90d1c]" />
+          <div className="w-full py-2 px-3 bg-[#03170e]/95 backdrop-blur-md text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 border border-[#ffe088]/40">
+            <Eye className="w-4 h-4 text-[#ffe088]" />
             <span>Ver Detalle Rápido</span>
           </div>
         </div>
@@ -89,19 +89,19 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
         <div>
           <h3
             onClick={() => onOpenQuickView(product)}
-            className="font-serif text-xs sm:text-base font-bold text-[#002718] leading-snug hover:text-[#b90d1c] transition-colors cursor-pointer line-clamp-2"
+            className="font-serif text-xs sm:text-base font-bold text-white leading-snug hover:text-[#ffe088] transition-colors cursor-pointer line-clamp-2"
             title={product.name}
           >
             {product.name}
           </h3>
-          <p className="hidden sm:block text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed font-light">
+          <p className="hidden sm:block text-xs text-[#c1c8c1] mt-1 line-clamp-2 leading-relaxed font-light">
             {product.description}
           </p>
 
           {/* SELECTOR DE MEDIDAS / ALTURAS (1-clic interactivo) */}
           {product.variants && product.variants.length > 0 && (
-            <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-[#f0eee9]">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 block mb-1 tracking-wider">
+            <div className="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t border-white/10">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block mb-1 tracking-wider">
                 Altura:
               </span>
               <div className="flex items-center flex-wrap gap-1 sm:gap-1.5">
@@ -117,11 +117,11 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
                       }}
                       className={`px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-md sm:rounded-lg transition-all flex items-center gap-0.5 sm:gap-1 ${
                         isSelected
-                          ? 'bg-[#133e2b] text-white font-bold shadow-xs ring-1 sm:ring-2 ring-[#002718]/30 scale-102'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#22c55e] text-[#03170e] font-bold shadow-xs ring-1 ring-[#22c55e]/50 scale-102'
+                          : 'bg-[#03170e] text-slate-300 hover:text-white hover:bg-[#0d3b26] border border-white/10'
                       }`}
                     >
-                      <TreePine className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#ffe088]" />
+                      <TreePine className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${isSelected ? 'text-[#03170e]' : 'text-[#ffe088]'}`} />
                       <span>{v.label}</span>
                     </button>
                   );
@@ -132,14 +132,14 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
         </div>
 
         {/* PRECIO Y ACCIONES */}
-        <div className="pt-1.5 sm:pt-2 border-t border-[#f0eee9] flex flex-col gap-1.5 sm:gap-2">
+        <div className="pt-1.5 sm:pt-2 border-t border-white/10 flex flex-col gap-1.5 sm:gap-2">
           <div className="flex items-baseline justify-between gap-1">
             <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
-              <span className="text-sm sm:text-lg lg:text-xl font-bold text-[#002718]">
+              <span className="text-sm sm:text-lg lg:text-xl font-bold text-[#ffe088]">
                 ${currentPrice.toLocaleString('es-CO')}
               </span>
               {product.compareAtPrice && Number(product.compareAtPrice) > currentPrice && (
-                <span className="text-[10px] sm:text-xs text-gray-400 line-through">
+                <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                   ${Number(product.compareAtPrice).toLocaleString('es-CO')}
                 </span>
               )}
@@ -150,7 +150,7 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               title="Preguntar por WhatsApp"
-              className="text-emerald-600 hover:text-emerald-700 p-1 sm:p-1.5 rounded-full hover:bg-emerald-50 transition-colors shrink-0"
+              className="text-[#22c55e] hover:text-[#4ade80] p-1 sm:p-1.5 rounded-full hover:bg-white/5 transition-colors shrink-0"
             >
               <MessageCircle className="w-4 h-4 sm:w-4 sm:h-4" />
             </a>
@@ -159,16 +159,16 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
           <button
             type="button"
             onClick={handleAdd}
-            className="w-full py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-[#133e2b] hover:bg-[#002718] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1 sm:gap-2"
+            className="w-full py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-[#03170e] text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer"
           >
             {isAdded ? (
               <>
-                <Check className="w-3.5 h-3.5 text-[#ffe088]" />
+                <Check className="w-3.5 h-3.5 text-[#03170e]" />
                 <span className="truncate">¡Agregado!</span>
               </>
             ) : (
               <>
-                <ShoppingBag className="w-3.5 h-3.5" />
+                <ShoppingBag className="w-3.5 h-3.5 text-[#03170e]" />
                 <span className="truncate">Agregar</span>
               </>
             )}
