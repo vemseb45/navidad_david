@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StoreSection, StoreProduct, StoreVariant, CartItem } from '@/types/domain.types';
-import { Navbar } from './components/Navbar';
-import { Hero } from './components/Hero';
-import { FeaturesBanner } from './components/FeaturesBanner';
-import { Categories } from './components/Categories';
-import { DynamicSectionBar } from './components/DynamicSectionBar';
-import { DynamicSectionGrid } from './components/DynamicSectionGrid';
-import { Footer } from './components/Footer';
+import { CommercialHero } from './components/CommercialHero';
+import { HeightGuideSection } from './components/HeightGuideSection';
+import { CollectionSection } from './components/CollectionSection';
+import { BrandDifferenceSection } from './components/BrandDifferenceSection';
+import { ShowroomSection } from './components/ShowroomSection';
+import { CommercialFooter } from './components/CommercialFooter';
 import { CartDrawer } from '@/frontend/components/CartDrawer';
 import { GuestCheckoutModal } from '@/frontend/components/GuestCheckoutModal';
 import { ProductDetailModal } from '@/frontend/components/ProductDetailModal';
@@ -16,8 +15,6 @@ import { WhatsAppFloatingButton } from '@/frontend/components/WhatsAppFloatingBu
 import { SearchModal } from '@/frontend/components/SearchModal';
 
 export function StorefrontView({ initialSections }: { initialSections: StoreSection[] }) {
-  const [activeSectionSlug, setActiveSectionSlug] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -29,11 +26,6 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     [initialSections]
   );
 
-  const totalProductsCount = useMemo(
-    () => allProducts.length,
-    [allProducts]
-  );
-
   const cartCount = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
   const cartTotal = useMemo(
     () => cart.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0),
@@ -43,7 +35,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
   const handleAddToCart = (product: StoreProduct, variant?: StoreVariant) => {
     const selectedVariant = variant || product.variants.find((v) => v.isDefault) || product.variants[0];
     const unitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice);
-    const imageUrl = product.images[0]?.storagePath || '/img/cat-arboles-tradicionales.webp';
+    const imageUrl = product.images[0]?.storagePath || '/img/pino-canadiense-nevado.webp';
 
     setCart((prev) => {
       const existingIndex = prev.findIndex(
@@ -69,6 +61,28 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     });
   };
 
+  const handleAddSimpleToCart = (name: string, price: number, imageUrl: string) => {
+    setCart((prev) => {
+      const existing = prev.find((item) => item.name === name);
+      if (existing) {
+        return prev.map((item) =>
+          item.name === name ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          productId: Math.floor(Math.random() * 100000),
+          name,
+          unitPrice: price,
+          quantity: 1,
+          imageUrl,
+        },
+      ];
+    });
+    setIsCartOpen(true);
+  };
+
   const handleBuyNow = (product: StoreProduct, variant?: StoreVariant) => {
     handleAddToCart(product, variant);
     setIsCheckoutOpen(true);
@@ -87,144 +101,83 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
     }
     setCart((prev) =>
       prev.map((i) =>
-        i.productId === productId && i.variantId === variantId
-          ? { ...i, quantity }
-          : i
+        i.productId === productId && i.variantId === variantId ? { ...i, quantity } : i
       )
     );
   };
 
-  // NAVEGACIÓN SUAVE ENTRE SECCIONES SIN OCULTAR CONTENIDO (No-Filter Navigation)
-  const handleScrollToSection = (slug: string) => {
-    setActiveSectionSlug(slug);
-    if (slug === 'all') {
-      const el = document.getElementById('catalogo') || document.getElementById('arboles-tradicionales');
-      if (el) {
-        const yOffset = -85;
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-      return;
-    }
-
-    const el = document.getElementById(slug);
+  const handleScrollToCollection = () => {
+    const el = document.getElementById('coleccion');
     if (el) {
-      const yOffset = -85;
-      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  // DETECCIÓN AUTOMÁTICA DE SECCIÓN VISIBLE MEDIANTE OBSERVER AL HACER SCROLL
-  useEffect(() => {
-    const handleScroll = () => {
-      const sectionElements = initialSections
-        .map((s) => document.getElementById(s.slug))
-        .filter(Boolean) as HTMLElement[];
-
-      const scrollPosition = window.scrollY + 140;
-
-      for (let i = sectionElements.length - 1; i >= 0; i--) {
-        const el = sectionElements[i];
-        if (el.offsetTop <= scrollPosition) {
-          setActiveSectionSlug(el.id);
-          return;
-        }
-      }
-
-      if (window.scrollY < 400) {
-        setActiveSectionSlug('all');
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [initialSections]);
-
-  // TODAS LAS SECCIONES PERMANECEN SIEMPRE VISIBLES (Solo se filtran productos al escribir en el buscador)
-  const visibleSections = useMemo(() => {
-    return initialSections.map((sec) => ({
-      ...sec,
-      products: sec.products.filter((prod) =>
-        searchQuery.trim() === ''
-          ? true
-          : prod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            prod.description.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    }));
-  }, [initialSections, searchQuery]);
-
   return (
-    <div className="min-h-screen bg-[#03170e] text-white flex flex-col justify-between selection:bg-[#22c55e]/25 selection:text-[#22c55e]">
-      {/* NAVBAR OFICIAL - LOGO REDIRIGE A /admin (LOGIN), SIN BOTONES DE ADMIN EXTRA */}
-      <Navbar
-        sections={initialSections}
-        activeSectionSlug={activeSectionSlug}
-        onNavigateToSection={handleScrollToSection}
-        searchQuery={searchQuery}
-        onSearchChange={(q) => setSearchQuery(q)}
-        cartCount={cartCount}
-        cartTotal={cartTotal}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenSearch={() => setIsSearchModalOpen(true)}
-      />
-
-      <main className="pt-16 sm:pt-20 flex-1">
-        {/* HERO VISUAL DE ALTO IMPACTO */}
-        <Hero
-          onExploreClick={() => handleScrollToSection('arboles-tradicionales')}
+    <div className="bg-[#121417] text-white min-h-screen flex flex-col items-center justify-center p-3 sm:p-5 lg:p-7 antialiased selection:bg-brand-gold selection:text-black">
+      {/* BEGIN: Outer Frame Presentation Context */}
+      <div className="w-full max-w-[1580px] mx-auto transition-all" data-purpose="viewport-container">
+        
+        {/* BEGIN: Commercial Hero Main Container */}
+        <CommercialHero
+          cartCount={cartCount}
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenSearch={() => setIsSearchModalOpen(true)}
+          onExploreClick={handleScrollToCollection}
         />
+        {/* END: Commercial Hero Main Container */}
 
-        {/* PILARES DE LA MARCA (Garantías, Frondosidad, Fibra Óptica, Bold) */}
-        <FeaturesBanner />
+        {/* BEGIN: Quick Features Footer Strip */}
+        <div className="w-full flex flex-col space-y-16 sm:space-y-20 lg:space-y-24 mt-12 sm:mt-16 text-white">
+          {/* Section 1: Calculador de Espacio */}
+          <HeightGuideSection />
 
-        {/* GUÍA VISUAL DE COLECCIONES (DESPLAZA DIRECTAMENTE A LA SECCIÓN) */}
-        <Categories onSelectCategory={handleScrollToSection} />
-
-        {/* BARRA STICKY DE NAVEGACIÓN Y ACCESO RÁPIDO */}
-        <div id="catalogo">
-          <DynamicSectionBar
-            sections={initialSections}
-            activeSectionSlug={activeSectionSlug}
-            totalProductsCount={totalProductsCount}
-            onSelectSection={handleScrollToSection}
+          {/* Section 2: Colección Dos Tradiciones */}
+          <CollectionSection
+            onAddToCart={handleAddSimpleToCart}
+            onOpenQuickView={(item) => {
+              // Convert partial to StoreProduct for modal
+              const found = allProducts.find((p) => p.name.toLowerCase() === item.name?.toLowerCase());
+              if (found) {
+                setSelectedProductForDetail(found);
+              } else {
+                setSelectedProductForDetail({
+                  id: item.id || 999,
+                  name: item.name || '',
+                  description: item.description || '',
+                  basePrice: item.basePrice || 0,
+                  compareAtPrice: null,
+                  badgeTop: 'Colección 2026',
+                  badgeBottom: null,
+                  stock: 12,
+                  isPublished: true,
+                  sku: `ND-${item.id || 999}`,
+                  sectionId: 1,
+                  images: (item.images as StoreProduct['images']) || [],
+                  variants: [
+                    { id: 1, label: '1.80m', price: item.basePrice || 0, stock: 5, isDefault: true },
+                    { id: 2, label: '2.10m', price: (item.basePrice || 0) + 120000, stock: 4, isDefault: false },
+                    { id: 3, label: '2.40m', price: (item.basePrice || 0) + 250000, stock: 3, isDefault: false },
+                  ],
+                });
+              }
+            }}
           />
+
+          {/* Section 3: La Diferencia Navidad David */}
+          <BrandDifferenceSection />
+
+          {/* Section 4: Showroom Bogotá */}
+          <ShowroomSection />
+
+          {/* Section 5: Footer Oficial */}
+          <CommercialFooter />
         </div>
+        {/* END: Quick Features Footer Strip */}
+      </div>
+      {/* END: Outer Frame Presentation Context */}
 
-        {/* SECCIONES Y CATÁLOGO COMPLETO DE PRODUCTOS */}
-        {visibleSections.every((s) => s.products.length === 0) ? (
-          <div className="text-center py-20">
-            <span className="material-symbols-outlined text-5xl text-slate-500">search_off</span>
-            <p className="text-base font-bold text-slate-300 mt-2">
-              No encontramos productos que coincidan con &quot;{searchQuery}&quot;
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setActiveSectionSlug('all');
-              }}
-              className="mt-4 px-5 py-2.5 rounded-full bg-[#22c55e] text-[#03170e] text-xs font-bold shadow-md hover:bg-[#16a34a] transition-colors"
-            >
-              Restablecer búsqueda y ver todo el catálogo
-            </button>
-          </div>
-        ) : (
-          visibleSections.map((section, idx) => (
-            <DynamicSectionGrid
-              key={section.id}
-              section={section}
-              index={idx}
-              onAddToCart={handleAddToCart}
-              onOpenQuickView={(prod) => setSelectedProductForDetail(prod)}
-            />
-          ))
-        )}
-      </main>
-
-      {/* FOOTER */}
-      <Footer />
-
-      {/* MODAL DETALLE DE PRODUCTO CON ZOOM INTERACTIVO */}
+      {/* MODAL DETALLE DE PRODUCTO */}
       <ProductDetailModal
         product={selectedProductForDetail}
         onClose={() => setSelectedProductForDetail(null)}
@@ -237,10 +190,13 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
         products={allProducts}
-        onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
+        onSelectProduct={(prod) => {
+          setIsSearchModalOpen(false);
+          setSelectedProductForDetail(prod);
+        }}
       />
 
-      {/* BOTÓN FLOTANTE OFICIAL DE WHATSAPP CON PULSO VERDE */}
+      {/* BOTÓN FLOTANTE OFICIAL DE WHATSAPP */}
       <WhatsAppFloatingButton />
 
       {/* DRAWER CARRITO DE COMPRAS */}

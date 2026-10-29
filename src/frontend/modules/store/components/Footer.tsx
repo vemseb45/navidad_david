@@ -40,7 +40,7 @@ export function Footer() {
             Bogotá, D.C. - Colombia
           </p>
           <p className="text-xs text-[#ffe088] font-semibold">
-            🎄 Modalidad "Ir por el arbolito" disponible en el checkout.
+            🎄 Modalidad &quot;Ir por el arbolito&quot; disponible en el checkout.
           </p>
         </div>
 

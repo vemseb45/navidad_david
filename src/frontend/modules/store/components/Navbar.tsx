@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { StoreSection } from '@/types/domain.types';
 import { Menu, X, Search, ShoppingBag, TreePine, Phone, Sparkles } from 'lucide-react';
 
@@ -57,7 +58,7 @@ export function Navbar({
         </div>
 
         {/* LOGO OFICIAL - AL PRESIONARLO DIRIGE DIRECTAMENTE AL LOGIN ADMINISTRATIVO */}
-        <a
+        <Link
           href="/admin"
           title="Navidad David (Acceso Administrativo)"
           className="flex items-center gap-2 sm:gap-3 shrink-0 group focus:outline-none"
@@ -77,7 +78,7 @@ export function Navbar({
               Árboles de Navidad
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* NAVEGACIÓN DESKTOP: REDIRIGE / DESPLAZA SIN OCULTAR CATÁLOGO */}
         <nav className="hidden lg:flex items-center gap-6">
@@ -150,9 +151,15 @@ export function Navbar({
         </div>
       </div>
 
-      {/* MENÚ MÓVIL DESPLEGABLE DARK LUXURY */}
+      {/* MENÚ MÓVIL DESPLEGABLE DARK LUXURY CON BACKDROP */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#03170e]/98 backdrop-blur-md border-b border-white/10 shadow-2xl animate-in slide-in-from-top duration-200 px-4 py-4 space-y-3 text-white">
+        <>
+          <div
+            className="fixed inset-0 top-20 bg-black/60 backdrop-blur-xs z-30 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Cerrar menú"
+          />
+          <div className="relative z-40 lg:hidden bg-[#03170e]/98 backdrop-blur-md border-b border-white/10 shadow-2xl animate-in slide-in-from-top duration-200 px-4 py-4 space-y-3 text-white">
           <div className="text-[10px] font-bold uppercase tracking-widest text-[#ffe088] px-2">
             Colecciones Navideñas 2026
           </div>
@@ -204,6 +211,7 @@ export function Navbar({
             </a>
           </div>
         </div>
+        </>
       )}
     </header>
   );

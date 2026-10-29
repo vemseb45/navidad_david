@@ -30,7 +30,7 @@ export function CartDrawer({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-white h-full p-6 flex flex-col justify-between shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
+      <div className="w-full sm:max-w-md bg-white h-full p-4 sm:p-6 pb-7 sm:pb-6 flex flex-col justify-between shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
         {/* HEADER */}
         <div className="flex items-center justify-between border-b border-[#e4e2de] pb-4">
           <div className="flex items-center gap-2">
@@ -106,26 +106,26 @@ export function CartDrawer({
 
                 {/* CONTROLES DE CANTIDAD */}
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <div className="flex items-center bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="flex items-center bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
                     <button
                       onClick={() => onUpdateQuantity(item.productId, item.quantity - 1, item.variantId)}
-                      className="w-6 h-6 flex items-center justify-center text-xs font-bold hover:bg-gray-100"
+                      className="w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center text-xs font-bold hover:bg-gray-100 active:bg-gray-200"
                     >
                       -
                     </button>
-                    <span className="w-6 text-center text-xs font-bold text-[#002718]">
+                    <span className="w-6 sm:w-6 text-center text-xs font-bold text-[#002718]">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => onUpdateQuantity(item.productId, item.quantity + 1, item.variantId)}
-                      className="w-6 h-6 flex items-center justify-center text-xs font-bold hover:bg-gray-100"
+                      className="w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center text-xs font-bold hover:bg-gray-100 active:bg-gray-200"
                     >
                       +
                     </button>
                   </div>
                   <button
                     onClick={() => onRemoveItem(item.productId, item.variantId)}
-                    className="text-[10px] text-red-600 font-semibold hover:underline"
+                    className="text-[10px] text-red-600 font-semibold hover:underline p-1"
                   >
                     Eliminar
                   </button>

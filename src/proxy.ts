@@ -51,7 +51,7 @@ function applySecurityHeaders(response: NextResponse): void {
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.bold.co https://*.bold.co",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' blob: data: https://*.bold.co https://images.unsplash.com",
+    "img-src 'self' blob: data: https://*.bold.co https://images.unsplash.com https://*.googleusercontent.com https://lh3.googleusercontent.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "connect-src 'self' https://checkout.bold.co https://*.bold.co https://api.bold.co",
     "frame-src 'self' https://checkout.bold.co https://*.bold.co",

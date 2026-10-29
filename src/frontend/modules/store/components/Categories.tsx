@@ -43,25 +43,25 @@ export function Categories({ onSelectCategory }: { onSelectCategory: (slug: stri
   return (
     <section id="categorias" className="py-10 sm:py-14 bg-[#03170e] scroll-mt-20 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-7 sm:mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#08281a] border border-[#22c55e]/30 text-[#bfedd2] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-2">
+        <div className="text-center mb-6 sm:mb-10">
+          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-[#08281a] border border-[#22c55e]/30 text-[#bfedd2] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-1.5 sm:mb-2">
             <Sparkles size={12} className="text-[#ffe088]" />
             <span>Colecciones Navideñas 2026</span>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-bold">
+          <h2 className="font-serif text-xl sm:text-3xl lg:text-4xl text-white font-bold">
             Encuentra el Árbol Ideal para tu Hogar
           </h2>
-          <p className="text-xs sm:text-sm text-[#c1c8c1] mt-1.5 max-w-xl mx-auto font-light">
+          <p className="text-xs sm:text-sm text-[#c1c8c1] mt-1 max-w-xl mx-auto font-light">
             Selecciona una colección para ir directamente a los modelos disponibles:
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
           {CATEGORIES_DATA.map((cat) => (
             <div
               key={cat.id}
               onClick={() => onSelectCategory(cat.slug)}
-              className="group cursor-pointer p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#08281a] border border-white/10 hover:border-[#ffe088]/40 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
+              className="group cursor-pointer p-3 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#08281a] border border-white/10 hover:border-[#ffe088]/40 shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
             >
               <div>
                 <div className="relative overflow-hidden rounded-2xl aspect-[4/3] w-full mx-auto mb-3.5 bg-[#02130b] shadow-inner">

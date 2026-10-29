@@ -73,7 +73,9 @@ export function GuestCheckoutModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white rounded-t-[28px] sm:rounded-2xl max-w-lg w-full p-4 sm:p-6 shadow-2xl max-h-[94vh] sm:max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+      <div className="bg-white rounded-t-[28px] sm:rounded-2xl max-w-lg w-full p-4 sm:p-6 pb-8 sm:pb-6 shadow-2xl max-h-[92dvh] sm:max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+        {/* INDICADOR TÁCTIL MÓVIL */}
+        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden" />
         {orderConfirmation ? (
           <div className="text-center py-6 space-y-4">
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 mx-auto flex items-center justify-center font-bold text-3xl">

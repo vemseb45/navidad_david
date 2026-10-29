@@ -50,11 +50,11 @@ export function SearchModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-3 sm:pt-20 p-2.5 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-[#e4e2de] overflow-hidden"
+        className="w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-[#e4e2de] overflow-hidden max-h-[88dvh] sm:max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* BARRA DE ENTRADA */}

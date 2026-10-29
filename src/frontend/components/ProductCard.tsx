@@ -133,13 +133,13 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
 
         {/* PRECIO Y ACCIONES */}
         <div className="pt-1.5 sm:pt-2 border-t border-white/10 flex flex-col gap-1.5 sm:gap-2">
-          <div className="flex items-baseline justify-between gap-1">
-            <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
-              <span className="text-sm sm:text-lg lg:text-xl font-bold text-[#ffe088]">
+          <div className="flex items-center justify-between gap-1">
+            <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap min-w-0">
+              <span className="text-xs sm:text-lg lg:text-xl font-bold text-[#ffe088] truncate">
                 ${currentPrice.toLocaleString('es-CO')}
               </span>
               {product.compareAtPrice && Number(product.compareAtPrice) > currentPrice && (
-                <span className="text-[10px] sm:text-xs text-slate-400 line-through">
+                <span className="text-[9px] sm:text-xs text-slate-400 line-through truncate">
                   ${Number(product.compareAtPrice).toLocaleString('es-CO')}
                 </span>
               )}
@@ -150,7 +150,7 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               title="Preguntar por WhatsApp"
-              className="text-[#22c55e] hover:text-[#4ade80] p-1 sm:p-1.5 rounded-full hover:bg-white/5 transition-colors shrink-0"
+              className="text-[#22c55e] hover:text-[#4ade80] p-1 sm:p-1.5 rounded-full hover:bg-white/10 transition-colors shrink-0"
             >
               <MessageCircle className="w-4 h-4 sm:w-4 sm:h-4" />
             </a>
@@ -159,7 +159,7 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
           <button
             type="button"
             onClick={handleAdd}
-            className="w-full py-2 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-[#03170e] text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer"
+            className="w-full min-h-[36px] sm:min-h-[40px] py-1.5 sm:py-2.5 px-2 rounded-lg sm:rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-[#03170e] text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer"
           >
             {isAdded ? (
               <>

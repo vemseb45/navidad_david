@@ -27,40 +27,40 @@ export function DynamicSectionGrid({
   return (
     <section
       id={section.slug}
-      className={`w-full py-8 sm:py-14 scroll-mt-24 sm:scroll-mt-32 text-white ${
+      className={`w-full py-6 sm:py-14 scroll-mt-28 sm:scroll-mt-36 text-white ${
         index % 2 === 1 ? 'bg-[#041d12]/60' : 'bg-[#03170e]'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 md:px-12">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 md:px-12">
         {/* HEADER DE LA SECCIÓN */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-3 mb-4 sm:mb-6 border-b border-white/10 pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 sm:gap-3 mb-3.5 sm:mb-6 border-b border-white/10 pb-2.5 sm:pb-4">
           <div>
             {section.badgeText && (
               <div className="flex items-center gap-1.5 mb-0.5 sm:mb-1">
-                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#ef4444]"></span>
-                <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#ffe088] font-bold">
+                <span className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-[#ef4444]"></span>
+                <span className="text-[9px] sm:text-[11px] uppercase tracking-widest text-[#ffe088] font-bold">
                   {section.badgeText}
                 </span>
               </div>
             )}
-            <h2 className="font-serif text-xl sm:text-3xl text-white font-bold">
+            <h2 className="font-serif text-lg sm:text-3xl text-white font-bold">
               {section.title}
             </h2>
             {section.subtitle && (
-              <p className="text-xs sm:text-sm text-[#c1c8c1] mt-0.5 font-light">{section.subtitle}</p>
+              <p className="text-[11px] sm:text-sm text-[#c1c8c1] mt-0.5 font-light">{section.subtitle}</p>
             )}
           </div>
-          <span className="text-[11px] sm:text-xs font-semibold text-[#ffe088]">
+          <span className="text-[10px] sm:text-xs font-semibold text-[#ffe088]">
             {filteredProducts.length} artículo(s) disponibles
           </span>
         </div>
 
         {/* SUBCATEGORÍAS FILTERABLE_CHIPS */}
         {section.subcategories && section.subcategories.length > 0 && (
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-4 mb-3 sm:mb-4 no-scrollbar">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 sm:pb-4 mb-3 sm:mb-4 no-scrollbar scroll-smooth">
             <button
               onClick={() => setActiveSubcatSlug('all')}
-              className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+              className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 activeSubcatSlug === 'all'
                   ? 'bg-[#22c55e] text-[#03170e] font-bold shadow-xs'
                   : 'bg-[#08281a] text-slate-300 hover:text-white border border-white/10'
@@ -72,7 +72,7 @@ export function DynamicSectionGrid({
               <button
                 key={sub.id}
                 onClick={() => setActiveSubcatSlug(sub.slug)}
-                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                   activeSubcatSlug === sub.slug
                     ? 'bg-[#22c55e] text-[#03170e] font-bold shadow-xs'
                     : 'bg-[#08281a] text-slate-300 hover:text-white border border-white/10'
@@ -90,7 +90,7 @@ export function DynamicSectionGrid({
             No hay productos disponibles en esta selección.
           </p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
