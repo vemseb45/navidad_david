@@ -5,6 +5,7 @@ import { StoreProduct, StoreVariant } from '@/types/domain.types';
 import { Eye, ShoppingBag, Check, TreePine, MessageCircle } from 'lucide-react';
 import { formatCOP } from '@/frontend/shared/formatters';
 import { OFFICIAL_ASSETS, WHATSAPP_CONTACT } from '@/frontend/shared/constants';
+import { shootChristmasCoins } from '@/frontend/shared/christmasCoins';
 
 interface ProductCardProps {
   product: StoreProduct;
@@ -22,9 +23,11 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
   const primaryImage = product.images[0]?.storagePath || OFFICIAL_ASSETS.TREE_TRADITIONAL;
   const hoverImage = product.images[1]?.storagePath || primaryImage;
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const handleAdd = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    onAddToCart(product, selectedVariant);
+    shootChristmasCoins(e.currentTarget, () => {
+      onAddToCart(product, selectedVariant);
+    });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1200);
   };

@@ -5,6 +5,7 @@ import { StoreProduct, StoreVariant } from '@/types/domain.types';
 import { X, TreePine, ShoppingBag, Truck, Sparkles, MessageCircle, Check } from 'lucide-react';
 import { formatCOP } from '@/frontend/shared/formatters';
 import { OFFICIAL_ASSETS, WHATSAPP_CONTACT } from '@/frontend/shared/constants';
+import { shootChristmasCoins } from '@/frontend/shared/christmasCoins';
 
 interface ProductDetailModalProps {
   product: StoreProduct | null;
@@ -75,10 +76,21 @@ export function ProductDetailModal({
     imgRef.current.style.transformOrigin = `${x}% ${y}%`;
   };
 
-  const handleAdd = () => {
-    onAddToCart(product, selectedVariant);
+  const handleAdd = (e: React.MouseEvent<HTMLElement>) => {
+    shootChristmasCoins(e.currentTarget, () => {
+      onAddToCart(product, selectedVariant);
+    });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1500);
+  };
+
+  const handleBuy = (e: React.MouseEvent<HTMLElement>) => {
+    shootChristmasCoins(e.currentTarget, () => {
+      if (onBuyNow) {
+        onBuyNow(product, selectedVariant);
+      }
+      onClose();
+    });
   };
 
   const whatsappMessage = `¡Hola Navidad David! 🎄 Me interesa información sobre el producto "${product.name}"${
@@ -259,13 +271,10 @@ export function ProductDetailModal({
               {onBuyNow && (
                 <button
                   type="button"
-                  onClick={() => {
-                    onBuyNow(product, selectedVariant);
-                    onClose();
-                  }}
-                  className="min-h-[44px] py-2.5 sm:py-3.5 px-5 sm:px-6 rounded-full bg-brand-gold hover:bg-[#d4a352] text-black text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-glow active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer font-display"
+                  onClick={handleBuy}
+                  className="min-h-[44px] py-2.5 sm:py-3.5 px-5 sm:px-6 rounded-full bg-white hover:bg-stone-100 text-stone-950 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer font-display"
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 text-stone-950" />
                   <span>Comprar</span>
                 </button>
               )}

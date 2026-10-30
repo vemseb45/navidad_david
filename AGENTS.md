@@ -137,7 +137,7 @@ El smartphone es el **dispositivo principal** de los clientes y administradores.
 * **Viewport Oficial**: Configurado en `src/app/layout.tsx` con `width=device-width, initial-scale=1, maximum-scale=5`.
 * **Marco Superior y Hero Comercial ([CommercialHero.tsx](file:///src/frontend/modules/store/components/CommercialHero.tsx))**: Banner fotográfico familiar festivo en alta resolución (`hero_familia.png`/`.webp`), logo corporativo `Logo_david_original.png` (enlace de acceso al panel administrativo), barra de navegación fija persistente al desplazarse (`fixed top-0 inset-x-0 z-50` con backdrop blur `#121417`), 6 enlaces principales de navegación y botón de carrito de compras glass-pill con badge de conteo (barra de búsqueda e icono de usuario eliminados para mantener un diseño equilibrado, limpio y sin espacios vacíos).
 * **Calculador de Espacio ([HeightGuideSection.tsx](file:///src/frontend/modules/store/components/HeightGuideSection.tsx))**: Selector interactivo de alturas (`1.80m`, `2.10m`, `2.40m`) para adecuar el árbol a los techos residenciales estándar de Colombia.
-* **Colección Dos Tradiciones ([CollectionSection.tsx](file:///src/frontend/modules/store/components/CollectionSection.tsx))**: Segmentación interactiva entre Pinos Tradicionales Canadienses (`arbol_tradicional.png`) y Árboles con Fibra Óptica Micro-LED (`arbol_fibra.png`). Grilla responsive (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6`).
+* **Colección Dos Tradiciones ([CollectionSection.tsx](file:///src/frontend/modules/store/components/CollectionSection.tsx))**: Segmentación interactiva entre Pinos Tradicionales Canadienses (`arbol_tradicional.png`) y Árboles con Fibra Óptica Micro-LED (`arbol_fibra.png`). Grilla responsive (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6`). Botones "Comprar" estrictamente blancos (`bg-white text-stone-950`) que disparan la animación festiva de monedas del reno de Santa Claus (`shootChristmasCoins`) hacia el carrito sin redirigir a WhatsApp.
 * **Tarjetas de Producto ([ProductCard.tsx](file:///src/frontend/components/ProductCard.tsx))**:
   * Proporción vertical **3:4** con badges compactos.
   * Selector interactivo de altura en formato chip que no desborda la tarjeta.
@@ -152,6 +152,11 @@ El smartphone es el **dispositivo principal** de los clientes y administradores.
   * Diseño Dark Luxury en `#16181c` tipo Bottom-Sheet en móvil (`rounded-t-[28px] sm:rounded-3xl`).
   * Visor de zoom interactivo en imagen con miniaturas seleccionables en anillo dorado.
   * Selector de variantes de altura en chips dorados y botones de acción rápida ("Agregar" y "Comprar").
+  * **Botón "Comprar" Blanco & Animación Navideña**: Botón "Comprar" estrictamente en blanco (`bg-white text-stone-950`). Tanto "Agregar" como "Comprar" activan la animación de monedas doradas con el reno de Santa Claus (`shootChristmasCoins`) que vuelan hacia el carrito; "Comprar" dirige al carrito y abre de inmediato la orden.
+* **Animación de Monedas Festivas del Reno de Santa Claus ([christmasCoins.ts](file:///src/frontend/shared/christmasCoins.ts))**:
+  * Motor nativo con Web Animations API (60fps, aceleración GPU).
+  * Monedas doradas festivas con silueta del reno de Santa Claus y nariz roja resplandeciente de Rodolfo.
+  * Trayectoria parabólica ascendente hacia `#header-cart-button` con rebote elástico y destello estelar ✨ al impactar.
 * **Modal de Búsqueda Predictiva ([SearchModal.tsx](file:///src/frontend/components/SearchModal.tsx))**:
   * Interfaz modal en `#16181c` con búsqueda instantánea por SKU, estilo y nombre de árbol.
   * Navegación fluida y enlaces directos al visor de detalle rápido.

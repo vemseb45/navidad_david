@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { StoreProduct } from '@/types/domain.types';
 import { formatCOP } from '@/frontend/shared/formatters';
-import { OFFICIAL_ASSETS, WHATSAPP_CONTACT } from '@/frontend/shared/constants';
+import { OFFICIAL_ASSETS } from '@/frontend/shared/constants';
+import { shootChristmasCoins } from '@/frontend/shared/christmasCoins';
 
 interface CollectionSectionProps {
   onAddToCart?: (productName: string, price: number, imageUrl: string) => void;
@@ -99,10 +100,13 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
 
   const filteredTrees = filter === 'fibra' ? trees.filter((t) => t.isFibra) : trees;
 
-  const handleBuyClick = (item: TreeItem) => {
-    if (onAddToCart) {
-      onAddToCart(item.name, item.priceNum, item.image);
-    }
+  const handleBuyClick = (item: TreeItem, e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    shootChristmasCoins(e.currentTarget, () => {
+      if (onAddToCart) {
+        onAddToCart(item.name, item.priceNum, item.image);
+      }
+    });
   };
 
   const handleOpenQuickView = (item: TreeItem) => {
@@ -124,16 +128,6 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
       ],
       variants: [],
     });
-  };
-
-  const getBuyButtonClass = (item: TreeItem): string => {
-    if (item.isFibra) {
-      return 'bg-emerald-400 text-black hover:brightness-110';
-    }
-    if (item.id === 1) {
-      return 'bg-brand-gold text-black hover:brightness-110';
-    }
-    return 'bg-white text-stone-950 hover:bg-stone-200';
   };
 
   return (
@@ -235,18 +229,14 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
                     </span>
                   </div>
 
-                  <a
-                    onClick={() => handleBuyClick(item)}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-xs active:scale-95 transition-all shadow-lg cursor-pointer ${getBuyButtonClass(
-                      item
-                    )}`}
-                    href={WHATSAPP_CONTACT.buildUrl(item.waText)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={(e) => handleBuyClick(item, e)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs active:scale-95 transition-all shadow-md cursor-pointer bg-white text-stone-950 hover:bg-stone-100"
                   >
-                    <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
+                    <span className="material-symbols-outlined text-[16px] text-stone-950">shopping_bag</span>
                     <span>Comprar</span>
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

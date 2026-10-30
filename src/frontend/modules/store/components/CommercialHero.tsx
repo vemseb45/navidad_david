@@ -210,6 +210,8 @@ export function CommercialHero({
           <div className="flex items-center space-x-2.5 sm:space-x-3">
             {/* Shopping Cart Button */}
             <button
+              id="header-cart-button"
+              data-purpose="cart-button"
               onClick={onOpenCart}
               aria-label={`Carrito de compras (${cartCount} productos)`}
               title="Abrir Carrito"

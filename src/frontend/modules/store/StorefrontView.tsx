@@ -85,7 +85,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
 
   const handleBuyNow = (product: StoreProduct, variant?: StoreVariant) => {
     handleAddToCart(product, variant);
-    setIsCheckoutOpen(true);
+    setIsCartOpen(true);
   };
 
   const handleRemoveFromCart = (productId: number, variantId?: number) => {
