@@ -131,22 +131,30 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
 
 ---
 
-## 5. Diseño del Frontend (Mobile-First UX/UI Inspirado en Nana.col)
+## 5. Diseño del Frontend (Mobile-First UX/UI Inspirado en Nana.col y Dark Luxury)
 
 El smartphone es el **dispositivo principal** de los clientes y administradores. Toda la interfaz debe respetar estrictamente:
 * **Viewport Oficial**: Configurado en `src/app/layout.tsx` con `width=device-width, initial-scale=1, maximum-scale=5`.
-* **Navbar Móvil ([Navbar.tsx](file:///src/frontend/modules/store/components/Navbar.tsx))**: Altura compacta `h-16`, ribbon superior optimizado, botón hamburguesa con drawer táctil desplegable, buscador predictivo y carrito accesible con el pulgar.
-* **Barra de Secciones Sticky ([DynamicSectionBar.tsx](file:///src/frontend/modules/store/components/DynamicSectionBar.tsx))**: Anclada con `top-[64px] sm:top-24` para no tapar contenido en teléfonos, con scroll horizontal fluido y sin barras de desplazamiento intrusivas.
-* **Grilla de Catálogo Móvil ([DynamicSectionGrid.tsx](file:///src/frontend/modules/store/components/DynamicSectionGrid.tsx))**: Grilla de **2 columnas en teléfonos móviles** (`grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6`), permitiendo ver pares de árboles sin scroll excesivo.
+* **Marco Superior y Hero Comercial ([CommercialHero.tsx](file:///src/frontend/modules/store/components/CommercialHero.tsx))**: Banner fotográfico familiar festivo en alta resolución (`hero_familia.png`/`.webp`), logo corporativo `Logo_david_original.png`, badges dorados de temporada, árbol 3D interactivo en rotación continua y barra de navegación compacta con acceso al carrito y búsqueda predictiva.
+* **Calculador de Espacio ([HeightGuideSection.tsx](file:///src/frontend/modules/store/components/HeightGuideSection.tsx))**: Selector interactivo de alturas (`1.80m`, `2.10m`, `2.40m`) para adecuar el árbol a los techos residenciales estándar de Colombia.
+* **Colección Dos Tradiciones ([CollectionSection.tsx](file:///src/frontend/modules/store/components/CollectionSection.tsx))**: Segmentación interactiva entre Pinos Tradicionales Canadienses (`arbol_tradicional.png`) y Árboles con Fibra Óptica Micro-LED (`arbol_fibra.png`). Grilla responsive (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6`).
 * **Tarjetas de Producto ([ProductCard.tsx](file:///src/frontend/components/ProductCard.tsx))**:
   * Proporción vertical **3:4** con badges compactos.
   * Selector interactivo de altura en formato chip que no desborda la tarjeta.
   * Botón "Agregar" táctil y botón directo a WhatsApp.
   * Al tocar la tarjeta o foto, abre inmediatamente el modal de detalle rápido.
-* **Modal de Detalle Táctil ([ProductDetailModal.tsx](file:///src/frontend/components/ProductDetailModal.tsx))**:
-  * Diseño tipo Bottom-Sheet en móvil (`rounded-t-[32px] sm:rounded-3xl`).
-  * Galería cuadrada compacta (`aspect-square max-h-56`) para dejar espacio visible a los precios y variantes.
-  * **Barra de compra sticky** fija en la parte inferior de la pantalla para compra en 1 toque.
+* **Carrito Desplegable ([CartDrawer.tsx](file:///src/frontend/components/CartDrawer.tsx))**:
+  * Diseño Dark Luxury en `#16181c` con bordes `border-white/10` y tarjetas `glass-card`.
+  * Barra de progreso de envío gratis (meta: $150.000 COP).
+  * **REGLA ESTRICTA**: Prohibido incluir textos de impuestos ni recargos ("Impuestos y costos de envío (si aplican) calculados al checkout").
+  * **Botón Oficial**: Botón de alta gama en oro `brand-gold` con texto estrictamente **"Pagar"** (sin frases largas como "Proceder al Pago Seguro (Sin Registro)").
+* **Modal de Detalle Táctil ([ProductDetailModal.tsx](file:///src/frontend/components/ProductDetailModal.tsx)):**
+  * Diseño Dark Luxury en `#16181c` tipo Bottom-Sheet en móvil (`rounded-t-[28px] sm:rounded-3xl`).
+  * Visor de zoom interactivo en imagen con miniaturas seleccionables en anillo dorado.
+  * Selector de variantes de altura en chips dorados y botones de acción rápida ("Agregar" y "Comprar").
+* **Modal de Búsqueda Predictiva ([SearchModal.tsx](file:///src/frontend/components/SearchModal.tsx))**:
+  * Interfaz modal en `#16181c` con búsqueda instantánea por SKU, estilo y nombre de árbol.
+  * Navegación fluida y enlaces directos al visor de detalle rápido.
 * **Formularios & Prevención de Auto-Zoom iOS ([GuestCheckoutModal.tsx](file:///src/frontend/components/GuestCheckoutModal.tsx))**: Todos los inputs usan tamaño de fuente mínimo de 16px (`text-base sm:text-sm`) para evitar que Safari en iPhone haga zoom involuntario al enfocar campos.
 * **Panel de Control Administrativo ([AdminDashboardView.tsx](file:///src/frontend/modules/admin/AdminDashboardView.tsx) & [AdminSidebar.tsx](file:///src/frontend/modules/admin/components/AdminSidebar.tsx))**: Header móvil con botón hamburguesa y sidebar deslizable (off-canvas drawer) con backdrop, permitiendo gestionar ventas y productos con total comodidad desde el celular.
 
@@ -162,6 +170,11 @@ El smartphone es el **dispositivo principal** de los clientes y administradores.
 > 5. **NO** eludir la validación con Zod en los controladores del backend.
 > 6. **NO** usar UUID para productos, imágenes o catálogo. ÚNICAMENTE `tb_users` debe usar `UUID`. Las otras 9 tablas deben usar claves numéricas enteras autoincrementables (`Int @id @default(autoincrement())`).
 > 7. **NO** comitear migraciones de Prisma al repositorio Git (deben estar en `.gitignore`).
+> 8. **NO** incluir textos o referencias a impuestos ("Impuestos y costos de envío (si aplican) calculados al checkout") en el carrito ni en modales.
+> 9. **NO** usar textos largos o redundantes en el botón de pago del carrito; debe decir estrictamente **"Pagar"** con estética minimalista.
+> 10. **NO** mezclar fondos blancos o tarjetas claras que desentonen con la estética Dark Luxury (`#121417`, `#16181c`, `brand-gold: #E5B869`).
+> 11. **NO** renderizar imágenes duplicadas o genéricas sin relación con árboles en la tienda pública. Emplear exclusivamente los activos oficiales: `hero_familia.png`/`.webp` (imagen principal del Hero), `hero_familia_2.png`/`.webp`, `hero_familia_3.png`/`.webp`, `hero_familia_4.png`/`.webp` (carrusel interactivo de 3 estilos), `arbol_tradicional.png`/`.webp`, `arbol_fibra.png`/`.webp` y `Logo_david_original.png`.
+> 12. **NO** mostrar badges invasivos ('Activo', 'Más vendido', 'Micro-LED', 'Nieve Realista') sobre las fotos de los recuadros ni contadores numéricos (ej. `01 / 04`, `02 / 04`) en el carrusel del Hero. El cliente percibe una experiencia visual limpia y fotográfica de las 3 colecciones destacadas, acompañada de una barra blanca de navegación sutil de 3 posiciones (`w-1/3 bg-white`) que marca estrictamente las 3 colecciones (la foto principal `hero_familia` no tiene sección en la barra, aunque se puede navegar a ella con los botones) y flechas circulares de control.
 
 ---
 
@@ -290,40 +303,66 @@ Para evitar pantallas en blanco, parpadeos y problemas de autorización por cook
 
 ---
 
-## 11. Estética y Sistema Visual del Storefront (Dark Luxury Christmas Atelier)
+## 11. Estética y Sistema Visual del Storefront (Dark Luxury Christmas 2026)
 
-La tienda pública implementa una estética festiva nocturna de alta gama inspirada en el coleccionismo botánico:
+La tienda pública implementa la estética de alta gama **Dark Luxury Christmas** diseñada exclusivamente para la venta de árboles navideños de lujo:
 
-* **Paleta de Color Oficial**:
-  * **Fondo Principal**: Verde pino imperial nocturno (`#03170e`).
-  * **Superficies y Cards**: Terciopelo verde oscuro (`#062115`, `#08281a`) con bordes sutiles en `border-white/10`.
-  * **Acentos Lumínicos**:
-    * Oro Cálido Navideño (`#ffe088`, `#fde047`): Precios, estrellas, detalles de ribbon y badges.
-    * Verde Esmeralda Festivo (`#22c55e`, `#bfedd2`): Botones de acción, indicadores activos y micro-filamentos.
-    * Rojo Rubí Tradicional (`#b90d1c`, `#ef4444`): Badges destacados y CTA principal de la colección.
-    * Textos Secundarios: Gris plata sutil (`#c1c8c1`, `#94a3b8`).
+* **Paleta de Color y Tokens Tailwind**:
+  * **Fondo Principal del Viewport**: `#121417` (negro carbón profundo con acentos sutiles).
+  * **Superficies, Contenedores y Modales**: `#16181c` con bordes finos `border-white/10`.
+  * **Efecto de Cristal Festivo**: Clases utilitarias `.glass-card` y `.glass-pill` (`backdrop-filter: blur(20px)`, fondo `rgba(22, 24, 28, 0.68)` y hover con realce dorado).
+  * **Oro Cálido de Marca (`brand-gold: #E5B869`)**: Precios principales, estrellas de calificación, badges de alta exclusividad, anillos de selección y botones CTA principales.
+  * **Rojo Rubí (`brand-ruby: #B91C1C`)**: Badges de urgencia y acentos de temporada.
+  * **Verde Esmeralda Nocturno (`brand-emerald: #0B291B` / `#22c55e`)**: Acentos lumínicos de fibra óptica y asesoría WhatsApp.
+  * **Tipografías Oficiales**: `Outfit` (`font-display` para títulos editoriales, marcas de precio y botones) y `Plus Jakarta Sans` (`font-sans` para textos informativos, fichas técnicas y modales).
 
-### Componentes de la Tienda
-1. **`Navbar.tsx`**: Ribbon superior festivo (`#0b281b`), barra principal con glassmorphism oscuro (`#03170e/95`), acceso al login de administración al tocar el logo, buscador predictivo, asesoría por WhatsApp y carrito accesible.
-2. **`FeaturesBanner.tsx`**: 4 pilares de marca con tarjetas en `#08281a`, iconos con resplandor neón festivo y tipografía contrastada.
-3. **`Categories.tsx`**: Navegación visual directa hacia las colecciones con tarjetas en `#08281a` y enlaces que desplazan suavemente sin ocultar el resto del catálogo.
-4. **`DynamicSectionBar.tsx`**: Barra de subsecciones sticky en `#062115/95` con botones de filtro rápido que desplazan suavemente.
-5. **`DynamicSectionGrid.tsx` & `ProductCard.tsx`**: Cuadrícula de 2 columnas en móviles y 4 en desktop, tarjetas en `#08281a`, selectores de altura táctiles y compra en 1 clic.
+### Arquitectura de Componentes de la Tienda (`src/frontend/modules/store/components/`)
+1. **`CommercialHero.tsx`**: Marco comercial de alta gama con carrusel interactivo de 4 escenas fotográficas en el fondo (`hero_familia.png` principal, `hero_familia_2.png`, `hero_familia_3.png`, `hero_familia_4.png`), 3 recuadros flotantes inferiores que muestran estrictamente las 3 colecciones (`hero_familia_2.png`, `hero_familia_3.png`, `hero_familia_4.png` sin mostrar hero_familia en los recuadros), logo oficial (`Logo_david_original.png`), controles circulares de navegación limpios (sin textos de 'Activo' ni contadores numéricos '01 / 04') y acceso rápido al carrito y buscador.
+2. **`ChristmasTreeScene.tsx`**: Representación geométrica tridimensional del árbol de Navidad en rotación continua (24s por vuelta) compuesta por 180 nodos estelares interactivos, estrella apical dorada y partículas flotantes. Inicia automáticamente sin requerir intervención del usuario ni textos de arrastre.
+3. **`HeightGuideSection.tsx`**: Guía interactiva de proporciones y alturas (`1.80m`, `2.10m`, `2.40m`) diseñada para techos residenciales de apartamentos y casas en Colombia.
+4. **`CollectionSection.tsx`**: Catálogo segmentado en dos tradiciones botánicas: Pinos Tradicionales Canadienses (`arbol_tradicional.png`) y Árboles con Iluminación Fibra Óptica Micro-LED (`arbol_fibra.png`). Compra en 1 toque y enlace directo a WhatsApp.
+5. **`BrandDifferenceSection.tsx`**: 4 tarjetas de valor diferencial (Follaje Ultra Denso, Iluminación Cero Enredos, Estructura de Acero Reforzada y Envío a toda Colombia con Guía).
+6. **`ShowroomSection.tsx`**: Invitación a conocer los árboles en exhibición física en Bogotá y garantía de despacho nacional.
+7. **`CommercialFooter.tsx`**: Pie de página de lujo con enlaces corporativos, horarios de atención decembrina, pasarelas de pago y soporte directo.
 
 ---
 
-## 12. Efectos Interactivos del Hero (`Hero.tsx`)
+## 12. Reglas Estrictas del Carrito, Checkout y Modales
 
-* **Escala Proporcionada (100% de Zoom)**: Altura máxima de `720px` y escala de contenedor de `440px` de ancho por `420px-500px` de alto, optimizada para que el usuario no necesite alejar el zoom de su navegador.
-* **Constelación y Silueta del Árbol**:
-  * Silueta vectorial en capas de pino imperial escandinavo en degradado verde esmeralda profundo (`#082b1c` a `#010d08`).
-  * 38 nodos lumínicos asimétricos con la animación CSS `needle-glow` (`needleTwinkle`).
-  * Estrella dorada apical pulsante (`tree-star-anim`).
-* **Pirotecnia y Serpentinas Dinámicas Detrás del Árbol (Arquitectura en 3 Capas de Profundidad)**:
-  * **Capa 1 (Fondo `z-10`)**: Lienzo `<canvas>` acelerado por hardware a 60 FPS con motor de partículas (`RibbonParticle`, `SparkParticle`, `StarParticle`, estrictamente sin globos). **Se ubica detrás del árbol**.
-  * **Capa 2 (Frente `z-20`)**: El árbol navideño botánico (silueta de pino opaca, resplandor interactivo, constelación de 38 filamentos y estrella apical dorada). Actúa como plano frontal que oculta el origen de los fuegos y permite ver cómo los cohetes, chispas y serpentinas ascienden y estallan por detrás en el cielo nocturno.
-  * **Capa 3 (Interacción `z-30`)**: Plano de captura táctil y de cursor sobre el árbol (`treeContainerRef`, `onMouseMove={handleTreeMouseMove}`). Despacha coordenadas relativas al escenario (`heroRef`) hacia el canvas inferior sin bloquear la lectura ni los botones CTA de la columna editorial derecha.
-  * El efecto se activa **exclusivamente cuando el cursor interactúa con el árbol**, y se limpia de forma automática para garantizar un rendimiento óptimo de 60 FPS sin fugas de memoria.
+> [!IMPORTANT]
+> **El carrito de compras y los modales deben mantener una coherencia visual y de copy rigurosa con la landing page.**
+
+1. **Carrito de Compras (`CartDrawer.tsx`)**:
+   * Contenedor lateral oscuro (`#16181c` con `border-l border-white/10`).
+   * **REGLA ZERO-TAX**: Prohibido mostrar cualquier leyenda sobre impuestos ("Impuestos y costos de envío (si aplican) calculados al checkout").
+   * **BOTÓN ÚNICO**: El botón de checkout debe tener como texto estrictamente **"Pagar"** (en fondo `brand-gold`, texto negro, esquinas redondeadas completas `rounded-full`). No usar textos como "Proceder al Pago Seguro (Sin Registro)".
+2. **Modal de Detalle de Árboles (`ProductDetailModal.tsx`)**:
+   * Fondo oscuro (`#16181c`), visor de zoom con lupa interactiva al pasar el cursor o pulsar en móviles.
+   * Selector interactivo de variantes de altura en chips con borde dorado activo.
+   * Botón "Agregar" en vidrio y botón "Comprar" en dorado brillante que abre el checkout inmediato.
+3. **Modal de Checkout (`GuestCheckoutModal.tsx`)**:
+   * Checkout ágil sin registro previo; agrupa órdenes automáticamente por el email del cliente.
+   * Campos de formulario con tamaño de fuente mínimo de 16px (`text-base sm:text-sm`) para prevenir el zoom forzado de Safari en iOS.
+   * Integración directa con pasarela Bold (PSE, Tarjeta de Crédito, Tarjeta de Débito) y modalidad de entrega a Domicilio o "Ir por el arbolito".
+   * Botón directo: `Pagar $... COP` en botón dorado redondeado.
+4. **Modal de Búsqueda Predictiva (`SearchModal.tsx`)**:
+   * Búsqueda por coincidencia en vivo contra catálogo oficial en memoria. Cierre ágil con ESC o botón táctil.
+
+---
+
+## 13. Registro Histórico de Actualizaciones y Parámetros Obligatorios
+
+Este registro documenta las decisiones de diseño y cambios obligatorios para prevenir regresiones en futuras iteraciones:
+
+* **Octubre 2026 - Unificación Dark Luxury**:
+  * **Problema Previo**: La página principal tenía colores verdes esmeralda tradicionales y el carrito/modales utilizaban fondos blancos desalineados con el nuevo concepto de alta gama.
+  * **Solución Aplicada**: Migración integral a la paleta Dark Luxury (`#121417`, `#16181c`, `brand-gold: #E5B869`, `Outfit` y `Plus Jakarta Sans`).
+  * **Fotografía Oficial**: Eliminación de imágenes genéricas y duplicadas. Se fijaron como únicos activos de producto: `hero_familia.png` (banner familiar del Hero), `arbol_tradicional.png` (pinos tradicionales) y `arbol_fibra.png` (árboles de fibra óptica), todos optimizados en WebP con Sharp.
+  * **Simplificación del Carrito**: Supresión definitiva de menciones de impuestos y estandarización del botón en **"Pagar"**.
+  * **Depuración del Carrusel Hero**: Remoción de los badges de texto ("Activo", "Más vendido", "Micro-LED", "Nieve Realista") en las fotos de los 3 recuadros inferiores para una estética fotográfica limpia. Se implementa la barra de navegación blanca (`w-1/3 bg-white`) con 3 secciones exclusivas para las 3 colecciones destacadas (la imagen de portada `hero_familia` no ocupa ranura en la barra pero se recorre con los botones circulares), sin contadores numéricos invasivos (`01 / 04`).
+  * **Persistencia**: Todo nuevo modal, sección o componente añadido en el futuro DEBE cumplir con los tokens oscuros (`#16181c`, `border-white/10`, `brand-gold`) y mantener la experiencia mobile-first sin auto-zoom en iOS.
+
+---
 
 <!-- BEGIN:nextjs-agent-feedback -->
 

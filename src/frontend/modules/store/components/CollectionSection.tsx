@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { StoreProduct } from '@/types/domain.types';
+import { formatCOP } from '@/frontend/shared/formatters';
+import { OFFICIAL_ASSETS, WHATSAPP_CONTACT } from '@/frontend/shared/constants';
 
 interface CollectionSectionProps {
   onAddToCart?: (productName: string, price: number, imageUrl: string) => void;
@@ -21,7 +23,6 @@ interface TreeItem {
   reviews: string;
   description: string;
   sizes: string;
-  price: string;
   priceNum: number;
   waText: string;
 }
@@ -38,12 +39,11 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
       tag1Class: 'bg-brand-gold text-black text-[11px] font-bold px-2.5 py-1 rounded-full shadow',
       tag2: 'Follaje PE/PVC Ultra Denso',
       tag2Class: 'bg-black/60 backdrop-blur-md text-stone-200 text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10',
-      image: '/img/pino-canadiense-nevado.webp',
+      image: OFFICIAL_ASSETS.TREE_TRADITIONAL,
       rating: '4.9',
       reviews: '142',
       description: 'Silueta robusta de inspiración montañosa con ramas de memoria flexible y 1.200 puntas.',
       sizes: '1.80m / 2.10m / 2.40m',
-      price: '$620.000',
       priceNum: 620000,
       waText: 'Hola, deseo comprar el Pino Canadiense Frondoso',
     },
@@ -55,12 +55,11 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
       tag1Class: 'bg-emerald-500 text-black text-[11px] font-bold px-2.5 py-1 rounded-full shadow',
       tag2: 'Brillo Frío/Cálido Switch',
       tag2Class: 'bg-black/60 backdrop-blur-md text-emerald-200 text-[10px] font-medium px-2 py-0.5 rounded-full border border-emerald-500/20',
-      image: '/img/fibra-optica-cristal-glow.webp',
+      image: OFFICIAL_ASSETS.TREE_FIBER,
       rating: '5.0',
       reviews: '89',
       description: 'Puntas con filamentos lumínicos destellantes. Olvídate de enredar extensiones tradicionales.',
       sizes: '1.80m / 2.10m',
-      price: '$780.000',
       priceNum: 780000,
       waText: 'Hola, deseo adquirir el Starlight Fibra Optica',
     },
@@ -72,12 +71,11 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
       tag1Class: 'bg-white/20 backdrop-blur-md text-stone-100 text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20',
       tag2: 'Textura Algodón',
       tag2Class: 'bg-black/60 backdrop-blur-md text-stone-200 text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10',
-      image: '/img/artic-pine-nevado.webp',
+      image: OFFICIAL_ASSETS.TREE_TRADITIONAL,
       rating: '4.8',
       reviews: '64',
       description: 'Efecto nieve aterciopelada no volátil. Ramos con textura real y soporte metálico antideslizante.',
       sizes: '2.10m / 2.40m',
-      price: '$890.000',
       priceNum: 890000,
       waText: 'Hola, deseo comprar el Nevado Alpino Royal',
     },
@@ -89,12 +87,11 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
       tag1Class: 'bg-stone-800 text-stone-200 text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/10',
       tag2: 'Ideal Apartamento',
       tag2Class: 'bg-black/60 backdrop-blur-md text-stone-200 text-[10px] font-medium px-2 py-0.5 rounded-full border border-white/10',
-      image: '/img/noble-pine-clasico.webp',
+      image: OFFICIAL_ASSETS.TREE_FIBER,
       rating: '4.9',
       reviews: '53',
       description: 'Ideal para apartamentos y esquinas sin sacrificar opulencia ni densidad visual en ramas.',
       sizes: '1.60m / 1.80m / 2.00m',
-      price: '$540.000',
       priceNum: 540000,
       waText: 'Hola, deseo comprar el Silueta Slim',
     },
@@ -106,6 +103,37 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
     if (onAddToCart) {
       onAddToCart(item.name, item.priceNum, item.image);
     }
+  };
+
+  const handleOpenQuickView = (item: TreeItem) => {
+    if (!onOpenQuickView) return;
+    onOpenQuickView({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      basePrice: item.priceNum,
+      images: [
+        {
+          id: item.id,
+          storagePath: item.image,
+          altText: item.name,
+          widthPx: 800,
+          heightPx: 800,
+          isPrimary: true,
+        },
+      ],
+      variants: [],
+    });
+  };
+
+  const getBuyButtonClass = (item: TreeItem): string => {
+    if (item.isFibra) {
+      return 'bg-emerald-400 text-black hover:brightness-110';
+    }
+    if (item.id === 1) {
+      return 'bg-brand-gold text-black hover:brightness-110';
+    }
+    return 'bg-white text-stone-950 hover:bg-stone-200';
   };
 
   return (
@@ -156,27 +184,7 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
             </div>
 
             <div
-              onClick={() => {
-                if (onOpenQuickView) {
-                  onOpenQuickView({
-                    id: item.id,
-                    name: item.name,
-                    description: item.description,
-                    basePrice: item.priceNum,
-                    images: [
-                      {
-                        id: item.id,
-                        storagePath: item.image,
-                        altText: item.name,
-                        widthPx: 800,
-                        heightPx: 800,
-                        isPrimary: true,
-                      },
-                    ],
-                    variants: [],
-                  });
-                }
-              }}
+              onClick={() => handleOpenQuickView(item)}
               className="w-full h-72 sm:h-80 rounded-2xl overflow-hidden bg-stone-900/90 relative mb-4 cursor-pointer"
             >
               <img
@@ -191,27 +199,7 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
               <div className="mb-4">
                 <div className="flex items-center justify-between">
                   <h3
-                    onClick={() => {
-                      if (onOpenQuickView) {
-                        onOpenQuickView({
-                          id: item.id,
-                          name: item.name,
-                          description: item.description,
-                          basePrice: item.priceNum,
-                          images: [
-                            {
-                              id: item.id,
-                              storagePath: item.image,
-                              altText: item.name,
-                              widthPx: 800,
-                              heightPx: 800,
-                              isPrimary: true,
-                            },
-                          ],
-                          variants: [],
-                        });
-                      }
-                    }}
+                    onClick={() => handleOpenQuickView(item)}
                     className={`text-lg font-bold text-white transition-colors cursor-pointer ${
                       item.isFibra ? 'group-hover:text-emerald-300' : 'group-hover:text-brand-gold'
                     }`}
@@ -242,44 +230,23 @@ export function CollectionSection({ onAddToCart, onOpenQuickView }: CollectionSe
                   <div>
                     <span className="text-[10px] text-stone-400 uppercase tracking-wider block">Desde</span>
                     <span className="text-xl font-bold text-white font-display">
-                      {item.price} <span className="text-xs font-normal text-stone-300">COP</span>
+                      {formatCOP(item.priceNum)}{' '}
+                      <span className="text-xs font-normal text-stone-300">COP</span>
                     </span>
                   </div>
 
-                  {item.isFibra ? (
-                    <a
-                      onClick={() => handleBuyClick(item)}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-400 text-black font-semibold text-xs hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
-                      href={`https://wa.me/573001234567?text=${encodeURIComponent(item.waText)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
-                      <span>Comprar</span>
-                    </a>
-                  ) : item.id === 1 ? (
-                    <a
-                      onClick={() => handleBuyClick(item)}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-brand-gold text-black font-semibold text-xs hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
-                      href={`https://wa.me/573001234567?text=${encodeURIComponent(item.waText)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
-                      <span>Comprar</span>
-                    </a>
-                  ) : (
-                    <a
-                      onClick={() => handleBuyClick(item)}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-stone-950 font-semibold text-xs hover:bg-stone-200 active:scale-95 transition-all shadow-lg cursor-pointer"
-                      href={`https://wa.me/573001234567?text=${encodeURIComponent(item.waText)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
-                      <span>Comprar</span>
-                    </a>
-                  )}
+                  <a
+                    onClick={() => handleBuyClick(item)}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full font-semibold text-xs active:scale-95 transition-all shadow-lg cursor-pointer ${getBuyButtonClass(
+                      item
+                    )}`}
+                    href={WHATSAPP_CONTACT.buildUrl(item.waText)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">shopping_bag</span>
+                    <span>Comprar</span>
+                  </a>
                 </div>
               </div>
             </div>

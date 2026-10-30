@@ -35,7 +35,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
   const handleAddToCart = (product: StoreProduct, variant?: StoreVariant) => {
     const selectedVariant = variant || product.variants.find((v) => v.isDefault) || product.variants[0];
     const unitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.basePrice);
-    const imageUrl = product.images[0]?.storagePath || '/img/pino-canadiense-nevado.webp';
+    const imageUrl = product.images[0]?.storagePath || '/img/arbol_tradicional.png';
 
     setCart((prev) => {
       const existingIndex = prev.findIndex(

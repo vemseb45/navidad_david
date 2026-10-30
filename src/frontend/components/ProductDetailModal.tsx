@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StoreProduct, StoreVariant } from '@/types/domain.types';
 import { X, TreePine, ShoppingBag, Truck, Sparkles, MessageCircle, Check } from 'lucide-react';
+import { formatCOP } from '@/frontend/shared/formatters';
+import { OFFICIAL_ASSETS, WHATSAPP_CONTACT } from '@/frontend/shared/constants';
 
 interface ProductDetailModalProps {
   product: StoreProduct | null;
@@ -52,14 +54,14 @@ export function ProductDetailModal({
 
   if (!product) return null;
 
-  // Lista de imágenes
+  // Lista de imágenes con respaldo oficial
   const images =
     product.images.length > 0
       ? product.images.map((img) => img.storagePath)
-      : ['/img/cat-arboles-tradicionales.webp'];
+      : [OFFICIAL_ASSETS.TREE_TRADITIONAL];
 
-  const mainImage = images[0] || '/img/cat-arboles-tradicionales.webp';
-  const altImage = images[1] || mainImage.replace('.webp', '-alt.webp');
+  const mainImage = images[0] || OFFICIAL_ASSETS.TREE_TRADITIONAL;
+  const altImage = images[1] || mainImage;
   const gallery = [mainImage, altImage];
 
   const currentImage = gallery[selectedImageIndex] || mainImage;
@@ -79,38 +81,36 @@ export function ProductDetailModal({
     setTimeout(() => setIsAdded(false), 1500);
   };
 
-  const whatsappMessage = encodeURIComponent(
-    `¡Hola Navidad David! 🎄 Me interesa información sobre el producto "${product.name}"${
-      selectedVariant ? ` en medida ${selectedVariant.label}` : ''
-    } ($${currentPrice.toLocaleString('es-CO')} COP).`
-  );
-  const whatsappUrl = `https://wa.me/573104567890?text=${whatsappMessage}`;
+  const whatsappMessage = `¡Hola Navidad David! 🎄 Me interesa información sobre el producto "${product.name}"${
+    selectedVariant ? ` en medida ${selectedVariant.label}` : ''
+  } (${formatCOP(currentPrice)} COP).`;
+  const whatsappUrl = WHATSAPP_CONTACT.buildUrl(whatsappMessage);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl bg-white rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-[#e4e2de] overflow-hidden flex flex-col md:flex-row max-h-[92dvh] sm:max-h-[90vh] animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200"
+        className="relative w-full max-w-4xl bg-[#16181c] text-white rounded-t-[28px] sm:rounded-3xl shadow-glow border border-white/10 overflow-hidden flex flex-col md:flex-row max-h-[92dvh] sm:max-h-[90vh] animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* INDICADOR TÁCTIL VISUAL EN MÓVIL (BOTTOM SHEET HANDLE) */}
-        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-2.5 sm:hidden shrink-0" />
+        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2.5 sm:hidden shrink-0" />
 
         {/* BOTÓN CERRAR TÁCTIL */}
         <button
           onClick={onClose}
           aria-label="Cerrar modal"
-          className="absolute top-2.5 right-3 sm:top-4 sm:right-4 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 backdrop-blur-md text-gray-700 hover:text-black hover:bg-white shadow-md flex items-center justify-center transition-all cursor-pointer"
+          className="absolute top-2.5 right-3 sm:top-4 sm:right-4 z-30 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/60 hover:bg-black/90 backdrop-blur-md text-stone-300 hover:text-white border border-white/10 shadow-md flex items-center justify-center transition-all cursor-pointer"
         >
           <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
 
         {/* COLUMNA IZQUIERDA: GALERÍA ADAPTADA A CELULARES */}
-        <div className="md:w-1/2 p-3 sm:p-5 bg-[#fbf9f5] flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#e4e2de] shrink-0">
+        <div className="md:w-1/2 p-3 sm:p-5 bg-black/30 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/10 shrink-0">
           <div
-            className="relative w-full aspect-[4/3] sm:aspect-[3/4] max-h-48 sm:max-h-none rounded-2xl overflow-hidden bg-white shadow-inner cursor-crosshair select-none group"
+            className="relative w-full aspect-[4/3] sm:aspect-[3/4] max-h-48 sm:max-h-none rounded-2xl overflow-hidden bg-black/60 border border-white/10 shadow-inner cursor-crosshair select-none group"
             onMouseEnter={() => setIsZoomed(true)}
             onMouseLeave={() => {
               setIsZoomed(false);
@@ -128,13 +128,13 @@ export function ProductDetailModal({
             />
 
             {product.badgeTop && (
-              <span className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#b90d1c] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-md pointer-events-none">
+              <span className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2.5 py-1 rounded-full bg-brand-gold text-black text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-md pointer-events-none">
                 {product.badgeTop}
               </span>
             )}
 
             {product.badgeBottom && (
-              <span className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#002718]/90 text-[#ffe088] text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-md pointer-events-none">
+              <span className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-stone-200 border border-white/15 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider shadow-md pointer-events-none">
                 {product.badgeBottom}
               </span>
             )}
@@ -147,10 +147,10 @@ export function ProductDetailModal({
                 key={idx}
                 type="button"
                 onClick={() => setSelectedImageIndex(idx)}
-                className={`w-11 h-11 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all shadow-xs shrink-0 ${
+                className={`w-11 h-11 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all shadow-xs shrink-0 cursor-pointer ${
                   selectedImageIndex === idx
-                    ? 'border-[#002718] scale-105 ring-2 ring-[#002718]/20'
-                    : 'border-transparent opacity-60 hover:opacity-100'
+                    ? 'border-brand-gold scale-105 ring-2 ring-brand-gold/30'
+                    : 'border-white/10 opacity-50 hover:opacity-100 bg-black/40'
                 }`}
               >
                 <img src={imgUrl} alt={`Vista ${idx + 1}`} className="w-full h-full object-cover" />
@@ -160,41 +160,41 @@ export function ProductDetailModal({
         </div>
 
         {/* COLUMNA DERECHA: INFORMACIÓN Y ACCIONES */}
-        <div className="md:w-1/2 p-3.5 sm:p-7 flex flex-col justify-between overflow-y-auto">
+        <div className="md:w-1/2 p-3.5 sm:p-7 flex flex-col justify-between overflow-y-auto bg-[#16181c]">
           <div className="space-y-2.5 sm:space-y-4">
             <div>
-              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#b90d1c] block mb-0.5">
+              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-brand-gold block mb-0.5">
                 Navidad David • Colección Oficial
               </span>
-              <h2 className="font-serif text-lg sm:text-2xl lg:text-3xl font-bold text-[#002718] leading-tight">
+              <h2 className="font-display text-lg sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
                 {product.name}
               </h2>
-              <span className="text-[10px] sm:text-xs font-mono text-gray-400 mt-0.5 block">
+              <span className="text-[10px] sm:text-xs font-mono text-stone-400 mt-0.5 block">
                 SKU: {product.sku}
               </span>
             </div>
 
             {/* PRECIO EN COP */}
             <div className="flex items-baseline gap-2">
-              <span className="text-xl sm:text-3xl font-bold text-[#002718]">
-                ${currentPrice.toLocaleString('es-CO')}
-                <span className="text-xs font-medium text-gray-500 ml-1">COP</span>
+              <span className="text-xl sm:text-3xl font-display font-bold text-brand-gold">
+                {formatCOP(currentPrice)}
+                <span className="text-xs font-medium text-stone-400 font-sans ml-1">COP</span>
               </span>
               {product.compareAtPrice && Number(product.compareAtPrice) > currentPrice && (
-                <span className="text-xs sm:text-sm text-gray-400 line-through">
-                  ${Number(product.compareAtPrice).toLocaleString('es-CO')}
+                <span className="text-xs sm:text-sm text-stone-500 line-through">
+                  {formatCOP(Number(product.compareAtPrice))}
                 </span>
               )}
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed font-light line-clamp-3 sm:line-clamp-none">
+            <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-light line-clamp-3 sm:line-clamp-none">
               {product.description}
             </p>
 
             {/* SELECTOR DE ALTURA / VARIANTES */}
             {product.variants && product.variants.length > 0 && (
               <div className="pt-1">
-                <span className="text-[10px] sm:text-xs font-bold text-gray-800 uppercase tracking-wider block mb-1.5">
+                <span className="text-[10px] sm:text-xs font-bold text-stone-300 uppercase tracking-wider block mb-1.5">
                   Selecciona la Altura del Árbol:
                 </span>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -205,16 +205,16 @@ export function ProductDetailModal({
                         key={variant.id}
                         type="button"
                         onClick={() => setSelectedVariant(variant)}
-                        className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 ${
+                        className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer ${
                           isSelected
-                            ? 'bg-[#133e2b] text-white shadow-sm ring-2 ring-[#002718]/30 scale-102'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-brand-gold text-black shadow-md ring-2 ring-brand-gold/40 scale-102'
+                            : 'bg-white/5 text-stone-300 hover:bg-white/10 border border-white/10'
                         }`}
                       >
                         <TreePine className="w-3 h-3" />
                         <span>{variant.label}</span>
-                        <span className="text-[9px] sm:text-[10px] opacity-80">
-                          (${Number(variant.price).toLocaleString('es-CO')})
+                        <span className={`text-[9px] sm:text-[10px] ${isSelected ? 'opacity-80' : 'text-stone-400'}`}>
+                          ({formatCOP(Number(variant.price))})
                         </span>
                       </button>
                     );
@@ -224,28 +224,28 @@ export function ProductDetailModal({
             )}
 
             {/* MODALIDAD DE ENTREGA */}
-            <div className="p-2.5 sm:p-3 rounded-xl bg-[#fbf9f5] border border-[#e4e2de] text-xs space-y-0.5 sm:space-y-1">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-[#002718] font-bold text-[11px] sm:text-xs">
-                <Truck className="w-3.5 h-3.5 text-[#b90d1c] shrink-0" />
+            <div className="p-2.5 sm:p-3 rounded-2xl bg-white/5 border border-white/10 text-xs space-y-0.5 sm:space-y-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-white font-bold text-[11px] sm:text-xs">
+                <Truck className="w-3.5 h-3.5 text-brand-gold shrink-0" />
                 <span>Despacho Nacional o Retiro en Tienda</span>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-gray-500 leading-tight">
+              <p className="text-[10px] sm:text-[11px] text-stone-400 leading-tight">
                 Entrega a domicilio o retiro gratis con la modalidad <strong>&quot;Ir por el arbolito&quot;</strong>.
               </p>
             </div>
           </div>
 
           {/* BOTONES DE COMPRA STICKY INFERIOR CON SAFE AREA PADDING */}
-          <div className="sticky bottom-0 bg-white/95 backdrop-blur-md -mx-3.5 -mb-3.5 p-3 pb-5 sm:pb-3 sm:static sm:mx-0 sm:mb-0 sm:p-0 sm:bg-transparent border-t border-gray-100 sm:border-0 shadow-lg sm:shadow-none space-y-2 mt-3 sm:mt-6 z-20">
+          <div className="sticky bottom-0 bg-[#16181c]/95 backdrop-blur-md -mx-3.5 -mb-3.5 p-3 pb-5 sm:pb-3 sm:static sm:mx-0 sm:mb-0 sm:p-0 sm:bg-transparent border-t border-white/10 sm:border-0 shadow-lg sm:shadow-none space-y-2 mt-3 sm:mt-6 z-20">
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleAdd}
-                className="flex-1 min-h-[44px] py-2.5 sm:py-3.5 px-3 rounded-xl bg-[#133e2b] hover:bg-[#002718] text-white text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 min-h-[44px] py-2.5 sm:py-3.5 px-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {isAdded ? (
                   <>
-                    <Check className="w-4 h-4 text-[#ffe088]" />
+                    <Check className="w-4 h-4 text-brand-gold" />
                     <span>¡Agregado!</span>
                   </>
                 ) : (
@@ -263,9 +263,9 @@ export function ProductDetailModal({
                     onBuyNow(product, selectedVariant);
                     onClose();
                   }}
-                  className="min-h-[44px] py-2.5 sm:py-3.5 px-4 sm:px-5 rounded-xl bg-[#b90d1c] hover:bg-[#930011] text-white text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="min-h-[44px] py-2.5 sm:py-3.5 px-5 sm:px-6 rounded-full bg-brand-gold hover:bg-[#d4a352] text-black text-xs sm:text-sm font-bold uppercase tracking-wider transition-all shadow-glow active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer font-display"
                 >
-                  <Sparkles className="w-4 h-4 text-[#ffe088]" />
+                  <Sparkles className="w-4 h-4" />
                   <span>Comprar</span>
                 </button>
               )}
@@ -275,9 +275,9 @@ export function ProductDetailModal({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full min-h-[38px] py-2 px-3 rounded-xl border border-emerald-600 text-emerald-800 hover:bg-emerald-50 text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+              className="w-full min-h-[38px] py-2 px-3 rounded-full border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1.5"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              <MessageCircle className="w-4 h-4 text-emerald-400" />
               <span>Asesoría por WhatsApp</span>
             </a>
           </div>

@@ -18,7 +18,7 @@ const CATEGORIES_DATA: CategoryItem[] = [
     slug: 'arboles-tradicionales',
     title: 'Árboles Tradicionales',
     desc: 'Pinos canadienses y abetos ultra frondosos con selector de altura (1.80m a 2.40m).',
-    img: '/img/cat-arboles-tradicionales.webp',
+    img: '/img/arbol_tradicional.png',
     cta: 'Ver Pinos Clásicos',
   },
   {
@@ -26,7 +26,7 @@ const CATEGORIES_DATA: CategoryItem[] = [
     slug: 'arboles-fibra-optica',
     title: 'Árboles de Fibra Óptica',
     desc: 'Micro-filamentos ópticos con destellos estelares multicolores y bajo consumo.',
-    img: '/img/cat-fibra-optica.webp',
+    img: '/img/arbol_fibra.png',
     cta: 'Ver Fibra Óptica',
   },
   {
@@ -34,7 +34,7 @@ const CATEGORIES_DATA: CategoryItem[] = [
     slug: 'accesorios-navidenos',
     title: 'Coronas & Decoración',
     desc: 'Coronas nevadas, guirnaldas, luces microLED y faldones de terciopelo bordado.',
-    img: '/img/cat-accesorios.webp',
+    img: '/img/arbol_tradicional.png',
     cta: 'Ver Accesorios',
   },
 ];

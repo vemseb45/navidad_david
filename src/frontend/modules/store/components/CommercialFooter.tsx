@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { OFFICIAL_ASSETS } from '@/frontend/shared/constants';
 
 export function CommercialFooter() {
   return (
@@ -13,7 +14,7 @@ export function CommercialFooter() {
             <img
               alt="Logo Navidad David"
               className="w-12 h-12 rounded-full object-cover border-2 border-brand-gold/60 shadow-md group-hover:scale-105 transition-transform"
-              src="/Logo_david_original.png"
+              src={OFFICIAL_ASSETS.LOGO_ORIGINAL}
             />
             <span className="text-xl font-bold font-display text-white tracking-tight group-hover:text-brand-gold transition-colors">
               Navidad David

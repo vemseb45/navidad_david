@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
+import { WHATSAPP_CONTACT } from '@/frontend/shared/constants';
 
 export function WhatsAppFloatingButton() {
-  const whatsappUrl =
-    'https://wa.me/573104567890?text=' +
-    encodeURIComponent('¡Hola Navidad David! 🎄 Quisiera recibir asesoría personalizada sobre los árboles de Navidad y accesorios.');
+  const whatsappUrl = WHATSAPP_CONTACT.buildUrl(
+    '¡Hola Navidad David! 🎄 Quisiera recibir asesoría personalizada sobre los árboles de Navidad y accesorios.'
+  );
 
   return (
     <a

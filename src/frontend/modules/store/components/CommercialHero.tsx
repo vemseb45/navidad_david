@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { OFFICIAL_ASSETS } from '@/frontend/shared/constants';
 
 interface CommercialHeroProps {
   cartCount: number;
@@ -10,6 +11,77 @@ interface CommercialHeroProps {
   onExploreClick: () => void;
   onSelectProductCard?: (index: number) => void;
 }
+
+interface HeroBackgroundItem {
+  id: number;
+  image: string;
+  title: string;
+}
+
+interface MiniCardItem {
+  id: number;
+  slideIndex: number;
+  title: string;
+  subtitle: string;
+  image: string;
+  objectPos: string;
+  brightness: string;
+}
+
+// Las 4 fotos que se muestran en el fondo del Hero al mover el carrusel
+const HERO_BACKGROUNDS: readonly HeroBackgroundItem[] = [
+  {
+    id: 0,
+    image: OFFICIAL_ASSETS.HERO_FAMILY,
+    title: 'Navidad David • Colección Oficial',
+  },
+  {
+    id: 1,
+    image: OFFICIAL_ASSETS.HERO_FAMILY_2,
+    title: 'Pino Tradicional Frondoso',
+  },
+  {
+    id: 2,
+    image: OFFICIAL_ASSETS.HERO_FAMILY_3,
+    title: 'Mágico Fibra Óptica',
+  },
+  {
+    id: 3,
+    image: OFFICIAL_ASSETS.HERO_FAMILY_4,
+    title: 'Nevado Alpino Imperial',
+  },
+];
+
+// Los 3 recuadros inferiores: muestran estrictamente hero_familia_2, hero_familia_3, hero_familia_4 (sin hero_familia)
+const MINI_CARDS: readonly MiniCardItem[] = [
+  {
+    id: 1,
+    slideIndex: 1,
+    title: 'Pino Tradicional Frondoso',
+    subtitle: 'Elegancia verde y ramas con memoria',
+    image: OFFICIAL_ASSETS.HERO_FAMILY_2,
+    objectPos: 'object-center',
+    brightness: 'brightness-100',
+  },
+  {
+    id: 2,
+    slideIndex: 2,
+    title: 'Mágico Fibra Óptica',
+    subtitle: 'Tecnología y destellos estelares',
+    image: OFFICIAL_ASSETS.HERO_FAMILY_3,
+    objectPos: 'object-center',
+    brightness: 'brightness-100',
+  },
+  {
+    id: 3,
+    slideIndex: 3,
+    title: 'Nevado Alpino Imperial',
+    subtitle: 'Toque invernal sin residuos',
+    image: OFFICIAL_ASSETS.HERO_FAMILY_4,
+    objectPos: 'object-center',
+    brightness: 'brightness-100',
+  },
+];
 
 export function CommercialHero({
   cartCount,
@@ -20,47 +92,28 @@ export function CommercialHero({
 }: CommercialHeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const miniCards = [
-    {
-      id: 1,
-      badge: 'Más vendido',
-      badgeClass: 'bg-black/60 backdrop-blur-md text-[10px] font-semibold text-brand-gold px-2 py-0.5 rounded-md border border-white/10',
-      title: 'Pino Tradicional Frondoso',
-      subtitle: 'Elegancia verde y ramas con memoria',
-      image: '/img/cat-arboles-tradicionales.webp',
-      objectPos: 'object-[70%_20%]',
-      brightness: 'brightness-95',
-    },
-    {
-      id: 2,
-      badge: 'Micro-LED',
-      badgeClass: 'bg-emerald-950/80 backdrop-blur-md text-[10px] font-semibold text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/20',
-      title: 'Mágico Fibra Óptica',
-      subtitle: 'Tecnología y destellos estelares',
-      image: '/img/cat-fibra-optica.webp',
-      objectPos: 'object-[55%_10%]',
-      brightness: 'brightness-105',
-    },
-    {
-      id: 3,
-      badge: 'Nieve Realista',
-      badgeClass: 'bg-stone-900/80 backdrop-blur-md text-[10px] font-semibold text-stone-200 px-2 py-0.5 rounded-md border border-white/10',
-      title: 'Nevado Alpino Imperial',
-      subtitle: 'Toque invernal sin residuos',
-      image: '/img/artic-pine-nevado.webp',
-      objectPos: 'object-[80%_35%]',
-      brightness: 'brightness-100',
-    },
-  ];
-
+  // Navegación en las 4 fotos del Hero
   const handlePrevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? miniCards.length - 1 : prev - 1));
+    setCurrentSlide((prev) => (prev === 0 ? HERO_BACKGROUNDS.length - 1 : prev - 1));
   };
 
   const handleNextSlide = () => {
-    setCurrentSlide((prev) => (prev === miniCards.length - 1 ? 0 : prev + 1));
+    setCurrentSlide((prev) => (prev === HERO_BACKGROUNDS.length - 1 ? 0 : prev + 1));
   };
+
+  // Desplazar automáticamente el recuadro correspondiente en móviles
+  useEffect(() => {
+    const targetIdx = currentSlide === 0 ? 0 : currentSlide - 1;
+    if (cardRefs.current[targetIdx]) {
+      cardRefs.current[targetIdx]?.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
+  }, [currentSlide]);
 
   return (
     <main
@@ -68,17 +121,23 @@ export function CommercialHero({
       className="relative w-full rounded-3xl md:rounded-[32px] overflow-hidden border border-white/10 shadow-glow bg-stone-950 aspect-auto lg:aspect-[16/10] min-h-[720px] md:min-h-[780px] lg:h-[840px] flex flex-col justify-between"
       data-purpose="commercial-hero"
     >
-      {/* Background Image with Ambient Cinema Lighting Overlay */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" data-purpose="hero-background-image">
-        <img
-          alt="Familia colombiana celebrando la navidad alrededor de un árbol mágico con buñuelos"
-          className="w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.04] scale-100 transition-transform duration-1000 ease-out"
-          src="/img/hero-navidad-david.webp"
-        />
-        {/* Deep left-to-right cinematic gradient to mirror the high contrast left side of reference */}
+      {/* Background Carousel: Muestra las 4 fotos con transición suave de crossfade */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" data-purpose="hero-background-carousel">
+        {HERO_BACKGROUNDS.map((bg, idx) => (
+          <img
+            key={bg.id}
+            alt={bg.title}
+            className={`absolute inset-0 w-full h-full object-cover object-center filter brightness-[0.88] contrast-[1.04] transition-all duration-1000 ease-in-out ${
+              currentSlide === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-105 pointer-events-none'
+            }`}
+            src={bg.image}
+          />
+        ))}
+
+        {/* Deep left-to-right cinematic gradient to mirror the high contrast left side */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0c0d10] via-[#0c0d10]/85 via-45% to-transparent z-10" />
         {/* Bottom vignette to cradle floating product cards and navigation controls */}
-        <div className="absolute inset-x-0 bottom-0 h-80 bg-gradient-to-t from-[#090a0d] via-[#090a0d]/75 to-transparent z-10" />
+        <div className="absolute inset-x-0 bottom-0 h-88 bg-gradient-to-t from-[#090a0d] via-[#090a0d]/75 to-transparent z-10" />
         {/* Top subtle vignette for navigation contrast */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/70 to-transparent z-10" />
       </div>
@@ -98,7 +157,7 @@ export function CommercialHero({
             <img
               alt="Logo Oficial Navidad David"
               className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover border-2 border-brand-gold/60 shadow-md"
-              src="/Logo_david_original.png"
+              src={OFFICIAL_ASSETS.LOGO_ORIGINAL}
             />
             <span className="hidden sm:inline font-display font-bold text-base md:text-lg text-white tracking-tight group-hover:text-brand-gold transition-colors">
               Navidad David
@@ -134,11 +193,11 @@ export function CommercialHero({
           {/* Search Pill (Interactive: opens search modal) */}
           <button
             onClick={onOpenSearch}
-            className="flex items-center glass-pill rounded-full px-3.5 sm:px-4 py-2 text-stone-300 hover:text-white focus:outline-none transition-all"
+            className="flex items-center glass-pill rounded-full px-3.5 sm:px-4 py-2 text-stone-300 hover:text-white focus:outline-none transition-all cursor-pointer"
             aria-label="Buscar en la tienda"
           >
             <svg className="w-4 h-4 text-stone-400 sm:mr-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className="hidden sm:inline text-xs md:text-sm text-stone-400">Buscar árbol, luces...</span>
           </button>
@@ -174,7 +233,7 @@ export function CommercialHero({
           {/* Mobile Menu Hamburger Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Abrir menú"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,6 +302,12 @@ export function CommercialHero({
         className="relative z-20 px-6 md:px-12 lg:px-16 pt-4 pb-2 md:py-8 max-w-2xl"
         data-purpose="editorial-headline-block"
       >
+        {/* Dynamic active category badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-brand-gold font-medium mb-3.5 shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-brand-gold animate-pulse" />
+          <span className="tracking-wide">{HERO_BACKGROUNDS[currentSlide].title}</span>
+        </div>
+
         {/* Main Title */}
         <h1 className="font-display text-4xl sm:text-5xl lg:text-[62px] font-bold leading-[1.08] tracking-tight text-white drop-shadow-sm mb-4">
           Momentos&nbsp;
@@ -263,7 +328,7 @@ export function CommercialHero({
         <div className="flex flex-wrap items-center gap-4">
           <button
             onClick={onExploreClick}
-            className="inline-flex items-center justify-between gap-3 bg-white text-stone-950 hover:bg-stone-100 px-7 py-3.5 rounded-full font-semibold text-sm transition-all duration-200 shadow-xl group transform active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-between gap-3 bg-white text-stone-950 hover:bg-stone-100 px-7 py-3.5 rounded-full font-semibold text-sm transition-all duration-200 shadow-xl group transform active:scale-95 cursor-pointer font-display"
             data-purpose="primary-cta-button"
           >
             <span>Ver árboles</span>
@@ -290,19 +355,32 @@ export function CommercialHero({
         className="relative z-20 w-full px-6 md:px-12 lg:px-16 pb-8 pt-4 flex flex-col space-y-5"
         data-purpose="floating-product-carousel-deck"
       >
-        {/* Horizontal Floating Product Mini-Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 max-w-4xl" data-purpose="product-mini-cards">
-          {miniCards.map((card, idx) => {
-            const isVisibleOnMobile = idx === currentSlide || idx < 2;
+        {/* Horizontal Floating Product Mini-Cards: Los 3 recuadros con hero_familia_2, hero_familia_3, hero_familia_4 */}
+        <div
+          className="flex md:grid md:grid-cols-3 gap-3.5 max-w-4xl overflow-x-auto pb-2 pt-1 no-scrollbar snap-x snap-mandatory"
+          data-purpose="product-mini-cards"
+        >
+          {MINI_CARDS.map((card, idx) => {
+            const isActive = currentSlide === card.slideIndex;
             return (
               <div
                 key={card.id}
-                onClick={() => {
-                  if (onSelectProductCard) onSelectProductCard(idx);
-                  onExploreClick();
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
                 }}
-                className={`glass-card rounded-2xl p-3 flex flex-col justify-between cursor-pointer group ${
-                  idx === 2 ? 'hidden md:flex' : isVisibleOnMobile ? 'flex' : 'hidden sm:flex'
+                onClick={() => {
+                  // Si ya está activo ese recuadro, alternar de vuelta al hero principal (slide 0)
+                  if (currentSlide === card.slideIndex) {
+                    setCurrentSlide(0);
+                  } else {
+                    setCurrentSlide(card.slideIndex);
+                  }
+                  if (onSelectProductCard) onSelectProductCard(idx);
+                }}
+                className={`glass-card rounded-2xl p-3 flex flex-col justify-between cursor-pointer group transition-all duration-300 w-[82vw] sm:w-[48vw] md:w-auto shrink-0 snap-center ${
+                  isActive
+                    ? 'border-brand-gold ring-1 ring-brand-gold/60 shadow-glow bg-[#181a20]/95'
+                    : 'border-white/10 opacity-70 hover:opacity-100 hover:border-white/30 bg-[#16181c]/80'
                 }`}
                 data-purpose="mini-card-item"
               >
@@ -312,54 +390,76 @@ export function CommercialHero({
                     className={`w-full h-full object-cover ${card.objectPos} group-hover:scale-105 transition-transform duration-500 filter ${card.brightness}`}
                     src={card.image}
                   />
-                  <span className={`absolute top-2 left-2 ${card.badgeClass}`}>
-                    {card.badge}
-                  </span>
                 </div>
+
                 <div className="flex items-end justify-between gap-2 px-1">
                   <div>
-                    <h2 className="text-sm font-semibold text-white tracking-tight leading-snug group-hover:text-brand-gold transition-colors">
+                    <h2
+                      className={`text-sm font-semibold tracking-tight leading-snug transition-colors ${
+                        isActive ? 'text-brand-gold' : 'text-white group-hover:text-brand-gold'
+                      }`}
+                    >
                       {card.title}
                     </h2>
-                    <p className="text-[11px] text-stone-400 mt-0.5 line-clamp-1">
+                    <p className="text-[11px] text-stone-300 mt-0.5 line-clamp-1 font-light">
                       {card.subtitle}
                     </p>
                   </div>
-                  <div className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-white text-white group-hover:text-black flex items-center justify-center flex-shrink-0 transition-all">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExploreClick();
+                    }}
+                    title={`Ver colección de ${card.title}`}
+                    className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-brand-gold text-black hover:brightness-110 shadow-md'
+                        : 'bg-white/10 hover:bg-white text-white hover:text-black'
+                    }`}
+                  >
                     <svg className="w-3.5 h-3.5 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                       <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </div>
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Carousel Pagination Controls */}
-        <div className="flex items-center space-x-6 pt-1 text-sm font-medium" data-purpose="carousel-pagination">
-          {/* Slide index and dynamic progress bar indicator */}
-          <div className="flex items-center space-x-3 text-stone-400 text-xs tracking-wider">
-            <span className="text-white font-semibold">0{currentSlide + 1}</span>
-            {/* Progress Track */}
-            <div className="w-20 sm:w-28 h-[2px] bg-stone-700/80 rounded-full overflow-hidden relative">
-              <div
-                className="absolute top-0 bottom-0 bg-white rounded-full transition-all duration-300"
-                style={{
-                  left: `${(currentSlide / 3) * 100}%`,
-                  width: '33.33%',
-                }}
-              />
-            </div>
-            <span>03</span>
+        {/* Controles de Navegación del Carrusel con Barra Blanca de 3 Posiciones */}
+        <div className="flex items-center space-x-4 pt-1 self-start sm:self-auto" data-purpose="carousel-nav">
+          {/* Barra blanca de 3 segmentos que marca únicamente las 3 colecciones (slides 1, 2 y 3) */}
+          <div
+            className="w-20 sm:w-28 h-[2px] bg-stone-700/80 rounded-full overflow-hidden relative"
+            role="progressbar"
+            aria-label="Posición en las 3 colecciones"
+          >
+            <div
+              className={`absolute top-0 bottom-0 w-1/3 bg-white rounded-full transition-all duration-300 ease-out ${
+                currentSlide === 0 ? 'opacity-0' : 'opacity-100'
+              }`}
+              style={{
+                left:
+                  currentSlide === 1
+                    ? '0%'
+                    : currentSlide === 2
+                    ? '33.333%'
+                    : currentSlide === 3
+                    ? '66.666%'
+                    : '0%',
+              }}
+            />
           </div>
 
-          {/* Circular Nav Buttons: Previous & Next */}
+          {/* Botones circulares de navegación */}
           <div className="flex items-center space-x-2">
             <button
               onClick={handlePrevSlide}
-              aria-label="Página anterior"
-              className="w-10 h-10 rounded-full glass-pill flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+              aria-label="Foto anterior"
+              title="Foto anterior"
+              className="w-10 h-10 rounded-full glass-pill flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
             >
               <svg className="w-4 h-4 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                 <path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeLinecap="round" strokeLinejoin="round" />
@@ -367,8 +467,9 @@ export function CommercialHero({
             </button>
             <button
               onClick={handleNextSlide}
-              aria-label="Página siguiente"
-              className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-stone-200 transition-all shadow-lg active:scale-95 cursor-pointer"
+              aria-label="Siguiente foto"
+              title="Siguiente foto"
+              className="w-10 h-10 rounded-full bg-brand-gold text-black hover:bg-[#d4a352] flex items-center justify-center transition-all shadow-glow active:scale-95 cursor-pointer font-bold"
             >
               <svg className="w-4 h-4 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                 <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />

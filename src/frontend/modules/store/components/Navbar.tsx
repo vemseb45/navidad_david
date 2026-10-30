@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { StoreSection } from '@/types/domain.types';
 import { Menu, X, Search, ShoppingBag, TreePine, Phone, Sparkles } from 'lucide-react';
+import { formatCOP } from '@/frontend/shared/formatters';
+import { OFFICIAL_ASSETS, WHATSAPP_CONTACT } from '@/frontend/shared/constants';
 
 interface NavbarProps {
   sections: StoreSection[];
@@ -65,7 +67,7 @@ export function Navbar({
         >
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden ring-2 ring-[#ffe088]/40 shadow-md bg-white flex items-center justify-center p-0.5 group-hover:scale-105 group-hover:ring-[#22c55e] transition-all">
             <img
-              src="/Logo_david.png"
+              src={OFFICIAL_ASSETS.LOGO_ORIGINAL}
               alt="Logo Navidad David"
               className="w-full h-full object-cover rounded-full"
             />
@@ -124,7 +126,7 @@ export function Navbar({
 
           {/* ASESORÍA DIRECTA POR WHATSAPP */}
           <a
-            href="https://wa.me/573104567890?text=Hola%20Navidad%20David!%20Deseo%20informaci%C3%B3n%20sobre%20los%20%C3%A1rboles%20de%20Navidad."
+            href={WHATSAPP_CONTACT.buildUrl('Hola Navidad David! Deseo información sobre los árboles de Navidad.')}
             target="_blank"
             rel="noopener noreferrer"
             title="Asesoría personalizada por WhatsApp"
@@ -142,7 +144,7 @@ export function Navbar({
           >
             <ShoppingBag size={18} />
             <span className="text-xs font-bold hidden md:inline">
-              ${cartTotal.toLocaleString('es-CO')}
+              {formatCOP(cartTotal)}
             </span>
             <span className="min-w-5 h-5 px-1 rounded-full bg-[#b90d1c] text-white text-[11px] flex items-center justify-center font-bold">
               {cartCount}
