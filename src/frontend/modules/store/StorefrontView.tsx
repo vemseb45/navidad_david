@@ -128,7 +128,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
         {/* END: Commercial Hero Main Container */}
 
         {/* BEGIN: Quick Features Footer Strip */}
-        <div className="w-full flex flex-col space-y-16 sm:space-y-20 lg:space-y-24 mt-12 sm:mt-16 text-white">
+        <div className="w-full flex flex-col space-y-16 sm:space-y-20 lg:space-y-24 mt-16 sm:mt-20 lg:mt-24 text-white">
           {/* Section 1: Calculador de Espacio */}
           <HeightGuideSection />
 

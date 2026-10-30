@@ -352,12 +352,12 @@ export function CommercialHero({
 
       {/* BEGIN: Bottom Section - Floating Product Cards & Carousel Navigator */}
       <div
-        className="relative z-20 w-full px-6 md:px-12 lg:px-16 pb-8 pt-4 flex flex-col space-y-5"
+        className="relative z-20 w-full px-6 md:px-12 lg:px-16 pb-6 sm:pb-8 pt-2 flex flex-col space-y-3.5 sm:space-y-4"
         data-purpose="floating-product-carousel-deck"
       >
         {/* Horizontal Floating Product Mini-Cards: Los 3 recuadros con hero_familia_2, hero_familia_3, hero_familia_4 */}
         <div
-          className="flex md:grid md:grid-cols-3 gap-3.5 max-w-4xl overflow-x-auto pb-2 pt-1 no-scrollbar snap-x snap-mandatory"
+          className="flex md:grid md:grid-cols-3 gap-3.5 max-w-4xl overflow-x-auto pb-1 pt-0.5 no-scrollbar snap-x snap-mandatory"
           data-purpose="product-mini-cards"
         >
           {MINI_CARDS.map((card, idx) => {
@@ -428,8 +428,11 @@ export function CommercialHero({
           })}
         </div>
 
-        {/* Controles de Navegación del Carrusel con Barra Blanca de 3 Posiciones */}
-        <div className="flex items-center space-x-4 pt-1 self-start sm:self-auto" data-purpose="carousel-nav">
+        {/* Controles de Navegación del Carrusel con Barra Blanca de 3 Posiciones y Botones Blancos */}
+        <div
+          className="flex items-center space-x-6 pt-1 pb-1 pl-2 sm:pl-4 self-start text-sm font-medium"
+          data-purpose="carousel-nav"
+        >
           {/* Barra blanca de 3 segmentos que marca únicamente las 3 colecciones (slides 1, 2 y 3) */}
           <div
             className="w-20 sm:w-28 h-[2px] bg-stone-700/80 rounded-full overflow-hidden relative"
@@ -453,7 +456,7 @@ export function CommercialHero({
             />
           </div>
 
-          {/* Botones circulares de navegación */}
+          {/* Botones circulares de navegación (blancos de alto contraste) */}
           <div className="flex items-center space-x-2">
             <button
               onClick={handlePrevSlide}
@@ -469,7 +472,7 @@ export function CommercialHero({
               onClick={handleNextSlide}
               aria-label="Siguiente foto"
               title="Siguiente foto"
-              className="w-10 h-10 rounded-full bg-brand-gold text-black hover:bg-[#d4a352] flex items-center justify-center transition-all shadow-glow active:scale-95 cursor-pointer font-bold"
+              className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-stone-200 transition-all shadow-lg active:scale-95 cursor-pointer font-bold"
             >
               <svg className="w-4 h-4 stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                 <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
