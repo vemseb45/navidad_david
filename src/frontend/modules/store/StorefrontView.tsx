@@ -114,7 +114,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
   };
 
   return (
-    <div className="bg-[#121417] text-white min-h-screen flex flex-col items-center justify-center p-3 sm:p-5 lg:p-7 antialiased selection:bg-brand-gold selection:text-black">
+    <div className="bg-[#121417] text-white min-h-screen flex flex-col items-center justify-center p-2 sm:p-5 lg:p-7 antialiased selection:bg-brand-gold selection:text-black">
       {/* BEGIN: Outer Frame Presentation Context */}
       <div className="w-full max-w-[1580px] mx-auto transition-all" data-purpose="viewport-container">
         

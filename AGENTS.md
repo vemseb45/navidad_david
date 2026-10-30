@@ -135,7 +135,7 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
 
 El smartphone es el **dispositivo principal** de los clientes y administradores. Toda la interfaz debe respetar estrictamente:
 * **Viewport Oficial**: Configurado en `src/app/layout.tsx` con `width=device-width, initial-scale=1, maximum-scale=5`.
-* **Marco Superior y Hero Comercial ([CommercialHero.tsx](file:///src/frontend/modules/store/components/CommercialHero.tsx))**: Banner fotográfico familiar festivo en alta resolución (`hero_familia.png`/`.webp`), logo corporativo `Logo_david_original.png`, badges dorados de temporada, árbol 3D interactivo en rotación continua y barra de navegación compacta con acceso al carrito y búsqueda predictiva.
+* **Marco Superior y Hero Comercial ([CommercialHero.tsx](file:///src/frontend/modules/store/components/CommercialHero.tsx))**: Banner fotográfico familiar festivo en alta resolución (`hero_familia.png`/`.webp`), logo corporativo `Logo_david_original.png` (enlace de acceso al panel administrativo), barra de navegación fija persistente al desplazarse (`fixed top-0 inset-x-0 z-50` con backdrop blur `#121417`), 6 enlaces principales de navegación y botón de carrito de compras glass-pill con badge de conteo (barra de búsqueda e icono de usuario eliminados para mantener un diseño equilibrado, limpio y sin espacios vacíos).
 * **Calculador de Espacio ([HeightGuideSection.tsx](file:///src/frontend/modules/store/components/HeightGuideSection.tsx))**: Selector interactivo de alturas (`1.80m`, `2.10m`, `2.40m`) para adecuar el árbol a los techos residenciales estándar de Colombia.
 * **Colección Dos Tradiciones ([CollectionSection.tsx](file:///src/frontend/modules/store/components/CollectionSection.tsx))**: Segmentación interactiva entre Pinos Tradicionales Canadienses (`arbol_tradicional.png`) y Árboles con Fibra Óptica Micro-LED (`arbol_fibra.png`). Grilla responsive (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6`).
 * **Tarjetas de Producto ([ProductCard.tsx](file:///src/frontend/components/ProductCard.tsx))**:
@@ -156,6 +156,14 @@ El smartphone es el **dispositivo principal** de los clientes y administradores.
   * Interfaz modal en `#16181c` con búsqueda instantánea por SKU, estilo y nombre de árbol.
   * Navegación fluida y enlaces directos al visor de detalle rápido.
 * **Formularios & Prevención de Auto-Zoom iOS ([GuestCheckoutModal.tsx](file:///src/frontend/components/GuestCheckoutModal.tsx))**: Todos los inputs usan tamaño de fuente mínimo de 16px (`text-base sm:text-sm`) para evitar que Safari en iPhone haga zoom involuntario al enfocar campos.
+* **Botón Flotante Oficial de WhatsApp ([WhatsAppFloatingButton.tsx](file:///src/frontend/components/WhatsAppFloatingButton.tsx))**:
+  * Diseño estrictamente circular (`rounded-full w-12 h-12 sm:w-14 sm:h-14`) para optimizar el viewport táctil.
+  * Icono vectorial oficial de WhatsApp sobre fondo `#25D366` con aro `ring-4 ring-black/40` y punto pulsante esmeralda.
+  * **REGLA ESTRICTA**: Prohibido añadir etiquetas o pastillas de texto alargadas ("Asesoría Navidad David") que reduzcan el espacio de visualización en smartphones.
+* **Composición y Encuadre del Hero en Smartphones**:
+  * Altura responsiva (`min-h-[640px] sm:min-h-[720px] md:min-h-[780px] lg:h-[840px]`) que previene el zoom desmedido (3.6x) al proyectar fotos panorámicas 16:9 en pantallas móviles verticales.
+  * Foco centralizado (`object-[center_32%] md:object-center`) para destacar siempre el árbol y la escena familiar.
+  * Gradiente móvil despejado (`bg-gradient-to-b from-black/75 via-transparent via-45% to-[#090a0d]/90`), suprimiendo la sombra lateral negra en móviles para permitir que las fotos luzcan brillantes y nítidas.
 * **Panel de Control Administrativo ([AdminDashboardView.tsx](file:///src/frontend/modules/admin/AdminDashboardView.tsx) & [AdminSidebar.tsx](file:///src/frontend/modules/admin/components/AdminSidebar.tsx))**: Header móvil con botón hamburguesa y sidebar deslizable (off-canvas drawer) con backdrop, permitiendo gestionar ventas y productos con total comodidad desde el celular.
 
 ---
@@ -360,6 +368,7 @@ Este registro documenta las decisiones de diseño y cambios obligatorios para pr
   * **Fotografía Oficial**: Eliminación de imágenes genéricas y duplicadas. Se fijaron como únicos activos de producto: `hero_familia.png` (banner familiar del Hero), `arbol_tradicional.png` (pinos tradicionales) y `arbol_fibra.png` (árboles de fibra óptica), todos optimizados en WebP con Sharp.
   * **Simplificación del Carrito**: Supresión definitiva de menciones de impuestos y estandarización del botón en **"Pagar"**.
   * **Depuración del Carrusel Hero**: Remoción de los badges de texto ("Activo", "Más vendido", "Micro-LED", "Nieve Realista") en las fotos de los 3 recuadros inferiores para una estética fotográfica limpia. Se implementa la barra de navegación blanca (`w-1/3 bg-white`) con 3 secciones exclusivas para las 3 colecciones destacadas (la imagen de portada `hero_familia` no ocupa ranura en la barra pero se recorre con los botones circulares) y botones de navegación blancos de alto contraste (`bg-white text-black`), sin contadores numéricos invasivos (`01 / 04`). Las proporciones del contenedor inferior (`pb-6 sm:pb-8`, `space-y-3.5`) garantizan que la barra y botones se ubiquen en el viewport sin ser recortados por `overflow-hidden`.
+  * **Navbar Persistente & Simplificado al Scrollear**: La barra de navegación se fijó de manera flotante (`fixed top-0 inset-x-0 z-50` con backdrop blur `#121417` al detectar scroll). Se eliminaron la barra de búsqueda y el icono de usuario/admin para suprimir elementos redundantes y espacios vacíos, manteniendo una distribución perfectamente equilibrada: Logo a la izquierda (acceso admin), 6 enlaces de sección al centro y botón de carrito con contador a la derecha.
   * **Persistencia**: Todo nuevo modal, sección o componente añadido en el futuro DEBE cumplir con los tokens oscuros (`#16181c`, `border-white/10`, `brand-gold`) y mantener la experiencia mobile-first sin auto-zoom en iOS.
 
 ---
