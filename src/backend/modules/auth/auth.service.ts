@@ -103,7 +103,7 @@ export class AuthService {
       const preAuthToken = createPreAuthToken(usuario.id);
 
       await this.repo.set2FACode(usuario.id, codigo2FA, expiracion);
-      console.log(`🔐 [2FA NAVIDDAVID] Código para ${usuario.correo_electronico}: ${codigo2FA}`);
+      console.log(`🔐 [2FA NAVIDAVID] Código para ${usuario.correo_electronico}: ${codigo2FA}`);
 
       // Despacho real mediante SMTP
       await send2FAEmail(usuario.correo_electronico, usuario.nombres_apellidos, codigo2FA);
@@ -202,7 +202,7 @@ export class AuthService {
   public async toggle2FA(input: Toggle2faInput) {
     const usuario = await this.repo.findById(input.usuarioId);
     if (!usuario) {
-      throw new Error('El usuario especificado no existe en tb_users');
+      throw new Error('El usuario especificado no existe');
     }
     return this.repo.update2FAStatus(input.usuarioId, input.activo);
   }

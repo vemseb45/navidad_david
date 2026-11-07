@@ -164,7 +164,7 @@ export function StorefrontView({ initialSections }: { initialSections: StoreSect
             }}
           />
 
-          {/* Section 3: La Diferencia NavidDavid */}
+          {/* Section 3: La Diferencia NaviDavid */}
           <BrandDifferenceSection />
 
           {/* Section 4: Showroom Bogotá */}

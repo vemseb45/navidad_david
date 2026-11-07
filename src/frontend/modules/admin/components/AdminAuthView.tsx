@@ -82,13 +82,13 @@ export function AdminAuthView({ onSuccess, noticeMessage }: AdminAuthViewProps) 
           <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-2.5 sm:mb-3 p-1 rounded-full bg-white shadow-md ring-2 ring-[#002718]/20 flex items-center justify-center overflow-hidden">
             <img
               src="/Logo_david.png"
-              alt="Logo Oficial NavidDavid"
+              alt="Logo Oficial NaviDavid"
               className="w-full h-full object-cover rounded-full"
             />
           </div>
-          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#002718]">NavidDavid</h2>
-          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#b90d1c] block mt-0.5">
-            Acceso Panel de Control • 2FA + JWT Cookie Only
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#002718]">NaviDavid</h2>
+          <span className="text-[10px] sm:text-xs font-semibold tracking-wide text-stone-500 block mt-1">
+            Panel de Control Administrativo
           </span>
         </div>
 
@@ -110,7 +110,7 @@ export function AdminAuthView({ onSuccess, noticeMessage }: AdminAuthViewProps) 
           <form onSubmit={handleCredentialsSubmit} className="space-y-4">
             <div>
               <label className="text-xs font-bold text-gray-700 block mb-1.5">
-                Correo Electrónico (tb_users)
+                Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />

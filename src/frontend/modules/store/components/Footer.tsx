@@ -12,13 +12,13 @@ export function Footer() {
             <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-[#ffe088]/40 shadow-md bg-white flex items-center justify-center p-0.5">
               <img
                 src="/Logo_david.png"
-                alt="NavidDavid"
+                alt="NaviDavid"
                 className="w-full h-full object-cover rounded-full"
               />
             </div>
             <div>
               <span className="font-serif text-lg font-bold block text-white leading-tight">
-                NavidDavid
+                NaviDavid
               </span>
               <span className="text-[10px] text-[#ffe088] uppercase tracking-widest font-bold">
                 Árboles & Decoración Navideña
@@ -72,8 +72,8 @@ export function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto px-5 md:px-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-2">
-        <p>© 2026 NavidDavid. Todos los derechos reservados.</p>
-        <p className="text-[11px]">Next.js 16 • React 19 • PostgreSQL + Prisma • Clean Architecture</p>
+        <p>© 2026 NaviDavid. Todos los derechos reservados.</p>
+        <p className="text-[11px] text-stone-400">Diseño exclusivo y alta gama para tu hogar en Colombia</p>
       </div>
     </footer>
   );

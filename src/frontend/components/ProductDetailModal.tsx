@@ -93,7 +93,7 @@ export function ProductDetailModal({
     });
   };
 
-  const whatsappMessage = `¡Hola NavidDavid! 🎄 Me interesa información sobre el producto "${product.name}"${
+  const whatsappMessage = `¡Hola NaviDavid! 🎄 Me interesa información sobre el producto "${product.name}"${
     selectedVariant ? ` en medida ${selectedVariant.label}` : ''
   } (${formatCOP(currentPrice)} COP).`;
   const whatsappUrl = WHATSAPP_CONTACT.buildUrl(whatsappMessage);
@@ -176,7 +176,7 @@ export function ProductDetailModal({
           <div className="space-y-2.5 sm:space-y-4">
             <div>
               <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-brand-gold block mb-0.5">
-                NavidDavid • Colección Oficial
+                NaviDavid • Colección Oficial
               </span>
               <h2 className="font-display text-lg sm:text-2xl lg:text-3xl font-bold text-white leading-tight">
                 {product.name}

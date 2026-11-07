@@ -79,7 +79,7 @@ export class OrderService {
     // 4. Crear link de pago oficial con la API de Bold (Al igual que en Barber_Tech_BF)
     const paymentUrl = await this.boldProvider.createPaymentLink(
       boldReference,
-      `Compra NavidDavid - Guía ${trackingNumber}`,
+      `Compra NaviDavid - Guía ${trackingNumber}`,
       totalAmount
     );
 

@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # GUÍA DE ARQUITECTURA Y ESTÁNDARES: NAVIDAD DAVID
 
-Este documento es la **fuente oficial de verdad** del proyecto **NavidDavid**. Cualquier agente o desarrollador que trabaje en esta base de código debe respetar estrictamente los principios, patrones arquitectónicos y reglas aquí detallados.
+Este documento es la **fuente oficial de verdad** del proyecto **NaviDavid**. Cualquier agente o desarrollador que trabaje en esta base de código debe respetar estrictamente los principios, patrones arquitectónicos y reglas aquí detallados.
 
 ---
 
@@ -164,7 +164,7 @@ El smartphone es el **dispositivo principal** de los clientes y administradores.
 * **Botón Flotante Oficial de WhatsApp ([WhatsAppFloatingButton.tsx](file:///src/frontend/components/WhatsAppFloatingButton.tsx))**:
   * Diseño estrictamente circular (`rounded-full w-12 h-12 sm:w-14 sm:h-14`) para optimizar el viewport táctil.
   * Icono vectorial oficial de WhatsApp sobre fondo `#25D366` con aro `ring-4 ring-black/40` y punto pulsante esmeralda.
-  * **REGLA ESTRICTA**: Prohibido añadir etiquetas o pastillas de texto alargadas ("Asesoría NavidDavid") que reduzcan el espacio de visualización en smartphones.
+  * **REGLA ESTRICTA**: Prohibido añadir etiquetas o pastillas de texto alargadas ("Asesoría NaviDavid") que reduzcan el espacio de visualización en smartphones.
 * **Composición y Encuadre del Hero en Smartphones**:
   * Altura responsiva (`min-h-[640px] sm:min-h-[720px] md:min-h-[780px] lg:h-[840px]`) que previene el zoom desmedido (3.6x) al proyectar fotos panorámicas 16:9 en pantallas móviles verticales.
   * Foco centralizado (`object-[center_32%] md:object-center`) para destacar siempre el árbol y la escena familiar.

@@ -241,7 +241,7 @@ export function ViewProductosAdmin({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       e.currentTarget.src =
-                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2305140e'><rect width='100' height='100'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2322c55e' font-size='14'>NavidDavid</text></svg>";
+                        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2305140e'><rect width='100' height='100'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2322c55e' font-size='14'>NaviDavid</text></svg>";
                     }}
                   />
                   {prod.badgeTop && (

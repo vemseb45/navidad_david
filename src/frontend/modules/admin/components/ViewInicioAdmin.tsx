@@ -138,7 +138,7 @@ export function ViewInicioAdmin({
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#133e2b] text-[#ffe088] text-[11px] font-sans font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-sm">sparkles</span>
-            Campaña Activa 2026 • NavidDavid
+            Campaña Activa 2026 • NaviDavid
           </div>
 
           <h1 className="font-serif text-2xl sm:text-4xl font-bold text-[#002718] tracking-tight">
@@ -146,7 +146,7 @@ export function ViewInicioAdmin({
           </h1>
 
           <p className="font-sans text-xs sm:text-sm text-[#414943] leading-relaxed">
-            Monitoreo en tiempo real de ingresos, conversión y despacho de árboles artesanales y accesorios de gala conectados a la base de datos oficial.
+            Monitoreo en tiempo real de ingresos, conversión y despacho de árboles artesanales y accesorios de gala en tienda y despachos a nivel nacional.
           </p>
         </div>
 

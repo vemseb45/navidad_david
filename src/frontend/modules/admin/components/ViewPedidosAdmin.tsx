@@ -183,7 +183,7 @@ export function ViewPedidosAdmin({ metrics, onRefresh }: ViewPedidosAdminProps) 
                     <td className="py-3.5 px-4 text-center">
                       <a
                         href={`https://wa.me/${ord.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                          `¡Hola ${ord.customerName}! Te contactamos de NavidDavid para confirmar el despacho de tu pedido con guía ${ord.trackingNumber}.`
+                          `¡Hola ${ord.customerName}! Te contactamos de NaviDavid para confirmar el despacho de tu pedido con guía ${ord.trackingNumber}.`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"

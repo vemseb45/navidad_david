@@ -27,14 +27,14 @@ export async function send2FAEmail(
   userName: string,
   code: string
 ): Promise<{ success: boolean; error?: string }> {
-  const from = process.env.SMTP_FROM || '"NavidDavid Seguridad" <soporte@navidaddavid.com>';
+  const from = process.env.SMTP_FROM || '"NaviDavid Seguridad" <soporte@navidaddavid.com>';
 
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="es">
     <head>
       <meta charset="utf-8">
-      <title>Código de Seguridad 2FA - NavidDavid</title>
+      <title>Código de Seguridad 2FA - NaviDavid</title>
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f3ef; margin: 0; padding: 24px;">
       <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 560px; background-color: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e4e2de; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
@@ -42,7 +42,7 @@ export async function send2FAEmail(
         <tr>
           <td style="background: linear-gradient(135deg, #002718 0%, #133e2b 100%); padding: 32px 24px; text-align: center;">
             <div style="font-size: 32px; line-height: 1;">🎄</div>
-            <h1 style="color: #ffffff; font-size: 22px; font-weight: bold; margin: 12px 0 4px 0; letter-spacing: -0.5px;">NavidDavid</h1>
+            <h1 style="color: #ffffff; font-size: 22px; font-weight: bold; margin: 12px 0 4px 0; letter-spacing: -0.5px;">NaviDavid</h1>
             <p style="color: #ffe088; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Panel de Control Administrativo • Seguridad 2FA</p>
           </td>
         </tr>
@@ -54,7 +54,7 @@ export async function send2FAEmail(
               Hola, <strong>${userName || 'Administrador'}</strong>:
             </p>
             <p style="color: #4a5568; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
-              Has iniciado sesión en el panel administrativo de <strong>NavidDavid</strong>. Para completar tu acceso protegido, ingresa el siguiente código de verificación de 6 dígitos:
+              Has iniciado sesión en el panel administrativo de <strong>NaviDavid</strong>. Para completar tu acceso protegido, ingresa el siguiente código de verificación de 6 dígitos:
             </p>
 
             <!-- CÓDIGO 2FA DESTACADO -->
@@ -78,7 +78,7 @@ export async function send2FAEmail(
         <tr>
           <td style="background-color: #f8f7f4; padding: 20px 24px; text-align: center; border-top: 1px solid #e4e2de;">
             <p style="color: #a0aec0; font-size: 11px; margin: 0;">
-              NavidDavid &copy; 2026. Todos los derechos reservados.
+              NaviDavid &copy; 2026. Todos los derechos reservados.
             </p>
           </td>
         </tr>
@@ -92,9 +92,9 @@ export async function send2FAEmail(
     const info = await transporter.sendMail({
       from,
       to,
-      subject: `🎄 [${code}] Tu código de verificación 2FA - NavidDavid`,
+      subject: `🎄 [${code}] Tu código de verificación 2FA - NaviDavid`,
       html: htmlContent,
-      text: `NavidDavid - Código de verificación 2FA: ${code}. Válido por 5 minutos.`,
+      text: `NaviDavid - Código de verificación 2FA: ${code}. Válido por 5 minutos.`,
     });
 
     console.log(`✉ [SMTP 2FA] Correo enviado a ${to} (MessageId: ${info.messageId})`);

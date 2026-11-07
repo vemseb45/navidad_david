@@ -33,7 +33,7 @@ const HERO_BACKGROUNDS: readonly HeroBackgroundItem[] = [
   {
     id: 0,
     image: OFFICIAL_ASSETS.HERO_FAMILY,
-    title: 'NavidDavid • Colección Oficial',
+    title: 'NaviDavid • Colección Oficial',
   },
   {
     id: 1,
@@ -169,16 +169,16 @@ export function CommercialHero({
           <div className="flex items-center space-x-3.5">
             <Link
               href="/admin"
-              title="NavidDavid - Administrador"
+              title="NaviDavid - Administrador"
               className="group flex items-center space-x-3 transition-transform hover:scale-105"
             >
               <img
-                alt="Logo Oficial NavidDavid"
+                alt="Logo Oficial NaviDavid"
                 className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover border-2 border-brand-gold/60 shadow-md"
                 src={OFFICIAL_ASSETS.LOGO_ORIGINAL}
               />
               <span className="font-display font-bold text-base md:text-lg text-white tracking-tight group-hover:text-brand-gold transition-colors">
-                NavidDavid
+                NaviDavid
               </span>
             </Link>
           </div>

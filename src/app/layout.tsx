@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'NavidDavid | Árboles y Momentos que Unen a tu Familia',
+  title: 'NaviDavid | Árboles y Momentos que Unen a tu Familia',
   description: 'Diseño, confort y magia artesanal para celebrar la Navidad más inolvidable junto a quienes amas en Colombia.',
   icons: {
     icon: [

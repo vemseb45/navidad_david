@@ -178,7 +178,7 @@ export class AuthController {
       }
 
       const nuevoUsuario = await this.service.createUser(parsed.data);
-      return apiResponse(true, 'Usuario creado exitosamente en tb_users', nuevoUsuario, 201);
+      return apiResponse(true, 'Usuario creado exitosamente', nuevoUsuario, 201);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al crear usuario';
       return apiResponse(false, message, null, 400);

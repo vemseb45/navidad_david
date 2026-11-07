@@ -61,7 +61,7 @@ export function ViewUsuariosAdmin({
         setUsuarios(list);
       }
     } catch (err) {
-      console.error('Error cargando usuarios de tb_users:', err);
+      console.error('Error cargando usuarios:', err);
     } finally {
       setLoading(false);
     }
@@ -142,7 +142,7 @@ export function ViewUsuariosAdmin({
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      showToast(`¡Usuario ${nombres} creado exitosamente en tb_users!`);
+      showToast(`¡Usuario ${nombres} creado exitosamente!`);
       setNombres('');
       setCorreo('');
       setContrasena('');
@@ -161,7 +161,7 @@ export function ViewUsuariosAdmin({
       return;
     }
 
-    if (!confirm(`¿Deseas eliminar permanentemente a "${nombre}" de tb_users?`)) return;
+    if (!confirm(`¿Deseas eliminar permanentemente a "${nombre}"?`)) return;
 
     try {
       const res = await fetch(`/api/auth/users?id=${userId}`, {
@@ -172,7 +172,7 @@ export function ViewUsuariosAdmin({
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      showToast(`Usuario ${nombre} eliminado de tb_users`);
+      showToast(`Usuario ${nombre} eliminado exitosamente`);
       cargarUsuarios();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error al eliminar usuario');
@@ -206,7 +206,7 @@ export function ViewUsuariosAdmin({
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#22c55e]">
-                Seguridad & Accesos • tb_users
+                Seguridad & Accesos • Administradores
               </span>
               <h2 className="font-serif text-lg sm:text-xl font-bold text-white leading-tight">
                 Gestión de Usuarios & Doble Factor (2FA) Individual
@@ -262,7 +262,7 @@ export function ViewUsuariosAdmin({
               {usuarios.length === 0 && !loading && (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
-                    <p className="font-semibold">No se encontraron usuarios en tb_users.</p>
+                    <p className="font-semibold">No se encontraron usuarios registrados.</p>
                     <p className="text-[11px] text-slate-500 mt-1">Presiona "Crear Usuario" para registrar uno nuevo.</p>
                   </td>
                 </tr>
@@ -272,7 +272,7 @@ export function ViewUsuariosAdmin({
                   <td colSpan={6} className="py-12 text-center text-[#22c55e]">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-[#22c55e] border-t-transparent rounded-full animate-spin" />
-                      <span>Cargando usuarios desde tb_users...</span>
+                      <span>Cargando usuarios...</span>
                     </div>
                   </td>
                 </tr>
@@ -364,7 +364,7 @@ export function ViewUsuariosAdmin({
                         <button
                           onClick={() => handleEliminarUsuario(u.id, u.nombres_apellidos)}
                           className="p-2 rounded-xl text-rose-400 hover:bg-rose-500/20 transition-colors"
-                          title="Eliminar usuario de tb_users"
+                          title="Eliminar usuario"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -382,14 +382,14 @@ export function ViewUsuariosAdmin({
       <div className="md:hidden space-y-3">
         {usuarios.length === 0 && !loading && (
           <div className="p-8 text-center text-slate-400 bg-[#081a13] rounded-2xl border border-white/10">
-            <p className="font-semibold">No se encontraron usuarios en tb_users.</p>
+            <p className="font-semibold">No se encontraron usuarios registrados.</p>
             <p className="text-[11px] text-slate-500 mt-1">Presiona "Crear Usuario" para registrar uno nuevo.</p>
           </div>
         )}
         {usuarios.length === 0 && loading && (
           <div className="p-8 text-center text-[#22c55e] bg-[#081a13] rounded-2xl border border-white/10 flex items-center justify-center gap-2">
             <div className="w-4 h-4 border-2 border-[#22c55e] border-t-transparent rounded-full animate-spin" />
-            <span>Cargando usuarios desde tb_users...</span>
+            <span>Cargando usuarios...</span>
           </div>
         )}
         {usuarios.map((u) => {
@@ -476,7 +476,7 @@ export function ViewUsuariosAdmin({
         })}
       </div>
 
-      {/* MODAL CREAR USUARIO EN tb_users (DARK LUXURY) */}
+      {/* MODAL CREAR USUARIO (DARK LUXURY) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-[#081a13] border border-white/15 rounded-t-[28px] sm:rounded-2xl max-w-md w-full p-5 sm:p-8 shadow-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto space-y-4 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200 text-white">
@@ -486,7 +486,7 @@ export function ViewUsuariosAdmin({
                   Crear Nuevo Usuario
                 </h3>
                 <p className="text-[11px] sm:text-xs text-slate-400">
-                  Se registrará en tb_users con hash seguro y su propia clave.
+                  Se registrará en el sistema con credenciales de acceso protegidas.
                 </p>
               </div>
               <button
@@ -586,7 +586,7 @@ export function ViewUsuariosAdmin({
                   type="submit"
                   className="px-6 py-2.5 rounded-xl bg-[#22c55e] hover:bg-[#16a34a] text-[#040d0a] text-xs font-bold uppercase tracking-wider disabled:opacity-50 shadow-md"
                 >
-                  {creating ? 'Guardando en tb_users...' : 'Crear Usuario'}
+                  {creating ? 'Guardando...' : 'Crear Usuario'}
                 </button>
               </div>
             </form>

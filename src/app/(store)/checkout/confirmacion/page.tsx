@@ -28,7 +28,7 @@ export default async function OrderConfirmationPage({
         <div className="flex items-center justify-center gap-4">
           <img
             src="/Logo_david.png"
-            alt="NavidDavid"
+            alt="NaviDavid"
             className="w-16 h-16 rounded-full object-cover ring-2 ring-[#002718]/20 shadow-md"
           />
           <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-3xl font-bold shadow-inner">
@@ -38,7 +38,7 @@ export default async function OrderConfirmationPage({
 
         <div>
           <span className="text-xs uppercase tracking-widest font-bold text-[#b90d1c]">
-            NavidDavid • Compra Confirmada
+            NaviDavid • Compra Confirmada
           </span>
           <h1 className="font-serif text-3xl font-bold text-[#002718] mt-1">
             ¡Gracias por tu compra navideña!
