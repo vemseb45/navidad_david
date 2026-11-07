@@ -8,9 +8,9 @@ export class BoldPaymentProvider {
   private readonly appUrl: string;
 
   constructor() {
-    this.apiKey = process.env.BOLD_API_KEY || process.env.NEXT_PUBLIC_BOLD_API_KEY || 'bold_dev_api_key';
+    this.apiKey = process.env.BOLD_API_KEY || '';
     this.apiUrl = process.env.BOLD_API_URL || 'https://integrations.api.bold.co/online/link/v1';
-    this.webhookSecret = process.env.BOLD_WEBHOOK_SECRET || process.env.BOLD_SECRET_KEY || 'bold_dev_webhook_secret';
+    this.webhookSecret = process.env.BOLD_WEBHOOK_SECRET || '';
     this.appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   }
 
@@ -18,6 +18,11 @@ export class BoldPaymentProvider {
    * Crea un Link de Pago oficial con la API de Bold (Al igual que en Barber_Tech_BF)
    */
   public async createPaymentLink(referencia: string, descripcion: string, monto: number): Promise<string> {
+    if (!this.apiKey || !this.apiUrl) {
+      console.error('❌ [BoldPaymentProvider] Faltan variables de entorno BOLD_API_KEY o BOLD_API_URL');
+      throw new Error('Credenciales de pasarela Bold incompletas en el servidor.');
+    }
+
     const payload = {
       description: descripcion,
       reference: referencia,
@@ -26,11 +31,10 @@ export class BoldPaymentProvider {
         currency: 'COP',
         total_amount: Math.round(monto),
       },
-      callback_url: `${this.appUrl}/checkout/confirmacion?guia=${referencia.replace('BOLD-', '')}`,
     };
 
     try {
-      console.log(`[BoldPaymentProvider] Generando link de pago Bold por $${monto} COP...`);
+      console.log(`[BoldPaymentProvider] Generando link de pago oficial Bold por $${monto} COP...`);
       console.log(`[BoldPaymentProvider] Payload:`, JSON.stringify(payload));
 
       const response = await fetch(this.apiUrl, {
@@ -44,21 +48,30 @@ export class BoldPaymentProvider {
 
       const data = await response.json();
 
-      if (response.ok) {
-        const urlDePago = data.payload?.url || data.url || data.linkUrl || data.payment_link;
-        if (urlDePago) {
-          console.log('✅ [BoldPaymentProvider] Link de Bold creado exitosamente:', urlDePago);
-          return urlDePago;
-        }
+      if (!response.ok) {
+        console.error('❌ [BoldPaymentProvider] Error devuelto por la API de Bold:', JSON.stringify(data, null, 2));
+        const errMsg =
+          data.message ||
+          data.error ||
+          (Array.isArray(data.errors) && data.errors[0]?.message) ||
+          'Error en la respuesta de Bold';
+        throw new Error(`Error en la pasarela Bold: ${errMsg}`);
       }
 
-      console.warn('⚠️ [BoldPaymentProvider] Respuesta no estándar de Bold, usando URL de confirmación directa:', data);
-      return `${this.appUrl}/checkout/confirmacion?guia=${referencia.replace('BOLD-', '')}`;
+      // Dependiendo de la versión de la API de Bold, devuelven la URL del link en una de estas variables
+      const urlDePago = data.payload?.url || data.url || data.linkUrl || data.payment_link || '';
+
+      if (!urlDePago) {
+        console.error('❌ [BoldPaymentProvider] No se recibió URL de pago en la respuesta de Bold:', data);
+        throw new Error('Bold no retornó una URL de pago válida.');
+      }
+
+      console.log('✅ [BoldPaymentProvider] Link de Bold creado exitosamente:', urlDePago);
+      return urlDePago;
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Error desconocido';
-      console.warn(`[BoldPaymentProvider] Modo offline / desarrollo: ${msg}`);
-      // Fallback para pruebas locales sin credenciales de producción
-      return `${this.appUrl}/checkout/confirmacion?guia=${referencia.replace('BOLD-', '')}`;
+      const msg = error instanceof Error ? error.message : 'Error desconocido comunicando con Bold';
+      console.error('❌ [BoldPaymentProvider] Excepción generando link de Bold:', msg);
+      throw new Error(msg);
     }
   }
 
