@@ -59,6 +59,15 @@ export function AdminDashboardView({
     }
   }, [initialUsers]);
 
+  // Purga inmediata de cualquier residuo sensible en almacenamiento del navegador
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('navidad_admin_token');
+      localStorage.removeItem('navidad_admin_user');
+      sessionStorage.clear();
+    }
+  }, []);
+
   // 1. SINCRONIZACIÓN DE ENDPOINTS EN LA URL (/admin/pedidos, /admin/productos, etc.)
   useEffect(() => {
     if (typeof window !== 'undefined') {
