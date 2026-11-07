@@ -125,7 +125,29 @@ export interface UserRecord {
   activacion_2fa: boolean;
   ultimo_login?: string | null;
   esta_activo: boolean;
+  esta_bloqueado?: boolean;
+  intentos_fallidos?: number;
+  fecha_bloqueo?: string | null;
   fecha_creacion: string;
+}
+
+export interface LogSeguridadRecord {
+  id: number;
+  tipo_evento: string;
+  correo_intentado: string;
+  direccion_ip: string;
+  detalles?: string | null;
+  fecha_hora: string;
+}
+
+export interface IpBloqueadaRecord {
+  id: number;
+  direccion_ip: string;
+  motivo: string;
+  esta_bloqueada: boolean;
+  intentos_registrados: number;
+  fecha_hora_bloqueo: string;
+  fecha_actualizacion: string;
 }
 
 export interface AdminCustomerRecord {

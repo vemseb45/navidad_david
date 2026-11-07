@@ -25,6 +25,7 @@ export const toggle2faSchema = z
     id: z.string().uuid('ID de usuario inválido').optional(),
     activo: z.boolean().optional(),
     activacion_2fa: z.boolean().optional(),
+    desbloquear: z.boolean().optional(),
   })
   .refine((data) => data.usuarioId || data.id, {
     message: 'Debe especificar el ID del usuario',
@@ -32,9 +33,15 @@ export const toggle2faSchema = z
   .transform((data) => ({
     usuarioId: (data.usuarioId || data.id) as string,
     activo: (data.activo !== undefined ? data.activo : data.activacion_2fa) ?? true,
+    desbloquear: data.desbloquear === true,
   }));
+
+export const unblockIpSchema = z.object({
+  ip: z.string().min(1, 'Dirección IP requerida'),
+});
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type Verify2faInput = z.infer<typeof verify2faSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type Toggle2faInput = z.infer<typeof toggle2faSchema>;
+export type UnblockIpInput = z.infer<typeof unblockIpSchema>;

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { AUTH_COOKIE_NAME, AUTH_TOKEN_SECRET } from '@/backend/modules/auth/auth.constants';
+import { getClientIp } from '@/backend/shared/utils/client-ip';
+import { SecurityRateLimitService } from '@/backend/modules/auth/security/security-rate-limit.service';
 
 /**
  * Rutas de la API que requieren autenticación administrativa obligatoria por JWT en Cookie HttpOnly
@@ -9,6 +11,7 @@ import { AUTH_COOKIE_NAME, AUTH_TOKEN_SECRET } from '@/backend/modules/auth/auth
 const PROTECTED_API_PATTERNS = [
   /^\/api\/admin(\/.*)?$/,
   /^\/api\/auth\/users(\/.*)?$/,
+  /^\/api\/auth\/security(\/.*)?$/,
 ];
 
 /**
@@ -65,9 +68,25 @@ function applySecurityHeaders(response: NextResponse): void {
 /**
  * Proxy de Seguridad en Next.js 16 (anteriormente middleware.ts)
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requestId = crypto.randomUUID();
+
+  // 0. Bloqueo Inmediato de IPs en Lista Negra (Anti-Fuerza Bruta & Rate Limiting)
+  const clientIp = getClientIp(request);
+  const isBlocked = await SecurityRateLimitService.isIpBlocked(clientIp);
+
+  if (isBlocked) {
+    // Si la dirección IP está bloqueada, la página no le contesta ("como si no tuviera alcance")
+    // Status 444: No Response / Conexión cerrada de inmediato
+    return new NextResponse(null, {
+      status: 444,
+      headers: {
+        Connection: 'close',
+        'Content-Length': '0',
+      },
+    });
+  }
 
   // 1. Manejo de peticiones preflight CORS en rutas de API
   if (request.method === 'OPTIONS' && pathname.startsWith('/api')) {

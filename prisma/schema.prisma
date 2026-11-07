@@ -56,12 +56,17 @@ model Usuario {
   activacion_2fa        Boolean   @default(true) // Requiere código 2FA para iniciar sesión
   codigo_2fa_temporal   String?   @db.VarChar(10) // Código numérico de verificación de 6 dígitos
   expiracion_codigo_2fa DateTime? @db.Timestamptz(6)
+  intentos_2fa          Int       @default(0) @db.Integer // Conteo de intentos fallidos de 2FA (máximo 3)
   ultimo_login          DateTime? @db.Timestamptz(6)
+  intentos_fallidos     Int       @default(0) @db.Integer // Conteo de intentos fallidos consecutivos
+  esta_bloqueado        Boolean   @default(false) // Bloqueado tras 5 intentos fallidos
+  fecha_bloqueo         DateTime? @db.Timestamptz(6) // Momento del bloqueo
   esta_activo           Boolean   @default(true)
   fecha_creacion        DateTime  @default(now()) @db.Timestamptz(6)
   fecha_actualizacion   DateTime  @updatedAt @db.Timestamptz(6)
 
   @@index([correo_electronico, esta_activo])
+  @@index([esta_bloqueado])
   @@map("tb_users")
 }
 
@@ -274,4 +279,41 @@ model NotificacionAdmin {
 
   @@index([esta_leida, fecha_creacion])
   @@map("tb_notificaciones_admin")
+}
+
+// ========================================================
+// 11. TABLA: tb_logs_seguridad (AUDITORÍA Y RATE LIMIT CON ID ENTERO)
+// ========================================================
+/// Tabla tb_logs_seguridad: Registro forense de auditoría de seguridad para registrar
+/// eventos de acceso, contraseñas erróneas, bloqueos de usuario e intentos denegados.
+model LogSeguridad {
+  id               Int      @id @default(autoincrement())
+  tipo_evento      String   @db.VarChar(100) // CONTRASENA_INCORRECTA, BLOQUEO_USUARIO, INTENTO_USUARIO_BLOQUEADO, BLOQUEO_IP, ACCESO_DENEGADO_IP, LOGIN_EXITOSO
+  correo_intentado String   @db.VarChar(255) // Correo que se intentó autenticar
+  direccion_ip     String   @db.VarChar(64)  // Dirección IP del cliente
+  detalles         String?  @db.Text         // Metadatos adicionales o user-agent
+  fecha_hora       DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([direccion_ip, fecha_hora])
+  @@index([correo_intentado, fecha_hora])
+  @@index([tipo_evento])
+  @@map("tb_logs_seguridad")
+}
+
+// ========================================================
+// 12. TABLA: tb_ips_bloqueadas (LISTA NEGRA DE DIRECCIONES IP CON ID ENTERO)
+// ========================================================
+/// Tabla tb_ips_bloqueadas: Almacena direcciones IP bloqueadas por actividad maliciosa
+/// o intentos excesivos de acceso al panel administrativo.
+model IpBloqueada {
+  id                   Int      @id @default(autoincrement())
+  direccion_ip         String   @unique @db.VarChar(64)
+  motivo               String   @db.VarChar(255) // Razón del bloqueo
+  esta_bloqueada       Boolean  @default(true)
+  intentos_registrados Int      @default(1) @db.Integer
+  fecha_hora_bloqueo   DateTime @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([direccion_ip, esta_bloqueada])
+  @@map("tb_ips_bloqueadas")
 }

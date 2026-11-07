@@ -119,7 +119,8 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
    * Al iniciar sesión con éxito, el sistema **convierte automáticamente** la clave plana a un hash PBKDF2 (`salt:hash`) y actualiza la base de datos de inmediato.
 4. **Flujo de 2FA**:
    * Al ingresar usuario y clave válidos, si `activacion_2fa = true`, se genera un código de 6 dígitos con validez de 5 minutos y se envía exclusivamente al correo por SMTP.
-   * **NUNCA** retornar el código 2FA en la respuesta JSON ni autollenarlo en el formulario del frontend.
+   * **NUNCA** retornar el código 2FA en la respuesta JSON, ni almacenarlo en `localStorage` o `sessionStorage`, ni autollenarlo en el formulario del frontend.
+   * **Límite Estricto de 3 Intentos en 2FA**: El usuario tiene únicamente 3 intentos para ingresar el código OTP correcto. Cada intento fallido es registrado (`CODIGO_2FA_INCORRECTO`). Al tercer fallo, el código es destruido e invalidado en la base de datos (`BLOQUEO_2FA_INTENTOS_AGOTADOS`), forzando al usuario a iniciar sesión nuevamente desde el paso 1.
 5. **Proxy de Seguridad Next.js 16 (`src/proxy.ts`)**:
    * En Next.js 16, la convención `middleware.ts` fue renombrada a `proxy.ts` y corre por defecto sobre el runtime de Node.js.
    * Ubicación oficial: `src/proxy.ts` (al mismo nivel que `src/app`).
@@ -128,6 +129,13 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
    * Bloquea ataques CSRF en métodos de mutación (`POST`, `PUT`, `DELETE`, `PATCH`) comparando el Origin del cliente contra el Host (eximiendo webhooks de pasarelas como `/api/webhooks/bold`).
    * Inyecta `x-request-id` único para trazabilidad y propaga datos de sesión autenticada (`x-user-id`, `x-user-role`, `x-user-email`) hacia los controladores.
    * Si la cookie de sesión está corrupta o expiró, responde 401 y la limpia automáticamente con `Set-Cookie: Max-Age=0`.
+6. **Rate Limiting, Bloqueo tras 5 Intentos, Auditoría Forense (`tb_logs_seguridad`) y Lista Negra de IPs (`tb_ips_bloqueadas`)**:
+   * **Bloqueo Automático tras 5 Fallos**: Si un usuario ingresa una contraseña errónea 5 veces consecutivas, la cuenta queda bloqueada (`esta_bloqueado = true`, `intentos_fallidos = 5`, `fecha_bloqueo = now()`).
+   * **Sigilo Criptográfico**: El atacante NUNCA es notificado del bloqueo de la cuenta para no revelar información ("Credenciales inválidas", 401).
+   * **Auditoría Forense (`tb_logs_seguridad`)**: Almacena `id`, `tipo_evento` (`CONTRASENA_INCORRECTA`, `BLOQUEO_USUARIO`, `INTENTO_USUARIO_BLOQUEADO`, `BLOQUEO_IP`, `ACCESO_DENEGADO_IP`, `LOGIN_EXITOSO`), `correo_intentado`, `direccion_ip`, `detalles` y `fecha_hora`.
+   * **Lista Negra de IPs (`tb_ips_bloqueadas`)**: Si una dirección IP acumula 5 intentos fallidos en el panel, se ingresa en lista negra de inmediato con caché en memoria ultra-rápida.
+   * **Corte de Conexión sin Alcance (Status 444)**: Si una IP bloqueada solicita cualquier recurso del panel o autenticación, `proxy.ts` devuelve status 444 sin cuerpo y con `Connection: close`, como si el servidor no tuviera alcance.
+   * **Gestión Administrativa**: Desde el panel en `/admin/usuarios` (pestaña Auditoría & IPs Bloqueadas), un Administrador puede visualizar los logs forenses, consultar la lista negra y desbloquear cuentas o IPs con un clic.
 
 ---
 

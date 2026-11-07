@@ -33,17 +33,33 @@ export class AuthRepository {
       data: {
         codigo_2fa_temporal: codigo,
         expiracion_codigo_2fa: expiracion,
+        intentos_2fa: 0,
       },
     });
   }
 
-  async clear2FACode(id: string) {
+  async clear2FACode(id: string, updateLastLogin = true) {
     return prisma.usuario.update({
       where: { id },
       data: {
         codigo_2fa_temporal: null,
         expiracion_codigo_2fa: null,
-        ultimo_login: new Date(),
+        intentos_2fa: 0,
+        ...(updateLastLogin ? { ultimo_login: new Date() } : {}),
+      },
+    });
+  }
+
+  async increment2FAAttempts(id: string) {
+    return prisma.usuario.update({
+      where: { id },
+      data: {
+        intentos_2fa: {
+          increment: 1,
+        },
+      },
+      select: {
+        intentos_2fa: true,
       },
     });
   }
@@ -58,6 +74,9 @@ export class AuthRepository {
         activacion_2fa: true,
         ultimo_login: true,
         esta_activo: true,
+        esta_bloqueado: true,
+        intentos_fallidos: true,
+        fecha_bloqueo: true,
         fecha_creacion: true,
         fecha_actualizacion: true,
       },

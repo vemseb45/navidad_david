@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { AuthRepository } from './auth.repository';
 import { createToken, createPreAuthToken, readPreAuthToken, SessionUser } from './security/token.service';
 import { send2FAEmail } from './security/email-otp.service';
+import { SecurityRateLimitService } from './security/security-rate-limit.service';
 import { LoginInput, Verify2faInput, CreateUserInput, Toggle2faInput } from './validators/auth.validator';
 
 export class AuthService {
@@ -69,18 +70,62 @@ export class AuthService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
-  // Paso 1 de Login: Validar credenciales y enviar OTP por SMTP si requiere 2FA
-  public async loginUser(input: LoginInput) {
+  // Paso 1 de Login: Validar credenciales con Rate Limit estricto, bloqueo tras 5 intentos y despacho 2FA
+  public async loginUser(input: LoginInput, clientIp = '127.0.0.1') {
+    // 0. Comprobar si la IP del cliente está en lista negra
+    const ipBloqueada = await SecurityRateLimitService.isIpBlocked(clientIp);
+    if (ipBloqueada) {
+      await SecurityRateLimitService.logSecurityEvent(
+        'ACCESO_DENEGADO_IP',
+        input.correo,
+        clientIp,
+        'Intento de login desde dirección IP bloqueada en lista negra.'
+      );
+      throw new Error('IP_BLOQUEADA');
+    }
+
     const usuario = await this.repo.findByEmail(input.correo);
 
+    // 1. Si el usuario no existe o está inactivo
     if (!usuario || !usuario.esta_activo) {
-      throw new Error('Credenciales inválidas o usuario inactivo');
-    }
-
-    const esValida = AuthService.verifyPassword(input.contrasena, usuario.contrasena_hash);
-    if (!esValida) {
+      await SecurityRateLimitService.handleFailedAttempt(input.correo, clientIp, null, 0);
       throw new Error('Credenciales inválidas');
     }
+
+    // 2. Si el usuario ya fue bloqueado por superar 5 intentos seguidos
+    // REGLA DE SEGURIDAD ESTRICTA: El atacante NUNCA debe saber que la cuenta está bloqueada
+    if (usuario.esta_bloqueado) {
+      await SecurityRateLimitService.logSecurityEvent(
+        'INTENTO_USUARIO_BLOQUEADO',
+        usuario.correo_electronico,
+        clientIp,
+        `Intento de acceso a cuenta bloqueada (Intentos registrados: ${usuario.intentos_fallidos}).`
+      );
+      // Evaluamos también la IP para frenar herramientas automatizadas de fuerza bruta
+      await SecurityRateLimitService.handleFailedAttempt(
+        usuario.correo_electronico,
+        clientIp,
+        usuario.id,
+        usuario.intentos_fallidos
+      );
+      throw new Error('Credenciales inválidas');
+    }
+
+    // 3. Verificación criptográfica de contraseña
+    const esValida = AuthService.verifyPassword(input.contrasena, usuario.contrasena_hash);
+    if (!esValida) {
+      // Registra el fallo, incrementa conteo y bloquea al llegar a 5 intentos consecutivos
+      await SecurityRateLimitService.handleFailedAttempt(
+        usuario.correo_electronico,
+        clientIp,
+        usuario.id,
+        usuario.intentos_fallidos
+      );
+      throw new Error('Credenciales inválidas');
+    }
+
+    // 4. Si la contraseña es válida, restablecemos los intentos fallidos a 0 y registramos éxito
+    await SecurityRateLimitService.handleSuccessfulLogin(usuario.id, usuario.correo_electronico, clientIp);
 
     // Si la contraseña en la base de datos era texto plano (por cambio manual del admin/DBA), la migramos automáticamente a hash seguro
     if (usuario.contrasena_hash === input.contrasena) {
@@ -103,9 +148,8 @@ export class AuthService {
       const preAuthToken = createPreAuthToken(usuario.id);
 
       await this.repo.set2FACode(usuario.id, codigo2FA, expiracion);
-      console.log(`🔐 [2FA NAVIDAVID] Código para ${usuario.correo_electronico}: ${codigo2FA}`);
 
-      // Despacho real mediante SMTP
+      // Despacho real mediante SMTP hacia el correo del usuario
       await send2FAEmail(usuario.correo_electronico, usuario.nombres_apellidos, codigo2FA);
 
       return {
@@ -127,8 +171,13 @@ export class AuthService {
     };
   }
 
-  // Paso 2 de Login: Validar código 2FA
-  public async verify2fa(input: Verify2faInput) {
+  // Paso 2 de Login: Validar código 2FA con límite estricto de 3 intentos
+  public async verify2fa(input: Verify2faInput, clientIp = '127.0.0.1') {
+    const ipBloqueada = await SecurityRateLimitService.isIpBlocked(clientIp);
+    if (ipBloqueada) {
+      throw new Error('IP_BLOQUEADA');
+    }
+
     if (input.preAuthToken) {
       const decoded = readPreAuthToken(input.preAuthToken);
       if (!decoded || decoded.usuarioId !== input.usuarioId) {
@@ -146,15 +195,59 @@ export class AuthService {
     }
 
     if (new Date() > new Date(usuario.expiracion_codigo_2fa)) {
-      throw new Error('El código 2FA ha expirado. Por favor inicia sesión nuevamente');
+      await this.repo.clear2FACode(usuario.id, false);
+      throw new Error('El código 2FA ha expirado. Por favor inicia sesión nuevamente.');
     }
 
+    // Si ya había alcanzado el límite de 3 intentos
+    if (usuario.intentos_2fa >= 3) {
+      await this.repo.clear2FACode(usuario.id, false);
+      throw new Error('Has superado los 3 intentos permitidos para este código. Por favor inicia sesión nuevamente.');
+    }
+
+    // Verificación del código de 6 dígitos
     if (usuario.codigo_2fa_temporal !== input.codigo) {
-      throw new Error('Código 2FA incorrecto');
+      const updated = await this.repo.increment2FAAttempts(usuario.id);
+      const intentosActuales = updated.intentos_2fa;
+
+      if (intentosActuales >= 3) {
+        // Al tercer fallo, se invalida el código de inmediato para frenar ataques de fuerza bruta al OTP
+        await this.repo.clear2FACode(usuario.id, false);
+        await SecurityRateLimitService.logSecurityEvent(
+          'BLOQUEO_2FA_INTENTOS_AGOTADOS',
+          usuario.correo_electronico,
+          clientIp,
+          'Código 2FA invalidado automáticamente tras agotar los 3 intentos permitidos.'
+        );
+        // Se computa fallo también a la IP para proteger el sistema
+        await SecurityRateLimitService.handleFailedAttempt(
+          usuario.correo_electronico,
+          clientIp,
+          null,
+          0
+        );
+        throw new Error('Código 2FA incorrecto. Has superado los 3 intentos permitidos. Por seguridad, el código ha sido invalidado. Inicia sesión nuevamente.');
+      } else {
+        const restantes = 3 - intentosActuales;
+        await SecurityRateLimitService.logSecurityEvent(
+          'CODIGO_2FA_INCORRECTO',
+          usuario.correo_electronico,
+          clientIp,
+          `Código 2FA incorrecto (Intento ${intentosActuales} de 3).`
+        );
+        throw new Error(`Código 2FA incorrecto. Te ${restantes === 1 ? 'queda 1 intento' : `quedan ${restantes} intentos`} antes de invalidar el código.`);
+      }
     }
 
-    // Limpiar código temporal y registrar login
-    await this.repo.clear2FACode(usuario.id);
+    // Código correcto: Limpiar código temporal, restablecer intentos de 2FA y registrar login
+    await this.repo.clear2FACode(usuario.id, true);
+
+    await SecurityRateLimitService.logSecurityEvent(
+      'LOGIN_2FA_EXITOSO',
+      usuario.correo_electronico,
+      clientIp,
+      'Verificación de doble factor (2FA) completada con éxito.'
+    );
 
     const sessionUser: SessionUser = {
       id: usuario.id,
@@ -199,7 +292,7 @@ export class AuthService {
   }
 
   // Conmutar 2FA individual por usuario
-  public async toggle2FA(input: Toggle2faInput) {
+  public async toggle2FA(input: { usuarioId: string; activo: boolean }) {
     const usuario = await this.repo.findById(input.usuarioId);
     if (!usuario) {
       throw new Error('El usuario especificado no existe');
@@ -217,5 +310,31 @@ export class AuthService {
       throw new Error('Debe existir al menos un usuario administrador en el sistema');
     }
     return this.repo.deleteUser(id);
+  }
+
+  // Desbloquear usuario administrativo bloqueado tras 5 intentos fallidos
+  public async unblockUser(id: string) {
+    const usuario = await this.repo.findById(id);
+    if (!usuario) {
+      throw new Error('El usuario especificado no existe');
+    }
+    await SecurityRateLimitService.unblockUser(id);
+    return { id, desbloqueado: true };
+  }
+
+  // Desbloquear dirección IP de la lista negra
+  public async unblockIp(ip: string) {
+    await SecurityRateLimitService.unblockIp(ip);
+    return { ip, desbloqueada: true };
+  }
+
+  // Listar direcciones IP bloqueadas
+  public async listBlockedIps() {
+    return SecurityRateLimitService.listBlockedIps();
+  }
+
+  // Listar logs forenses de auditoría de seguridad
+  public async listSecurityLogs(limit = 100) {
+    return SecurityRateLimitService.listSecurityLogs(limit);
   }
 }

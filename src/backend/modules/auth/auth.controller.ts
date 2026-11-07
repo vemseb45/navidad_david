@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiResponse } from '@/backend/shared/utils/apiResponse';
 import { getSessionUser } from '@/backend/shared/get-session-user';
+import { getClientIp } from '@/backend/shared/utils/client-ip';
+import { SecurityRateLimitService } from './security/security-rate-limit.service';
 import { SessionUser } from './security/token.service';
 import { setSessionCookie, clearSessionCookie } from './security/session.service';
 import { AuthService } from './auth.service';
@@ -9,6 +11,7 @@ import {
   verify2faSchema,
   createUserSchema,
   toggle2faSchema,
+  unblockIpSchema,
 } from './validators/auth.validator';
 
 async function parseBody(req: NextRequest) {
@@ -30,6 +33,16 @@ export class AuthController {
 
   // POST /api/auth/login
   async login(req: NextRequest) {
+    const clientIp = getClientIp(req);
+
+    // Si la IP está bloqueada en la lista negra, no se le da respuesta ("sin alcance")
+    if (await SecurityRateLimitService.isIpBlocked(clientIp)) {
+      return new NextResponse(null, {
+        status: 444,
+        headers: { Connection: 'close' },
+      });
+    }
+
     try {
       const raw = await parseBody(req);
       const parsed = loginSchema.safeParse(raw);
@@ -38,7 +51,7 @@ export class AuthController {
         return apiResponse(false, 'Datos de inicio de sesión inválidos', null, 400, parsed.error.flatten());
       }
 
-      const result = await this.service.loginUser(parsed.data);
+      const result = await this.service.loginUser(parsed.data, clientIp);
 
       // Si no requiere 2FA, configuramos la cookie HttpOnly de inmediato
       if (!result.requiere2FA && result.token) {
@@ -47,6 +60,12 @@ export class AuthController {
 
       return apiResponse(true, 'Autenticación procesada', result, 200);
     } catch (error) {
+      if (error instanceof Error && error.message === 'IP_BLOQUEADA') {
+        return new NextResponse(null, {
+          status: 444,
+          headers: { Connection: 'close' },
+        });
+      }
       const message = error instanceof Error ? error.message : 'Error al autenticar usuario';
       return apiResponse(false, message, null, 401);
     }
@@ -54,6 +73,15 @@ export class AuthController {
 
   // POST /api/auth/verify-2fa
   async verify2fa(req: NextRequest) {
+    const clientIp = getClientIp(req);
+
+    if (await SecurityRateLimitService.isIpBlocked(clientIp)) {
+      return new NextResponse(null, {
+        status: 444,
+        headers: { Connection: 'close' },
+      });
+    }
+
     try {
       const raw = await parseBody(req);
       const parsed = verify2faSchema.safeParse(raw);
@@ -62,11 +90,17 @@ export class AuthController {
         return apiResponse(false, 'Parámetros de código 2FA inválidos', null, 400, parsed.error.flatten());
       }
 
-      const result = await this.service.verify2fa(parsed.data);
+      const result = await this.service.verify2fa(parsed.data, clientIp);
       await setSessionCookie(result.token);
 
       return apiResponse(true, 'Código 2FA verificado exitosamente', result, 200);
     } catch (error) {
+      if (error instanceof Error && error.message === 'IP_BLOQUEADA') {
+        return new NextResponse(null, {
+          status: 444,
+          headers: { Connection: 'close' },
+        });
+      }
       const message = error instanceof Error ? error.message : 'Código 2FA incorrecto o expirado';
       return apiResponse(false, message, null, 400);
     }
@@ -200,10 +234,74 @@ export class AuthController {
         return apiResponse(false, 'Parámetros inválidos', null, 400, parsed.error.flatten());
       }
 
-      const usuarioActualizado = await this.service.toggle2FA(parsed.data);
-      return apiResponse(true, 'Estado de 2FA actualizado', usuarioActualizado, 200);
+      // Desbloqueo de usuario administrativo
+      if (parsed.data.desbloquear) {
+        await this.service.unblockUser(parsed.data.usuarioId);
+        return apiResponse(true, 'Usuario desbloqueado exitosamente', { id: parsed.data.usuarioId }, 200);
+      }
+
+      if (parsed.data.activo !== undefined) {
+        const usuarioActualizado = await this.service.toggle2FA({
+          usuarioId: parsed.data.usuarioId,
+          activo: parsed.data.activo,
+        });
+        return apiResponse(true, 'Estado de 2FA actualizado', usuarioActualizado, 200);
+      }
+
+      return apiResponse(true, 'Sin modificaciones requeridas', null, 200);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al actualizar usuario';
+      return apiResponse(false, message, null, 400);
+    }
+  }
+
+  // GET /api/auth/security (Listar IPs bloqueadas y logs de seguridad)
+  async getSecurityOverview(_req: NextRequest) {
+    try {
+      const auth = await this.checkAdminAccess();
+      if (!auth.authorized) {
+        return auth.errorResponse!;
+      }
+
+      const [ipsBloqueadas, logsRecientes] = await Promise.all([
+        this.service.listBlockedIps(),
+        this.service.listSecurityLogs(50),
+      ]);
+
+      return apiResponse(
+        true,
+        'Información de seguridad obtenida',
+        {
+          ipsBloqueadas,
+          logsRecientes,
+        },
+        200
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al obtener datos de seguridad';
+      return apiResponse(false, message, null, 500);
+    }
+  }
+
+  // POST /api/auth/security/unblock-ip (Desbloquear IP)
+  async unblockIp(req: NextRequest) {
+    try {
+      const auth = await this.checkAdminAccess();
+      if (!auth.authorized) {
+        return auth.errorResponse!;
+      }
+
+      const raw = await parseBody(req);
+      const parsed = unblockIpSchema.safeParse(raw);
+
+      if (!parsed.success) {
+        return apiResponse(false, 'Dirección IP inválida', null, 400, parsed.error.flatten());
+      }
+
+      const result = await this.service.unblockIp(parsed.data.ip);
+      return apiResponse(true, 'Dirección IP desbloqueada exitosamente', result, 200);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al desbloquear IP';
       return apiResponse(false, message, null, 400);
     }
   }
