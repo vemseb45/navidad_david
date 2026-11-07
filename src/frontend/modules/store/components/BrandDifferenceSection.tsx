@@ -7,7 +7,7 @@ export function BrandDifferenceSection() {
     <section className="w-full scroll-mt-10" id="diferencia">
       <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
         <h2 className="text-3xl md:text-5xl font-bold font-display text-white tracking-tight">
-          La Diferencia Navidad David
+          La Diferencia NavidDavid
         </h2>
         <p className="text-stone-300 text-sm md:text-base mt-3">
           No fabricamos árboles desechables. Diseñamos centros de unión familiar construidos para mantener su

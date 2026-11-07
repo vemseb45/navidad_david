@@ -5,7 +5,7 @@ import { WHATSAPP_CONTACT } from '@/frontend/shared/constants';
 
 export function WhatsAppFloatingButton() {
   const whatsappUrl = WHATSAPP_CONTACT.buildUrl(
-    '¡Hola Navidad David! 🎄 Quisiera recibir asesoría personalizada sobre los árboles de Navidad y accesorios.'
+    '¡Hola NavidDavid! 🎄 Quisiera recibir asesoría personalizada sobre los árboles de Navidad y accesorios.'
   );
 
   return (

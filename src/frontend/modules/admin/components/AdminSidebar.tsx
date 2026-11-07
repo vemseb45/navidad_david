@@ -119,13 +119,13 @@ export function AdminSidebar({
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#15803d] to-[#166534] flex items-center justify-center text-[#fef08a] shadow-[0_4px_12px_rgba(22,101,52,0.4)] shrink-0 overflow-hidden p-0.5">
                 <img
                   src="/Logo_david.png"
-                  alt="Logo Navidad David"
+                  alt="Logo NavidDavid"
                   className="w-full h-full object-cover rounded-lg"
                 />
               </div>
               <div className="flex flex-col">
                 <span className="font-serif text-[15px] font-bold tracking-wide text-white leading-tight">
-                  Navidad David
+                  NavidDavid
                 </span>
               </div>
             </div>

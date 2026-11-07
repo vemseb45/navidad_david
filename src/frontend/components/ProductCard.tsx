@@ -32,7 +32,7 @@ export function ProductCard({ product, onAddToCart, onOpenQuickView }: ProductCa
     setTimeout(() => setIsAdded(false), 1200);
   };
 
-  const whatsappMessage = `¡Hola Navidad David! 🎄 Me interesa información sobre el producto "${product.name}"${
+  const whatsappMessage = `¡Hola NavidDavid! 🎄 Me interesa información sobre el producto "${product.name}"${
     selectedVariant ? ` (${selectedVariant.label})` : ''
   } - ${formatCOP(currentPrice)} COP.`;
   const whatsappUrl = WHATSAPP_CONTACT.buildUrl(whatsappMessage);

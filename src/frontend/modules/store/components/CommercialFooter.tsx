@@ -12,12 +12,12 @@ export function CommercialFooter() {
         <div className="lg:col-span-2 space-y-4">
           <Link href="/admin" title="Panel de Administración" className="flex items-center space-x-3.5 group">
             <img
-              alt="Logo Navidad David"
+              alt="Logo NavidDavid"
               className="w-12 h-12 rounded-full object-cover border-2 border-brand-gold/60 shadow-md group-hover:scale-105 transition-transform"
               src={OFFICIAL_ASSETS.LOGO_ORIGINAL}
             />
             <span className="text-xl font-bold font-display text-white tracking-tight group-hover:text-brand-gold transition-colors">
-              Navidad David
+              NavidDavid
             </span>
           </Link>
           <p className="text-xs text-stone-400 max-w-sm leading-relaxed">
@@ -119,7 +119,7 @@ export function CommercialFooter() {
       {/* Bottom Bar */}
       <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-stone-400">
         <div className="flex items-center gap-3">
-          <span>© 2026 Navidad David S.A.S. Todos los derechos reservados.</span>
+          <span>© 2026 NavidDavid S.A.S. Todos los derechos reservados.</span>
         </div>
         <div className="flex items-center gap-6">
           <a className="hover:text-white transition-colors" href="#">

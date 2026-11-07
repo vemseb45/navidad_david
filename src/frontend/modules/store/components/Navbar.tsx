@@ -62,19 +62,19 @@ export function Navbar({
         {/* LOGO OFICIAL - AL PRESIONARLO DIRIGE DIRECTAMENTE AL LOGIN ADMINISTRATIVO */}
         <Link
           href="/admin"
-          title="Navidad David (Acceso Administrativo)"
+          title="NavidDavid (Acceso Administrativo)"
           className="flex items-center gap-2 sm:gap-3 shrink-0 group focus:outline-none"
         >
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden ring-2 ring-[#ffe088]/40 shadow-md bg-white flex items-center justify-center p-0.5 group-hover:scale-105 group-hover:ring-[#22c55e] transition-all">
             <img
               src={OFFICIAL_ASSETS.LOGO_ORIGINAL}
-              alt="Logo Navidad David"
+              alt="Logo NavidDavid"
               className="w-full h-full object-cover rounded-full"
             />
           </div>
           <div className="flex flex-col">
             <span className="font-serif text-base sm:text-xl font-bold text-white leading-none tracking-tight group-hover:text-[#ffe088] transition-colors">
-              Navidad David
+              NavidDavid
             </span>
             <span className="text-[9px] sm:text-[10px] text-[#ffe088] uppercase tracking-widest mt-0.5 font-bold">
               Árboles de Navidad
@@ -126,7 +126,7 @@ export function Navbar({
 
           {/* ASESORÍA DIRECTA POR WHATSAPP */}
           <a
-            href={WHATSAPP_CONTACT.buildUrl('Hola Navidad David! Deseo información sobre los árboles de Navidad.')}
+            href={WHATSAPP_CONTACT.buildUrl('¡Hola NavidDavid! Deseo información sobre los árboles de Navidad.')}
             target="_blank"
             rel="noopener noreferrer"
             title="Asesoría personalizada por WhatsApp"

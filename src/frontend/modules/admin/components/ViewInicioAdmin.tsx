@@ -138,7 +138,7 @@ export function ViewInicioAdmin({
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#133e2b] text-[#ffe088] text-[11px] font-sans font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-sm">sparkles</span>
-            Campaña Activa 2026 • Navidad David
+            Campaña Activa 2026 • NavidDavid
           </div>
 
           <h1 className="font-serif text-2xl sm:text-4xl font-bold text-[#002718] tracking-tight">

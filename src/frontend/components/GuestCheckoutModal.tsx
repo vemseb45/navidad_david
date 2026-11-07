@@ -88,7 +88,7 @@ export function GuestCheckoutModal({
               ¡Orden Creada y Guía Generada!
             </h3>
             <p className="text-xs sm:text-sm text-stone-300">
-              Hemos asociado esta compra a tu correo <strong className="text-white">{email}</strong> y notificado al equipo de Navidad David.
+              Hemos asociado esta compra a tu correo <strong className="text-white">{email}</strong> y notificado al equipo de NavidDavid.
             </p>
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
               <span className="text-xs uppercase font-bold text-stone-400 block tracking-wider">

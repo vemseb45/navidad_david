@@ -94,7 +94,7 @@ export class OrderController {
       {
         status: 'online',
         gateway: 'Bold Webhook Listener',
-        service: 'Navidad David E-Commerce',
+        service: 'NavidDavid E-Commerce',
       },
       200
     );
