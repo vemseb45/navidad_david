@@ -44,6 +44,7 @@ export function AdminDashboardView({
     correo_electronico: string;
     rol: string;
   } | null>(serverSessionUser || null);
+  const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -103,48 +104,86 @@ export function AdminDashboardView({
     }
   };
 
-  // 2. COMPROBACIÓN DE SESIÓN (HttpOnly Cookie con fallback)
-  useEffect(() => {
-    const verificarSesionCookie = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (res.ok) {
-          const json = await res.json();
-          const user = json.data?.usuario || json.user || json.usuario;
-          if (json.success && user) {
-            setCurrentUser(user);
-            setIsAuthenticated(true);
-            return;
-          }
-        }
-
-        // Fallback de localStorage
-        const token = localStorage.getItem('navidad_admin_token');
-        const userStr = localStorage.getItem('navidad_admin_user');
-        if (token && userStr) {
-          const user = JSON.parse(userStr);
+  // 2. COMPROBACIÓN DE SESIÓN (HttpOnly Cookie estricta sin fallbacks inseguros de localStorage)
+  const verificarSesionCookie = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (res.ok) {
+        const json = await res.json();
+        const user = json.data?.usuario || json.user || json.usuario;
+        if (json.success && user) {
           setCurrentUser(user);
           setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-          setCurrentUser(null);
+          return true;
         }
-      } catch {
-        setIsAuthenticated(false);
       }
-    };
 
+      // Sesión expirada (límite de 1 hora) o token inválido
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('navidad_admin_token');
+        localStorage.removeItem('navidad_admin_user');
+      }
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      return false;
+    } catch {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('navidad_admin_token');
+        localStorage.removeItem('navidad_admin_user');
+      }
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
     if (!serverSessionUser) {
       verificarSesionCookie();
     }
-  }, [serverSessionUser]);
+  }, [serverSessionUser, verificarSesionCookie]);
+
+  // 3. MONITOREO ACTIVO DE EXPIRACIÓN DE SESIÓN (LÍMITE ESTRICTO DE 1 HORA)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Verificación periódica cada 60 segundos
+    const intervalId = setInterval(async () => {
+      const isValid = await verificarSesionCookie();
+      if (!isValid) {
+        setSessionExpiredMessage('Tu sesión ha expirado por seguridad (límite de 1 hora). Inicia sesión nuevamente.');
+      }
+    }, 60 * 1000);
+
+    // Verificación inmediata al reanudar foco de la ventana o visibilidad de la pestaña
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        const isValid = await verificarSesionCookie();
+        if (!isValid) {
+          setSessionExpiredMessage('Tu sesión ha expirado tras 1 hora de inactividad. Inicia sesión nuevamente.');
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated, verificarSesionCookie]);
 
   const handleAuthSuccess = (
-    token: string,
+    _token: string,
     user: { id: string; nombres_apellidos: string; correo_electronico: string; rol: string }
   ) => {
-    localStorage.setItem('navidad_admin_token', token);
-    localStorage.setItem('navidad_admin_user', JSON.stringify(user));
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('navidad_admin_token');
+      localStorage.removeItem('navidad_admin_user');
+    }
+    setSessionExpiredMessage(null);
     setCurrentUser(user);
     setIsAuthenticated(true);
     reloadAllData();
@@ -152,12 +191,14 @@ export function AdminDashboardView({
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch {
       // Ignorar error de red
     }
-    localStorage.removeItem('navidad_admin_token');
-    localStorage.removeItem('navidad_admin_user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('navidad_admin_token');
+      localStorage.removeItem('navidad_admin_user');
+    }
     setIsAuthenticated(false);
     setCurrentUser(null);
     window.location.href = '/admin';
@@ -165,17 +206,23 @@ export function AdminDashboardView({
 
   const reloadAllData = useCallback(async () => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('navidad_admin_token') : null;
-      const headers: Record<string, string> = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       const [dashRes, catRes, userRes] = await Promise.all([
-        fetch('/api/admin/dashboard', { headers, credentials: 'include' }),
-        fetch('/api/catalog?admin=true', { headers, credentials: 'include' }),
-        fetch('/api/auth/users', { headers, credentials: 'include' }),
+        fetch('/api/admin/dashboard', { credentials: 'include' }),
+        fetch('/api/catalog?admin=true', { credentials: 'include' }),
+        fetch('/api/auth/users', { credentials: 'include' }),
       ]);
+
+      // Si cualquier ruta protegida retorna 401 (token expirado tras 1 hora), desautenticar de inmediato
+      if (dashRes.status === 401 || userRes.status === 401) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('navidad_admin_token');
+          localStorage.removeItem('navidad_admin_user');
+        }
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setSessionExpiredMessage('Tu sesión ha expirado por seguridad (límite de 1 hora). Inicia sesión nuevamente.');
+        return;
+      }
 
       const dashData = await dashRes.json();
       const catData = await catRes.json();
@@ -204,7 +251,7 @@ export function AdminDashboardView({
 
   // Si no está autenticado, muestra exclusivamente el Login 2FA (cero fugas de ventas o pedidos)
   if (!isAuthenticated || !currentUser) {
-    return <AdminAuthView onSuccess={handleAuthSuccess} />;
+    return <AdminAuthView onSuccess={handleAuthSuccess} noticeMessage={sessionExpiredMessage} />;
   }
 
   const newOrdersCount =

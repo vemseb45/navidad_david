@@ -42,12 +42,7 @@ export function ViewUsuariosAdmin({
   const [creating, setCreating] = useState(false);
 
   const getAuthHeaders = () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('navidad_admin_token') : null;
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
+    return { 'Content-Type': 'application/json' };
   };
 
   const cargarUsuarios = async () => {
@@ -169,13 +164,9 @@ export function ViewUsuariosAdmin({
     if (!confirm(`¿Deseas eliminar permanentemente a "${nombre}" de tb_users?`)) return;
 
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('navidad_admin_token') : null;
-      const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
       const res = await fetch(`/api/auth/users?id=${userId}`, {
         method: 'DELETE',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
       const data = await res.json();

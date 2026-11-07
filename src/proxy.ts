@@ -188,6 +188,7 @@ export function proxy(request: NextRequest) {
       if (sessionCookie) {
         invalidTokenResponse.cookies.delete(AUTH_COOKIE_NAME);
         invalidTokenResponse.cookies.delete('barber_tech_session');
+        invalidTokenResponse.cookies.delete('arbolitos_navidad_david');
       }
       applySecurityHeaders(invalidTokenResponse);
       return invalidTokenResponse;
@@ -207,21 +208,48 @@ export function proxy(request: NextRequest) {
     const tokenToVerify = sessionCookie || bearerToken;
 
     let isValid = false;
+    let userId: string | undefined = undefined;
+    let userEmail: string | undefined = undefined;
     let userRole: string | undefined = undefined;
 
     if (tokenToVerify) {
       try {
         const decoded = jwt.verify(tokenToVerify, AUTH_TOKEN_SECRET) as {
           id?: string;
+          correo_electronico?: string;
           rol?: string;
         };
         if (decoded?.id) {
           isValid = true;
+          userId = decoded.id;
+          userEmail = decoded.correo_electronico || '';
           userRole = (decoded.rol || '').toUpperCase();
         }
       } catch {
         isValid = false;
       }
+    }
+
+    // Si la sesión no es válida y se intenta acceder a una sub-ruta (/admin/pedidos, /admin/productos, etc.)
+    if (!isValid && pathname !== '/admin') {
+      const redirectLogin = NextResponse.redirect(new URL('/admin', request.url));
+      redirectLogin.cookies.delete(AUTH_COOKIE_NAME);
+      redirectLogin.cookies.delete('barber_tech_session');
+      redirectLogin.cookies.delete('arbolitos_navidad_david');
+      applySecurityHeaders(redirectLogin);
+      return redirectLogin;
+    }
+
+    // Si la sesión expiró o es inválida en /admin, purgar cookies muertas
+    if (!isValid) {
+      const response = NextResponse.next();
+      if (sessionCookie) {
+        response.cookies.delete(AUTH_COOKIE_NAME);
+        response.cookies.delete('barber_tech_session');
+        response.cookies.delete('arbolitos_navidad_david');
+      }
+      applySecurityHeaders(response);
+      return response;
     }
 
     // Protección de acceso exclusivo de ADMIN para /admin/usuarios
@@ -231,12 +259,21 @@ export function proxy(request: NextRequest) {
       return redirectAdmin;
     }
 
-    // Si está en /admin y la cookie expiró o está corrupta, limpiarla
-    if (!isValid && sessionCookie && pathname === '/admin') {
-      const response = NextResponse.next();
-      response.cookies.delete(AUTH_COOKIE_NAME);
-      response.cookies.delete('barber_tech_session');
+    // Propagar cabeceras autenticadas hacia los Server Components en /admin
+    if (isValid && userId) {
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set('x-user-id', userId);
+      requestHeaders.set('x-user-email', userEmail || '');
+      requestHeaders.set('x-user-role', userRole || 'OPERADOR');
+      requestHeaders.set('x-request-id', requestId);
+
+      const response = NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
       applySecurityHeaders(response);
+      response.headers.set('x-request-id', requestId);
       return response;
     }
   }

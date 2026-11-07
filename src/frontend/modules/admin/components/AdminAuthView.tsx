@@ -5,9 +5,10 @@ import { Lock, Mail, KeyRound, ShieldCheck, ArrowRight, CheckCircle2 } from 'luc
 
 interface AdminAuthViewProps {
   onSuccess: (token: string, user: { id: string; nombres_apellidos: string; correo_electronico: string; rol: string }) => void;
+  noticeMessage?: string | null;
 }
 
-export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
+export function AdminAuthView({ onSuccess, noticeMessage }: AdminAuthViewProps) {
   const [step, setStep] = useState<'CREDENTIALS' | '2FA'>('CREDENTIALS');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -90,6 +91,13 @@ export function AdminAuthView({ onSuccess }: AdminAuthViewProps) {
             Acceso Panel de Control • 2FA + JWT Cookie Only
           </span>
         </div>
+
+        {noticeMessage && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-semibold flex items-center gap-2">
+            <span>⏳</span>
+            <span>{noticeMessage}</span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold flex items-center gap-2">

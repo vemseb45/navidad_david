@@ -5,9 +5,9 @@
 export const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'barber_tech_session';
 
 const sessionHours = Number(process.env.AUTH_SESSION_HOURS);
-export const AUTH_SESSION_HOURS = Number.isNaN(sessionHours) || sessionHours <= 0 ? 3 : sessionHours;
+export const AUTH_SESSION_HOURS = Number.isNaN(sessionHours) || sessionHours <= 0 ? 1 : sessionHours;
 
-// Expiración de la cookie en segundos (AUTH_SESSION_HOURS * 3600)
+// Expiración de la cookie en segundos (1 hora = 3600 segundos)
 export const AUTH_SESSION_MAX_AGE = AUTH_SESSION_HOURS * 60 * 60;
 
 // Llave criptográfica para firma y verificación de JWT

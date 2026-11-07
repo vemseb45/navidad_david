@@ -100,7 +100,7 @@ Cada módulo debe contar con la siguiente estructura:
 ### Variables de Entorno Requeridas (.env)
 ```env
 AUTH_COOKIE_NAME=barber_tech_session
-AUTH_SESSION_HOURS=4
+AUTH_SESSION_HOURS=1
 NEXTAUTH_SECRET="c4@fwiuso=a)2xkw5+)4+j0&$bs2=)0$%%8r+@4dfpx$p_rv$q"
 
 SMTP_HOST="smtp.gmail.com"
@@ -112,8 +112,8 @@ SMTP_FROM="Soporte Barber Tech <barber_tech_help@gmail.com>"
 ```
 
 ### Reglas de Seguridad Críticas:
-1. **Firma de Tokens**: Todos los tokens JWT deben firmarse con `NEXTAUTH_SECRET` y expirar en `${AUTH_SESSION_HOURS}h`.
-2. **Cookie HttpOnly**: La cookie `barber_tech_session` se configura con `httpOnly: true`, `secure: true` (en producción), `sameSite: "lax"`, y `maxAge: AUTH_SESSION_HOURS * 3600`.
+1. **Firma de Tokens**: Todos los tokens JWT deben firmarse con `NEXTAUTH_SECRET` y expirar estrictamente en `${AUTH_SESSION_HOURS}h` (1 hora).
+2. **Cookie HttpOnly**: La cookie `barber_tech_session` se configura con `httpOnly: true`, `secure: true` (en producción), `sameSite: "lax"`, `maxAge: AUTH_SESSION_HOURS * 3600` (3600 segundos = 1 hora), y `expires: new Date(Date.now() + 3600000)`. Se prohíbe terminantemente el uso o bypass de autenticación por `localStorage`.
 3. **Manejo Resiliente de Contraseñas (Auto-Hash)**:
    * Si un administrador o DBA actualiza manualmente una contraseña en `tb_users.contrasena_hash` en texto plano (ej: `Admin123`), `AuthService.verifyPassword` detecta la coincidencia plana.
    * Al iniciar sesión con éxito, el sistema **convierte automáticamente** la clave plana a un hash PBKDF2 (`salt:hash`) y actualiza la base de datos de inmediato.
@@ -277,7 +277,7 @@ El panel de control en `/admin` implementa la estética de alta gama **Dark Luxu
 * **Seguridad de Acceso**:
   * Si el usuario no tiene sesión válida, ninguna métrica, pedido o catálogo es filtrado; se muestra estrictamente la pantalla de autenticación 2FA.
   * La ruta `/admin/usuarios` está protegida por `proxy.ts` y controladores de API exclusivamente para roles `ADMIN` y `SUPERADMIN`.
-  * Duración de sesión en cookie HttpOnly `barber_tech_session`: **3 horas** (`AUTH_SESSION_HOURS=3`), configurada con `sameSite: "lax"` y `maxAge: 10800`.
+  * Duración de sesión en cookie HttpOnly `barber_tech_session`: **1 hora** (`AUTH_SESSION_HOURS=1`), configurada con `sameSite: "lax"`, `maxAge: 3600` y expiración activa en frontend.
 
 ### Control Individual de 2FA por Usuario en Base de Datos (`tb_users.activacion_2fa`)
 * El 2FA **NO es una configuración global** de la tienda, sino un atributo individual por cada cuenta (`tb_users.activacion_2fa`).

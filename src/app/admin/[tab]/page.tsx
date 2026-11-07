@@ -33,6 +33,10 @@ export default async function AdminTabPage({ params }: AdminTabPageProps) {
   }
 
   const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    redirect('/admin');
+  }
+
   const { metrics, customers, sections, users } = await getAdminInitialData();
 
   return (
